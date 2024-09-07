@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <Adafruit_TinyUSB.h>
-#include "LedDisplay.h"
+#include "HCMS39xx.h"
+#include "font5x7.h"
 
 #define DATA_PIN A0
 #define RS_PIN A1
@@ -8,41 +9,59 @@
 #define ENABLE_PIN A3
 #define RESET_PIN A4
 
-LedDisplay display = LedDisplay(DATA_PIN, RS_PIN, CLOCK_PIN, ENABLE_PIN, RESET_PIN, 16);
+HCMS39xx display(16, DATA_PIN, RS_PIN, CLOCK_PIN, ENABLE_PIN);
 
-const char* message = "This is a demo of two HCMS-3917 displays! :)";
-String messageString = message;
-
-int scrolledBy = 16;
+char displayData[16 * 5];
 
 void setup() {
     Serial.begin(115200);
 
     display.begin();
     display.clear();
+    display.displayUnblank();
+}
 
-    display.home();
-    display.setString(message);
-    display.setBrightness(7);
-    display.scroll(16);
+void fadeOut() {
+    for (unsigned int i = 15; i != 0; i--) {
+        display.setBrightness(i);
+        delay(100);
+    }
+}
+
+void fadeIn() {
+    for (unsigned int i = 0; i <= 15; i++) {
+        display.setBrightness(i);
+        delay(100);
+    }
 }
 
 void loop() {
     Serial.println("Hello, world!");
 
-    display.scroll(-1);
+    display.clear();
+    display.print("Hello, world! :)");
 
-    scrolledBy--;
+    fadeIn();
+    delay(2000);
+    fadeOut();
 
-    delay(250);
-
-    if (-scrolledBy > (int)messageString.length()) {
-        while (scrolledBy < 16) {
-            display.scroll(1);
-
-            scrolledBy++;
-
-            delay(50);
-        }
+    for (unsigned int i = 0; i < sizeof(displayData); i++) {
+        displayData[i] = i % 2 == 0 ? 0b01010101 : 0b10101010;
     }
+
+    display.printDirect((uint8_t*)displayData, sizeof(displayData));
+
+    fadeIn();
+    delay(2000);
+    fadeOut();
+
+    for (unsigned int i = 0; i < sizeof(displayData); i++) {
+        displayData[i] = i % 2 == 1 ? 0b01010101 : 0b10101010;
+    }
+
+    display.printDirect((uint8_t*)displayData, sizeof(displayData));
+
+    fadeIn();
+    delay(2000);
+    fadeOut();
 }
