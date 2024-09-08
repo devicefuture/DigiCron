@@ -9,59 +9,49 @@
 #define ENABLE_PIN A3
 #define RESET_PIN A4
 
-HCMS39xx display(16, DATA_PIN, RS_PIN, CLOCK_PIN, ENABLE_PIN);
+#define BACK_BTN_PIN 6
+#define HOME_BTN_PIN 5
+#define JOY_UP_PIN 10
+#define JOY_DOWN_PIN 12
+#define JOY_LEFT_PIN 9
+#define JOY_RIGHT_PIN 11
+#define JOY_SELECT_PIN 13
 
-char displayData[16 * 5];
+HCMS39xx display(16, DATA_PIN, RS_PIN, CLOCK_PIN, ENABLE_PIN);
 
 void setup() {
     Serial.begin(115200);
+    Serial.println("Hello, world!");
+
+    pinMode(BACK_BTN_PIN, INPUT_PULLUP);
+    pinMode(HOME_BTN_PIN, INPUT_PULLUP);
+    pinMode(JOY_UP_PIN, INPUT_PULLUP);
+    pinMode(JOY_DOWN_PIN, INPUT_PULLUP);
+    pinMode(JOY_LEFT_PIN, INPUT_PULLUP);
+    pinMode(JOY_RIGHT_PIN, INPUT_PULLUP);
+    pinMode(JOY_SELECT_PIN, INPUT_PULLUP);
 
     display.begin();
     display.clear();
     display.displayUnblank();
-}
-
-void fadeOut() {
-    for (unsigned int i = 15; i != 0; i--) {
-        display.setBrightness(i);
-        delay(100);
-    }
-}
-
-void fadeIn() {
-    for (unsigned int i = 0; i <= 15; i++) {
-        display.setBrightness(i);
-        delay(100);
-    }
+    display.setBrightness(7);
+    display.print("Hello, world! :)");
 }
 
 void loop() {
-    Serial.println("Hello, world!");
-
-    display.clear();
-    display.print("Hello, world! :)");
-
-    fadeIn();
-    delay(2000);
-    fadeOut();
-
-    for (unsigned int i = 0; i < sizeof(displayData); i++) {
-        displayData[i] = i % 2 == 0 ? 0b01010101 : 0b10101010;
+    if (digitalRead(BACK_BTN_PIN) == LOW) {
+        display.print("12:34:56    BACK");
+    } else if (digitalRead(HOME_BTN_PIN) == LOW) {
+        display.print("12:34:56    HOME");
+    } else if (digitalRead(JOY_UP_PIN) == LOW) {
+        display.print("12:34:56      UP");
+    } else if (digitalRead(JOY_DOWN_PIN) == LOW) {
+        display.print("12:34:56    DOWN");
+    } else if (digitalRead(JOY_LEFT_PIN) == LOW) {
+        display.print("12:34:56    LEFT");
+    } else if (digitalRead(JOY_RIGHT_PIN) == LOW) {
+        display.print("12:34:56   RIGHT");
+    } else if (digitalRead(JOY_SELECT_PIN) == LOW) {
+        display.print("12:34:56  SELECT");
     }
-
-    display.printDirect((uint8_t*)displayData, sizeof(displayData));
-
-    fadeIn();
-    delay(2000);
-    fadeOut();
-
-    for (unsigned int i = 0; i < sizeof(displayData); i++) {
-        displayData[i] = i % 2 == 1 ? 0b01010101 : 0b10101010;
-    }
-
-    display.printDirect((uint8_t*)displayData, sizeof(displayData));
-
-    fadeIn();
-    delay(2000);
-    fadeOut();
 }
