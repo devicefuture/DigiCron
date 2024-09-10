@@ -4,6 +4,7 @@
 #include "font5x7.h"
 
 #include "time.h"
+#include "power.h"
 
 #define DATA_PIN A0
 #define RS_PIN A1
@@ -23,6 +24,7 @@ HCMS39xx display(16, DATA_PIN, RS_PIN, CLOCK_PIN, ENABLE_PIN);
 
 time::EarthTime timeKeeper(2024, 1, 1, 0, 0, 0);
 
+unsigned int displayMode = 0;
 long lastMillis = 0;
 
 void setup() {
@@ -57,14 +59,23 @@ void loop() {
 
     char timeString[17];
 
-    snprintf(timeString, 17, "%02d/%02d/%02d%02d:%02d:%02d",
-        timeKeeper.day() % 100,
-        timeKeeper.month() % 100,
-        timeKeeper.year() % 100,
-        timeKeeper.hour() % 100,
-        timeKeeper.minute() % 100,
-        timeKeeper.second() % 100
-    );
+    if (displayMode == 0) {
+        snprintf(timeString, 17, "%02d/%02d/%02d%02d:%02d:%02d",
+            timeKeeper.day() % 100,
+            timeKeeper.month() % 100,
+            timeKeeper.year() % 100,
+            timeKeeper.hour() % 100,
+            timeKeeper.minute() % 100,
+            timeKeeper.second() % 100
+        );
+    }
+
+    if (displayMode == 1) {
+        snprintf(timeString, 17, "Battery %s %03d%%",
+            power::isCharging() ? "chg" : "dsc",
+            (int)round(power::getBatteryLevel())
+        );
+    }
 
     if (digitalRead(BACK_BTN_PIN) == LOW) {
         display.print("Button      BACK");
@@ -80,6 +91,14 @@ void loop() {
         display.print("Button     RIGHT");
     } else if (digitalRead(JOY_SELECT_PIN) == LOW) {
         display.print("Button    SELECT");
+
+        displayMode++;
+
+        if (displayMode > 1) {
+            displayMode = 0;
+        }
+
+        while (digitalRead(JOY_SELECT_PIN) == LOW) {}
     } else {
         display.print(timeString);
     }
