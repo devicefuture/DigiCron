@@ -2,20 +2,33 @@
 #define TIME_H_
 
 namespace time {
+    struct LeapAdjustment {
+        unsigned long occurrence;
+        int adjustment;
+    };
+
+    const struct LeapAdjustment NO_LEAP_ADJUSTMENT = {0, 0};
+
     class Time {
         public:
+            unsigned long nonLeapMillisecondsInDay = 24 * 60 * 60 * 1000;
+
             Time(int year, unsigned int month, unsigned int day, unsigned int hour = 0, unsigned int minute = 0, unsigned int second = 0);
+            Time(int year, unsigned int dayOfYear, unsigned long millisecondOfDay = 0);
 
             virtual unsigned int daysInYear() {return 1;}
             virtual unsigned int daysInMonth(unsigned int month) {return daysInYear();}
-            virtual unsigned int millisecondsInDay() {return 24 * 60 * 60 * 1000;}
-            virtual int leapMillisecondsInDay() {return 0;}
+            virtual unsigned long millisecondsInDay() {return nonLeapMillisecondsInDay;}
+            virtual struct LeapAdjustment leapAdjustmentToday() {return NO_LEAP_ADJUSTMENT;}
 
             bool inLeapMillisecond();
+            unsigned long postLeapMillisecondOffset();
 
             void setDate(int year, unsigned int month, unsigned int day);
             void setTime(unsigned int hour, unsigned int minute, unsigned int second);
-            void incrementTime(unsigned int milliseconds);
+            void incrementTime(int milliseconds);
+            void toLocalTime(int timeShift);
+            void toGlobalTime();
 
             virtual int year();
             virtual unsigned int month();
@@ -25,34 +38,52 @@ namespace time {
             virtual unsigned int second();
 
             unsigned int dayOfYear();
+            virtual unsigned long millisecondOfDay();
+            virtual unsigned long millisecondOfDayIgnoringLeap();
+
             virtual unsigned int weekday() {return 0;}
 
         protected:
             int _year;
-            unsigned int _dayOfYear;
-            unsigned long _millisecondOfDay;
+            int _dayOfYear;
+            long _millisecondOfDay;
+            int _timeShift;
 
             void _accumulateDays();
             void _accumulateYears();
+
+            struct LeapAdjustment _cachedLeapAdjustment = NO_LEAP_ADJUSTMENT;
+            int _cachedLeapAdjustmentYear = 0;
+            int _cachedLeapAdjustmentDayOfYear = -1;
+            int _cachedLeapAdjustmentTimeShift = 0;
     };
 
-    class EarthTime : public Time {
+    class EarthTimeNonLeaping : public Time {
         public:
-            EarthTime(int year, unsigned int month, unsigned int day, unsigned int hour = 0, unsigned int minute = 0, unsigned int second = 0) : Time(year, month, day, hour, minute, second) {
+            EarthTimeNonLeaping(int year, unsigned int month, unsigned int day, unsigned int hour = 0, unsigned int minute = 0, unsigned int second = 0) : Time(year, month, day, hour, minute, second) {
                 setDate(year, month, day);
                 setTime(hour, minute, second);
             };
 
+            EarthTimeNonLeaping(int year, unsigned int dayOfYear, unsigned long millisecondOfDay = 0) : Time(year, dayOfYear, millisecondOfDay) {};
+
             unsigned int daysInYear() override;
             unsigned int daysInMonth(unsigned int month) override;
-            unsigned int millisecondsInDay() override;
-            int leapMillisecondsInDay() override;
+            unsigned long millisecondsInDay() override;
+            struct LeapAdjustment leapAdjustmentToday() override;
 
             unsigned int hour() override;
             unsigned int minute() override;
             unsigned int second() override;
 
             unsigned int weekday() override;
+    };
+
+    class EarthTime : public EarthTimeNonLeaping {
+        public:
+            using EarthTimeNonLeaping::EarthTimeNonLeaping;
+
+            struct LeapAdjustment leapAdjustmentToday() override;
     };
 }
 
