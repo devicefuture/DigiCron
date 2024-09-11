@@ -3,6 +3,7 @@
 
 namespace power {
     bool isCharging();
+    float getBatteryVoltage();
     float getBatteryLevel();
 }
 

@@ -77,6 +77,12 @@ void loop() {
         );
     }
 
+    if (displayMode == 2) {
+        snprintf(timeString, 17, "Battery %1.4f V",
+            power::getBatteryVoltage()
+        );
+    }
+
     if (digitalRead(BACK_BTN_PIN) == LOW) {
         display.print("Button      BACK");
     } else if (digitalRead(HOME_BTN_PIN) == LOW) {
@@ -94,7 +100,7 @@ void loop() {
 
         displayMode++;
 
-        if (displayMode > 1) {
+        if (displayMode > 2) {
             displayMode = 0;
         }
 
