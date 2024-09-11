@@ -25,11 +25,13 @@ HCMS39xx display(16, DATA_PIN, RS_PIN, CLOCK_PIN, ENABLE_PIN);
 time::EarthTime timeKeeper(2024, 1, 1, 0, 0, 0);
 
 unsigned int displayMode = 0;
-long lastMillis = 0;
+long lastTick = 0;
 
 void setup() {
     Serial.begin(115200);
     Serial.println("Hello, world!");
+
+    time::init();
 
     pinMode(BACK_BTN_PIN, INPUT_PULLUP);
     pinMode(HOME_BTN_PIN, INPUT_PULLUP);
@@ -49,12 +51,13 @@ void setup() {
 }
 
 void loop() {
-    long currentMillis = millis();
+    long currentTick = time::getCurrentTick();
+    int difference = currentTick - lastTick;
 
-    if (currentMillis - lastMillis > 100) {
-        timeKeeper.incrementTime(currentMillis - lastMillis);
+    if (difference > 100) {
+        timeKeeper.incrementTime(difference);
 
-        lastMillis = currentMillis;
+        lastTick = currentTick;
     }
 
     char timeString[17];

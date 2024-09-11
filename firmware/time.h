@@ -9,6 +9,16 @@ namespace time {
 
     const struct LeapAdjustment NO_LEAP_ADJUSTMENT = {0, 0};
 
+    const int RTC_FREQUENCY = 32768;
+    const int TARGET_FREQUENCY = 1000;
+    const int RTC_COMPARE = RTC_FREQUENCY / TARGET_FREQUENCY;
+
+    const float RTC_INTERRUPT_INTERVAL = 1000 / (float)RTC_FREQUENCY;
+    const int RTC_INTERRUPT_ERROR_SCALE = 10;
+    const int RTC_INTERRUPT_DROP_INTERVAL = 1000 * RTC_INTERRUPT_ERROR_SCALE;
+    const int RTC_INTERRUPT_ERROR_DROP = RTC_INTERRUPT_ERROR_SCALE * RTC_INTERRUPT_INTERVAL * (float)TARGET_FREQUENCY * (((float)RTC_FREQUENCY / (float)TARGET_FREQUENCY) - (float)RTC_COMPARE);
+    const int RTC_INTERRUPT_ERROR_SKIP_MOD = RTC_INTERRUPT_DROP_INTERVAL / RTC_INTERRUPT_ERROR_DROP;
+
     class Time {
         public:
             unsigned long nonLeapMillisecondsInDay = 24 * 60 * 60 * 1000;
@@ -85,6 +95,12 @@ namespace time {
 
             struct LeapAdjustment leapAdjustmentToday() override;
     };
+
+    unsigned long getCurrentTick();
+
+    void init();
 }
+
+extern "C" void RTC2_IRQHandler(void);
 
 #endif

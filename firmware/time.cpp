@@ -1,6 +1,13 @@
+#define RTC2_ENABLED 1
+
+#include <nrf_rtc.h>
+
 #include "time.h"
 
-int daysInEarthMonth[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+const int daysInEarthMonth[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+
+unsigned long currentTick = 0;
+unsigned int currentInterrupt = 0;
 
 time::Time::Time(int year, unsigned int month, unsigned int day, unsigned int hour, unsigned int minute, unsigned int second) {
     _year = 0;
@@ -257,4 +264,43 @@ struct time::LeapAdjustment time::EarthTime::leapAdjustmentToday() {
     _cachedLeapAdjustmentTimeShift = _timeShift;
 
     return _cachedLeapAdjustment;
+}
+
+unsigned long time::getCurrentTick() {
+    return currentTick;
+}
+
+void RTC2_IRQHandler(void) {
+    if (NRF_RTC2->EVENTS_COMPARE[0]) {
+        NRF_RTC2->EVENTS_COMPARE[0] = 0;
+        NRF_RTC2->CC[0] += time::RTC_COMPARE;
+
+        if (currentInterrupt % time::RTC_INTERRUPT_ERROR_SKIP_MOD > 0) {
+            currentTick++;
+        }
+
+        currentInterrupt++;
+
+        if (currentInterrupt == time::RTC_INTERRUPT_DROP_INTERVAL) {
+            currentInterrupt = 0;
+        }
+    }
+}
+
+void time::init() {
+    NVIC_SetPriority(RTC2_IRQn, 3); // Lowest priority
+
+    NRF_CLOCK->TASKS_LFCLKSTART = 1;
+
+    while (NRF_CLOCK->EVENTS_LFCLKSTARTED == 0) {}
+
+    NRF_RTC2->PRESCALER = 0;
+    NRF_RTC2->CC[0] = RTC_COMPARE;
+    NRF_RTC2->INTENSET = RTC_INTENSET_COMPARE0_Msk;
+
+    NVIC_EnableIRQ(RTC2_IRQn);
+
+    NRF_RTC2->TASKS_START = 1;
+
+    __enable_irq();
 }
