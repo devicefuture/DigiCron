@@ -54,11 +54,9 @@ void loop() {
     long currentTick = time::getCurrentTick();
     int difference = currentTick - lastTick;
 
-    if (difference > 100) {
-        timeKeeper.incrementTime(difference);
+    timeKeeper.incrementTime(difference);
 
-        lastTick = currentTick;
-    }
+    lastTick = currentTick;
 
     char timeString[17];
 
@@ -74,13 +72,22 @@ void loop() {
     }
 
     if (displayMode == 1) {
+        snprintf(timeString, 17, "%02d:%02d:%02d.%03d    ",
+            timeKeeper.hour() % 100,
+            timeKeeper.minute() % 100,
+            timeKeeper.second() % 100,
+            timeKeeper.millisecond()
+        );
+    }
+
+    if (displayMode == 2) {
         snprintf(timeString, 17, "Battery %s %03d%%",
             power::isCharging() ? "chg" : "dsc",
             (int)round(power::getBatteryLevel())
         );
     }
 
-    if (displayMode == 2) {
+    if (displayMode == 3) {
         snprintf(timeString, 17, "Battery %1.4f V",
             power::getBatteryVoltage()
         );
@@ -103,7 +110,7 @@ void loop() {
 
         displayMode++;
 
-        if (displayMode > 2) {
+        if (displayMode > 3) {
             displayMode = 0;
         }
 

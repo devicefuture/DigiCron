@@ -1,13 +1,12 @@
-#define RTC2_ENABLED 1
-
-#include <nrf_rtc.h>
+#include <Arduino.h>
+#include <nrf_timer.h>
 
 #include "time.h"
 
 const int daysInEarthMonth[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
 unsigned long currentTick = 0;
-unsigned int currentInterrupt = 0;
+unsigned int currentMillisecondOffset = 0;
 
 time::Time::Time(int year, unsigned int month, unsigned int day, unsigned int hour, unsigned int minute, unsigned int second) {
     _year = 0;
@@ -148,6 +147,10 @@ unsigned int time::Time::second() {
     return (millisecondOfDayIgnoringLeap() / 1000) % 60;
 }
 
+unsigned int time::Time::millisecond() {
+    return millisecondOfDayIgnoringLeap() % 1000;
+}
+
 unsigned int time::Time::dayOfYear() {
     return _dayOfYear + 1;
 }
@@ -267,40 +270,34 @@ struct time::LeapAdjustment time::EarthTime::leapAdjustmentToday() {
 }
 
 unsigned long time::getCurrentTick() {
-    return currentTick;
+    return currentTick + ((1000 + millis() - currentMillisecondOffset) % 1000);
 }
 
-void RTC2_IRQHandler(void) {
-    if (NRF_RTC2->EVENTS_COMPARE[0]) {
-        NRF_RTC2->EVENTS_COMPARE[0] = 0;
-        NRF_RTC2->CC[0] += time::RTC_COMPARE;
+void TIMER0_IRQHandler(void) {
+    currentTick += 1000 / time::RTC_TICK_FREQUENCY;
+    currentMillisecondOffset = millis() % 1000;
 
-        if (currentInterrupt % time::RTC_INTERRUPT_ERROR_SKIP_MOD > 0) {
-            currentTick++;
-        }
-
-        currentInterrupt++;
-
-        if (currentInterrupt == time::RTC_INTERRUPT_DROP_INTERVAL) {
-            currentInterrupt = 0;
-        }
-    }
+    nrf_timer_event_clear(NRF_TIMER0, NRF_TIMER_EVENT_COMPARE0);
+    nrf_timer_task_trigger(NRF_TIMER0, NRF_TIMER_TASK_CLEAR);
 }
 
 void time::init() {
-    NVIC_SetPriority(RTC2_IRQn, 3); // Lowest priority
+    NVIC_SetPriority(TIMER0_IRQn, 15); // Lowest priority
 
-    NRF_CLOCK->TASKS_LFCLKSTART = 1;
+    NRF_CLOCK->TASKS_HFCLKSTART = 1;
 
-    while (NRF_CLOCK->EVENTS_LFCLKSTARTED == 0) {}
+    while (NRF_CLOCK->EVENTS_HFCLKSTARTED == 0) {}
 
-    NRF_RTC2->PRESCALER = 0;
-    NRF_RTC2->CC[0] = RTC_COMPARE;
-    NRF_RTC2->INTENSET = RTC_INTENSET_COMPARE0_Msk;
+    nrf_timer_mode_set(NRF_TIMER0, NRF_TIMER_MODE_TIMER);
+    nrf_timer_bit_width_set(NRF_TIMER0, NRF_TIMER_BIT_WIDTH_32);
+    nrf_timer_frequency_set(NRF_TIMER0, NRF_TIMER_FREQ_1MHz);
 
-    NVIC_EnableIRQ(RTC2_IRQn);
+    NRF_TIMER0->CC[0] = 1000000 / RTC_TICK_FREQUENCY;
 
-    NRF_RTC2->TASKS_START = 1;
+    nrf_timer_int_enable(NRF_TIMER0, NRF_TIMER_INT_COMPARE0_MASK);
+    nrf_timer_task_trigger(NRF_TIMER0, NRF_TIMER_TASK_START);
+
+    NVIC_EnableIRQ(TIMER0_IRQn);
 
     __enable_irq();
 }
