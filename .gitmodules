@@ -1,6 +1,3 @@
-[submodule "lib/LedDisplay"]
-	path = lib/LedDisplay
-	url = https://github.com/PaulStoffregen/LedDisplay
 [submodule "lib/HCMS39xx"]
 	path = lib/HCMS39xx
 	url = https://github.com/Andy4495/HCMS39xx
