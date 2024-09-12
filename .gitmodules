@@ -1,3 +1,9 @@
 [submodule "lib/HCMS39xx"]
 	path = lib/HCMS39xx
 	url = https://github.com/Andy4495/HCMS39xx
+[submodule "devdeps/EpoxyDuino"]
+	path = devdeps/EpoxyDuino
+	url = https://github.com/bxparks/EpoxyDuino
+[submodule "devdeps/emsdk"]
+	path = devdeps/emsdk
+	url = https://github.com/juj/emsdk

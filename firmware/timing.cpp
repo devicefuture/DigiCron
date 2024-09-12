@@ -1,14 +1,17 @@
 #include <Arduino.h>
-#include <nrf_timer.h>
 
-#include "time.h"
+#ifndef DC_SIMULATOR
+    #include <nrf_timer.h>
+#endif
+
+#include "timing.h"
 
 const int daysInEarthMonth[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
 unsigned long currentTick = 0;
 unsigned int currentMillisecondOffset = 0;
 
-time::Time::Time(int year, unsigned int month, unsigned int day, unsigned int hour, unsigned int minute, unsigned int second) {
+timing::Time::Time(int year, unsigned int month, unsigned int day, unsigned int hour, unsigned int minute, unsigned int second) {
     _year = 0;
     _dayOfYear = 0;
     _millisecondOfDay = 0;
@@ -17,13 +20,13 @@ time::Time::Time(int year, unsigned int month, unsigned int day, unsigned int ho
     setTime(hour, minute, second);
 }
 
-time::Time::Time(int year, unsigned int dayOfYear, unsigned long millisecondOfDay) {
+timing::Time::Time(int year, unsigned int dayOfYear, unsigned long millisecondOfDay) {
     _year = year;
     _dayOfYear = dayOfYear;
     _millisecondOfDay = millisecondOfDay;
 }
 
-bool time::Time::inLeapMillisecond() {
+bool timing::Time::inLeapMillisecond() {
     struct LeapAdjustment leapAdjustment = leapAdjustmentToday();
 
     if (leapAdjustment.adjustment == 0) {
@@ -41,7 +44,7 @@ bool time::Time::inLeapMillisecond() {
     return true;
 }
 
-unsigned long time::Time::postLeapMillisecondOffset() {
+unsigned long timing::Time::postLeapMillisecondOffset() {
     struct LeapAdjustment leapAdjustment = leapAdjustmentToday();
 
     if (leapAdjustment.adjustment == 0) {
@@ -55,7 +58,7 @@ unsigned long time::Time::postLeapMillisecondOffset() {
     return leapAdjustment.adjustment;
 }
 
-void time::Time::setDate(int year, unsigned int month, unsigned int day) {
+void timing::Time::setDate(int year, unsigned int month, unsigned int day) {
     if (year > 0) {
         year--;
     }
@@ -73,7 +76,7 @@ void time::Time::setDate(int year, unsigned int month, unsigned int day) {
 
 }
 
-void time::Time::setTime(unsigned int hour, unsigned int minute, unsigned int second) {
+void timing::Time::setTime(unsigned int hour, unsigned int minute, unsigned int second) {
     _millisecondOfDay = 0;
     _millisecondOfDay += hour * 60 * 60 * 1000;
     _millisecondOfDay += minute * 60 * 1000;
@@ -82,27 +85,27 @@ void time::Time::setTime(unsigned int hour, unsigned int minute, unsigned int se
     _accumulateDays();
 }
 
-void time::Time::incrementTime(int milliseconds) {
+void timing::Time::incrementTime(int milliseconds) {
     _millisecondOfDay += milliseconds;
 
     _accumulateDays();
 }
 
-void time::Time::toLocalTime(int timeShift) {
+void timing::Time::toLocalTime(int timeShift) {
     incrementTime(timeShift);
 
     _timeShift = timeShift;
 }
 
-void time::Time::toGlobalTime() {
+void timing::Time::toGlobalTime() {
     return toLocalTime(-_timeShift);
 }
 
-int time::Time::year() {
+int timing::Time::year() {
     return _year >= 0 ? _year + 1 : _year;
 }
 
-unsigned int time::Time::month() {
+unsigned int timing::Time::month() {
     int currentDay = _dayOfYear;
     unsigned int currentMonth = 1;
 
@@ -120,7 +123,7 @@ unsigned int time::Time::month() {
     return currentMonth;
 }
 
-unsigned int time::Time::day() {
+unsigned int timing::Time::day() {
     unsigned int day = _dayOfYear;
     unsigned int dayMonth = month();
 
@@ -131,15 +134,15 @@ unsigned int time::Time::day() {
     return day + 1;
 }
 
-unsigned int time::Time::hour() {
+unsigned int timing::Time::hour() {
     return (millisecondOfDayIgnoringLeap() / 1000 / 60 / 60) % 24;
 }
 
-unsigned int time::Time::minute() {
+unsigned int timing::Time::minute() {
     return (millisecondOfDayIgnoringLeap() / 1000 / 60) % 60;
 }
 
-unsigned int time::Time::second() {
+unsigned int timing::Time::second() {
     if (inLeapMillisecond()) {
         return 60 + ((_millisecondOfDay - leapAdjustmentToday().occurrence) / 1000);
     }
@@ -147,23 +150,23 @@ unsigned int time::Time::second() {
     return (millisecondOfDayIgnoringLeap() / 1000) % 60;
 }
 
-unsigned int time::Time::millisecond() {
+unsigned int timing::Time::millisecond() {
     return millisecondOfDayIgnoringLeap() % 1000;
 }
 
-unsigned int time::Time::dayOfYear() {
+unsigned int timing::Time::dayOfYear() {
     return _dayOfYear + 1;
 }
 
-unsigned long time::Time::millisecondOfDay() {
+unsigned long timing::Time::millisecondOfDay() {
     return _millisecondOfDay;
 }
 
-unsigned long time::Time::millisecondOfDayIgnoringLeap() {
+unsigned long timing::Time::millisecondOfDayIgnoringLeap() {
     return _millisecondOfDay - postLeapMillisecondOffset();
 }
 
-void time::Time::_accumulateDays() {
+void timing::Time::_accumulateDays() {
     while (_millisecondOfDay < 0) {
         _dayOfYear--;
         _millisecondOfDay += millisecondsInDay();
@@ -179,7 +182,7 @@ void time::Time::_accumulateDays() {
     }
 }
 
-void time::Time::_accumulateYears() {
+void timing::Time::_accumulateYears() {
     while (_dayOfYear < 0) {
         _dayOfYear += daysInYear();
         _year--;
@@ -191,15 +194,15 @@ void time::Time::_accumulateYears() {
     }
 }
 
-struct time::LeapAdjustment time::EarthTimeNonLeaping::leapAdjustmentToday() {
+struct timing::LeapAdjustment timing::EarthTimeNonLeaping::leapAdjustmentToday() {
     return NO_LEAP_ADJUSTMENT;
 }
 
-unsigned long time::EarthTimeNonLeaping::millisecondsInDay() {
-    return time::Time::millisecondsInDay() + leapAdjustmentToday().adjustment;
+unsigned long timing::EarthTimeNonLeaping::millisecondsInDay() {
+    return timing::Time::millisecondsInDay() + leapAdjustmentToday().adjustment;
 }
 
-unsigned int time::EarthTimeNonLeaping::daysInYear() {
+unsigned int timing::EarthTimeNonLeaping::daysInYear() {
     unsigned int y = _year + 1;
 
     if (y % 4 == 0 && (y % 100 != 0 || y % 400 == 0)) {
@@ -209,7 +212,7 @@ unsigned int time::EarthTimeNonLeaping::daysInYear() {
     return 365;
 }
 
-unsigned int time::EarthTimeNonLeaping::daysInMonth(unsigned int month) {
+unsigned int timing::EarthTimeNonLeaping::daysInMonth(unsigned int month) {
     if (daysInYear() == 366 && month == 2) {
         return 29;
     }
@@ -217,20 +220,20 @@ unsigned int time::EarthTimeNonLeaping::daysInMonth(unsigned int month) {
     return daysInEarthMonth[(month - 1) % 12];
 }
 
-unsigned int time::EarthTimeNonLeaping::hour() {
-    return time::Time::hour();
+unsigned int timing::EarthTimeNonLeaping::hour() {
+    return timing::Time::hour();
 }
 
-unsigned int time::EarthTimeNonLeaping::minute() {
-    return time::Time::minute();
+unsigned int timing::EarthTimeNonLeaping::minute() {
+    return timing::Time::minute();
 }
 
-unsigned int time::EarthTimeNonLeaping::second() {
-    return time::Time::second();
+unsigned int timing::EarthTimeNonLeaping::second() {
+    return timing::Time::second();
 }
 
 // @source reference https://stackoverflow.com/a/53155217
-unsigned int time::EarthTimeNonLeaping::weekday() {
+unsigned int timing::EarthTimeNonLeaping::weekday() {
     int y = year();
     int m = month();
     int d = day();
@@ -243,7 +246,7 @@ unsigned int time::EarthTimeNonLeaping::weekday() {
     return (y + (y / 4) - (y / 100) + (y / 400) + offsets[m - 1] + d) % 7;
 }
 
-struct time::LeapAdjustment time::EarthTime::leapAdjustmentToday() {
+struct timing::LeapAdjustment timing::EarthTime::leapAdjustmentToday() {
     if (
         year() == _cachedLeapAdjustmentYear &&
         dayOfYear() == _cachedLeapAdjustmentDayOfYear &&
@@ -259,7 +262,7 @@ struct time::LeapAdjustment time::EarthTime::leapAdjustmentToday() {
     adjust_2025_06_30.toLocalTime(_timeShift);
 
     if (year() == adjust_2025_06_30.year() && dayOfYear() == adjust_2025_06_30.dayOfYear()) {
-        _cachedLeapAdjustment = (time::LeapAdjustment) {adjust_2025_06_30.millisecondOfDay() + 1000, 1000};
+        _cachedLeapAdjustment = (timing::LeapAdjustment) {adjust_2025_06_30.millisecondOfDay() + 1000, 1000};
     }
 
     _cachedLeapAdjustmentYear = year();
@@ -269,19 +272,25 @@ struct time::LeapAdjustment time::EarthTime::leapAdjustmentToday() {
     return _cachedLeapAdjustment;
 }
 
-unsigned long time::getCurrentTick() {
-    return currentTick + ((1000 + millis() - currentMillisecondOffset) % 1000);
+unsigned long timing::getCurrentTick() {
+    #ifndef DC_SIMULATOR
+        return currentTick + ((1000 + millis() - currentMillisecondOffset) % 1000);
+    #else
+        return millis();
+    #endif
 }
 
+#ifndef DC_SIMULATOR
+
 void TIMER0_IRQHandler(void) {
-    currentTick += 1000 / time::RTC_TICK_FREQUENCY;
+    currentTick += 1000 / timing::RTC_TICK_FREQUENCY;
     currentMillisecondOffset = millis() % 1000;
 
     nrf_timer_event_clear(NRF_TIMER0, NRF_TIMER_EVENT_COMPARE0);
     nrf_timer_task_trigger(NRF_TIMER0, NRF_TIMER_TASK_CLEAR);
 }
 
-void time::init() {
+void timing::init() {
     NVIC_SetPriority(TIMER0_IRQn, 15); // Lowest priority
 
     NRF_CLOCK->TASKS_HFCLKSTART = 1;
@@ -301,3 +310,9 @@ void time::init() {
 
     __enable_irq();
 }
+
+#else
+
+void timing::init() {}
+
+#endif

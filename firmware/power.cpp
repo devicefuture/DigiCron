@@ -1,3 +1,5 @@
+#ifndef DC_SIMULATOR
+
 #include <Arduino.h>
 #include <nrfx.h>
 
@@ -31,3 +33,21 @@ float power::getBatteryLevel() {
     */
     return 100 / (1 + exp(-12 * (getBatteryVoltage() - 3.66)));
 }
+
+#else
+
+#include "power.h"
+
+bool power::isCharging() {
+    return true;
+}
+
+float power::getBatteryVoltage() {
+    return 4.2;
+}
+
+float power::getBatteryLevel() {
+    return 100;
+}
+
+#endif

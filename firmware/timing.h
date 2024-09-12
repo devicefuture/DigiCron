@@ -1,7 +1,7 @@
 #ifndef TIME_H_
 #define TIME_H_
 
-namespace time {
+namespace timing {
     struct LeapAdjustment {
         unsigned long occurrence;
         int adjustment;
@@ -102,6 +102,8 @@ namespace time {
     void init();
 }
 
-extern "C" void TIMER0_IRQHandler(void);
+#ifndef DC_SIMULATOR
+    extern "C" void TIMER0_IRQHandler(void);
+#endif
 
 #endif
