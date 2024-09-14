@@ -13,6 +13,7 @@
 #include "power.h"
 #include "display.h"
 #include "ui.h"
+#include "input.h"
 
 #define BACK_BTN_PIN 6
 #define HOME_BTN_PIN 5
@@ -45,16 +46,9 @@ void setup() {
 
     timing::init();
     display::init();
+    input::init();
 
     #ifndef DC_SIMULATOR
-        pinMode(BACK_BTN_PIN, INPUT_PULLUP);
-        pinMode(HOME_BTN_PIN, INPUT_PULLUP);
-        pinMode(JOY_UP_PIN, INPUT_PULLUP);
-        pinMode(JOY_DOWN_PIN, INPUT_PULLUP);
-        pinMode(JOY_LEFT_PIN, INPUT_PULLUP);
-        pinMode(JOY_RIGHT_PIN, INPUT_PULLUP);
-        pinMode(JOY_SELECT_PIN, INPUT_PULLUP);
-
         display::driver.print("Hello, world! :)");
     #endif
 
@@ -126,30 +120,28 @@ void loop() {
     #endif
 
     #ifndef DC_SIMULATOR
-        if (digitalRead(BACK_BTN_PIN) == LOW) {
-            display::driver.print("Button      BACK");
-        } else if (digitalRead(HOME_BTN_PIN) == LOW) {
-            display::driver.print("Button      HOME");
-        } else if (digitalRead(JOY_UP_PIN) == LOW) {
-            display::driver.print("Button        UP");
-        } else if (digitalRead(JOY_DOWN_PIN) == LOW) {
-            display::driver.print("Button      DOWN");
-        } else if (digitalRead(JOY_LEFT_PIN) == LOW) {
-            display::driver.print("Button      LEFT");
-        } else if (digitalRead(JOY_RIGHT_PIN) == LOW) {
-            display::driver.print("Button     RIGHT");
-        } else if (digitalRead(JOY_SELECT_PIN) == LOW) {
-            display::driver.print("Button    SELECT");
+        switch (input::getButtonStatus()) {
+            case input::Button::BACK: display::driver.print("Button      BACK"); break;
+            case input::Button::HOME: display::driver.print("Button      HOME"); break;
+            case input::Button::UP: display::driver.print("Button        UP"); break;
+            case input::Button::DOWN: display::driver.print("Button      DOWN"); break;
+            case input::Button::LEFT: display::driver.print("Button      LEFT"); break;
+            case input::Button::RIGHT: display::driver.print("Button     RIGHT"); break;
 
-            displayMode++;
+            case input::Button::SELECT:
+            {
+                display::driver.print("Button    SELECT");
 
-            if (displayMode > 3) {
-                displayMode = 0;
+                displayMode++;
+
+                if (displayMode > 3) {
+                    displayMode = 0;
+                }
+
+                while (input::getButtonStatus() == input::Button::SELECT) {}
             }
 
-            while (digitalRead(JOY_SELECT_PIN) == LOW) {}
-        } else {
-            display::driver.print(timeString);
+            default: display::driver.print(timeString);
         }
     #endif
 }
