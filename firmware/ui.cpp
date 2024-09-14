@@ -6,8 +6,10 @@
 #include <Arduino.h>
 
 #include "ui.h"
+#include "input.h"
 #include "display.h"
 
+input::Button ui::lastButton;
 ui::Screen* ui::currentScreen;
 
 void ui::Icon::setPixel(unsigned int x, unsigned int y, bool value) {
@@ -57,6 +59,8 @@ void ui::Screen::print(Icon icon) {
     _nextPosition();
 }
 
+void ui::Screen::handleEvent(ui::Event event) {}
+
 void ui::Screen::_nextPosition() {
     _currentPosition++;
 
@@ -66,6 +70,26 @@ void ui::Screen::_nextPosition() {
 }
 
 void ui::renderCurrentScreen() {
+    input::Button currentButton = input::getButtonStatus();
+
+    if (currentButton != lastButton) {
+        if (lastButton != input::Button::NONE) {
+            currentScreen->handleEvent((Event) {
+                .type = EventType::BUTTON_UP,
+                .data.button = lastButton
+            });
+        }
+
+        if (currentButton != input::Button::NONE) {
+            currentScreen->handleEvent((Event) {
+                .type = EventType::BUTTON_DOWN,
+                .data.button = currentButton
+            });
+        }
+
+        lastButton = currentButton;
+    }
+
     display::render(currentScreen->displayData);
 }
 

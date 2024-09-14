@@ -3,9 +3,22 @@
 
 #include <Arduino.h>
 
+#include "input.h"
 #include "display.h"
 
 namespace ui {
+    enum EventType {
+        BUTTON_DOWN,
+        BUTTON_UP
+    };
+
+    struct Event {
+        EventType type;
+        union {
+            input::Button button;
+        } data;
+    };
+
     class Icon {
         public:
             char iconData[display::CHAR_COLUMNS];
@@ -24,12 +37,15 @@ namespace ui {
             void print(String string);
             void print(Icon icon);
 
+            virtual void handleEvent(Event event);
+
         private:
             unsigned int _currentPosition = 0;
 
             void _nextPosition();
     };
 
+    extern input::Button lastButton;
     extern Screen* currentScreen;
 
     void renderCurrentScreen();
