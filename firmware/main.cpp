@@ -11,12 +11,8 @@
 
 #include "timing.h"
 #include "power.h"
-
-#define DATA_PIN A0
-#define RS_PIN A1
-#define CLOCK_PIN A2
-#define ENABLE_PIN A3
-#define RESET_PIN A4
+#include "display.h"
+#include "ui.h"
 
 #define BACK_BTN_PIN 6
 #define HOME_BTN_PIN 5
@@ -26,11 +22,19 @@
 #define JOY_RIGHT_PIN 11
 #define JOY_SELECT_PIN 13
 
-#ifndef DC_SIMULATOR
-    HCMS39xx display(16, DATA_PIN, RS_PIN, CLOCK_PIN, ENABLE_PIN);
-#endif
-
 timing::EarthTime timeKeeper(2024, 1, 1, 0, 0, 0);
+
+ui::Screen* testScreen = new ui::Screen();
+
+ui::Icon happyIcon = ui::constructIcon(
+    " ### "
+    "#####"
+    "# # #"
+    "#####"
+    "# # #"
+    "## ##"
+    " ### "
+);
 
 unsigned int displayMode = 0;
 long lastTick = 0;
@@ -40,6 +44,7 @@ void setup() {
     Serial.println("Hello, world!");
 
     timing::init();
+    display::init();
 
     #ifndef DC_SIMULATOR
         pinMode(BACK_BTN_PIN, INPUT_PULLUP);
@@ -50,14 +55,19 @@ void setup() {
         pinMode(JOY_RIGHT_PIN, INPUT_PULLUP);
         pinMode(JOY_SELECT_PIN, INPUT_PULLUP);
 
-        display.begin();
-        display.clear();
-        display.displayUnblank();
-        display.setBrightness(7);
-        display.print("Hello, world! :)");
+        display::driver.print("Hello, world! :)");
     #endif
 
     delay(3000);
+
+    ui::currentScreen = testScreen;
+
+    testScreen->print("Test screen ");
+    testScreen->print(happyIcon);
+
+    ui::renderCurrentScreen();
+
+    delay(1000);
 }
 
 void loop() {
@@ -117,19 +127,19 @@ void loop() {
 
     #ifndef DC_SIMULATOR
         if (digitalRead(BACK_BTN_PIN) == LOW) {
-            display.print("Button      BACK");
+            display::driver.print("Button      BACK");
         } else if (digitalRead(HOME_BTN_PIN) == LOW) {
-            display.print("Button      HOME");
+            display::driver.print("Button      HOME");
         } else if (digitalRead(JOY_UP_PIN) == LOW) {
-            display.print("Button        UP");
+            display::driver.print("Button        UP");
         } else if (digitalRead(JOY_DOWN_PIN) == LOW) {
-            display.print("Button      DOWN");
+            display::driver.print("Button      DOWN");
         } else if (digitalRead(JOY_LEFT_PIN) == LOW) {
-            display.print("Button      LEFT");
+            display::driver.print("Button      LEFT");
         } else if (digitalRead(JOY_RIGHT_PIN) == LOW) {
-            display.print("Button     RIGHT");
+            display::driver.print("Button     RIGHT");
         } else if (digitalRead(JOY_SELECT_PIN) == LOW) {
-            display.print("Button    SELECT");
+            display::driver.print("Button    SELECT");
 
             displayMode++;
 
@@ -139,7 +149,7 @@ void loop() {
 
             while (digitalRead(JOY_SELECT_PIN) == LOW) {}
         } else {
-            display.print(timeString);
+            display::driver.print(timeString);
         }
     #endif
 }
