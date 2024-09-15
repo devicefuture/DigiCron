@@ -34,15 +34,16 @@ namespace ui {
 
             void clear();
             void print(char c);
+            void print(char* chars);
             void print(String string);
+            void print(String format, ...);
             void print(Icon icon);
 
-            virtual void handleEvent(Event event);
+            virtual void update() {}
+            virtual void handleEvent(Event event) {}
 
         private:
             unsigned int _currentPosition = 0;
-
-            void _nextPosition();
     };
 
     extern input::Button lastButton;

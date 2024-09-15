@@ -13,8 +13,6 @@ input::Button ui::lastButton;
 ui::Screen* ui::currentScreen;
 
 void ui::Icon::setPixel(unsigned int x, unsigned int y, bool value) {
-    char valueMask = 0;
-
     if (value) {
         iconData[x] |= 1 << y;
     } else {
@@ -35,6 +33,10 @@ void ui::Screen::clear() {
 }
 
 void ui::Screen::print(char c) {
+    if (_currentPosition >= display::CHAR_COUNT) {
+        return;
+    }
+
     char asciiOffset = pgm_read_byte(&font5x7[0]) - 1;
     char* fontByte = (char*)font5x7 + ((c - asciiOffset) * display::CHAR_COLUMNS);
 
@@ -42,7 +44,7 @@ void ui::Screen::print(char c) {
         displayData[(_currentPosition * display::CHAR_COLUMNS) + offset] = fontByte[offset];
     }
 
-    _nextPosition();
+    _currentPosition++;
 }
 
 void ui::Screen::print(String string) {
@@ -51,22 +53,38 @@ void ui::Screen::print(String string) {
     }
 }
 
+void ui::Screen::print(char* chars) {
+    unsigned int i = 0;
+
+    while (chars[i] != '\0') {
+        print(chars[i++]);
+    }
+}
+
+void ui::Screen::print(String format, ...) {
+    va_list args;
+    char formatCharArray[33];
+    char outputCharArray[17];
+
+    format.toCharArray(formatCharArray, sizeof(formatCharArray));
+
+    va_start(args, format);
+    vsnprintf(outputCharArray, sizeof(outputCharArray), formatCharArray, args);
+    va_end(args);
+
+    print(outputCharArray);
+}
+
 void ui::Screen::print(Icon icon) {
+    if (_currentPosition >= display::CHAR_COUNT) {
+        return;
+    }
+
     for (unsigned int offset = 0; offset < display::CHAR_COLUMNS; offset++) {
         displayData[(_currentPosition * display::CHAR_COLUMNS) + offset] = icon.iconData[offset];
     }
 
-    _nextPosition();
-}
-
-void ui::Screen::handleEvent(ui::Event event) {}
-
-void ui::Screen::_nextPosition() {
     _currentPosition++;
-
-    if (_currentPosition >= display::CHAR_COUNT) {
-        _currentPosition = 0;
-    }
 }
 
 void ui::renderCurrentScreen() {
@@ -74,21 +92,27 @@ void ui::renderCurrentScreen() {
 
     if (currentButton != lastButton) {
         if (lastButton != input::Button::NONE) {
-            currentScreen->handleEvent((Event) {
+            Event buttonUpEvent = {
                 .type = EventType::BUTTON_UP,
-                .data.button = lastButton
-            });
+                .data = {.button = lastButton}
+            };
+
+            currentScreen->handleEvent(buttonUpEvent);
         }
 
         if (currentButton != input::Button::NONE) {
-            currentScreen->handleEvent((Event) {
+            Event buttonDownEvent = {
                 .type = EventType::BUTTON_DOWN,
-                .data.button = currentButton
-            });
+                .data = {.button = currentButton}
+            };
+
+            currentScreen->handleEvent(buttonDownEvent);
         }
 
         lastButton = currentButton;
     }
+
+    currentScreen->update();
 
     display::render(currentScreen->displayData);
 }
