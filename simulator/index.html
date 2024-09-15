@@ -15,6 +15,13 @@
         <h1>Hello, world!</h1>
         <canvas width="0" height="0" class="displayRow"></canvas>
         <canvas width="0" height="0" class="displayRow"></canvas>
+        <button data-button="1" class="button">BACK</button>
+        <button data-button="2" class="button">HOME</button>
+        <button data-button="3" class="button">UP</button>
+        <button data-button="4" class="button">DOWN</button>
+        <button data-button="5" class="button">LEFT</button>
+        <button data-button="6" class="button">RIGHT</button>
+        <button data-button="7" class="button">SELECT</button>
         <script src="../build/digicron.js"></script>
         <script>
             const DISPLAY_CELL_WIDTH = 5;
@@ -67,6 +74,16 @@
                 console.log("Runtime initialised");
 
                 Module.display_render();
+
+                document.querySelectorAll("button").forEach(function(button) {
+                    button.addEventListener("pointerdown", function(event) {
+                        Module.input_setButtonStatus(Number(button.getAttribute("data-button")));
+                    });
+                });
+
+                document.body.addEventListener("pointerup", function(event) {
+                    Module.input_setButtonStatus(0);
+                });
             };
         </script>
     </body>

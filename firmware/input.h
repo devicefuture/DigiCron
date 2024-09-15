@@ -3,14 +3,14 @@
 
 namespace input {
     enum Button {
-        NONE,
-        BACK,
-        HOME,
-        UP,
-        DOWN,
-        LEFT,
-        RIGHT,
-        SELECT
+        NONE = 0,
+        BACK = 1,
+        HOME = 2,
+        UP = 3,
+        DOWN = 4,
+        LEFT = 5,
+        RIGHT = 6,
+        SELECT = 7
     };
 
     void init();

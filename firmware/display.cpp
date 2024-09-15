@@ -35,7 +35,7 @@ void display::render(char data[display::DATA_SIZE]) {
         sendDisplayDataToSimulator((uint8_t*)simulatorData, display::DATA_SIZE);
     }
 
-    EMSCRIPTEN_BINDINGS(my_module) {
+    EMSCRIPTEN_BINDINGS(display) {
         emscripten::function("display_render", render);
     }
 #endif

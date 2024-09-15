@@ -151,14 +151,8 @@ void setup() {
 
     ui::currentScreen = testScreen;
 
-    testScreen->print("Hello, world! ");
+    testScreen->print("Hello,  world! ");
     testScreen->print(happyIcon);
-
-    ui::renderCurrentScreen();
-
-    delay(3000);
-
-    ui::currentScreen = mainScreen;
 }
 
 void loop() {
@@ -168,6 +162,8 @@ void loop() {
     timeKeeper.incrementTime(difference);
 
     lastTick = currentTick;
+
+    ui::currentScreen = millis() < 3000 ? testScreen : mainScreen;
 
     ui::renderCurrentScreen();
 }

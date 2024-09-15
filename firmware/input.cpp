@@ -1,5 +1,8 @@
 #ifndef DC_SIMULATOR
     #include <Arduino.h>
+#else
+    #include <emscripten.h>
+    #include <emscripten/bind.h>
 #endif
 
 #include "input.h"
@@ -38,10 +41,20 @@ input::Button input::getButtonStatus() {
 
 #else
 
+input::Button currentButton = input::Button::NONE;
+
 void input::init() {}
 
 input::Button input::getButtonStatus() {
-    return Button::NONE;
+    return currentButton;
+}
+
+void setButtonStatus(uint32_t button) {
+    currentButton = (input::Button)button;
+}
+
+EMSCRIPTEN_BINDINGS(input) {
+    emscripten::function("input_setButtonStatus", setButtonStatus);
 }
 
 #endif
