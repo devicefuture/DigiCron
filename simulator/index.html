@@ -2,34 +2,241 @@
 <html>
     <head>
         <title>DigiCron Simulator</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
         <style>
+            @import url("fonts/fonts.css");
+
+            * {
+                box-sizing: border-box;
+            }
+
+            html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+            }
+
+            body {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                font-family: "Lexend Deca";
+            }
+
+            .device {
+                position: relative;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                width: 36mm;
+                height: 36mm;
+                margin-block: 18mm;
+                gap: 0.5mm;
+                background-color: #dd0000;
+                color: white;
+                border-radius: 1mm;
+                font-family: "Brass Mono";
+                font-weight: bold;
+                transform: scale(2);
+                transition: 0.5s transform;
+            }
+
+            body:has(#actualSize:checked) .device {
+                transform: scale(1);
+            }
+
+            .uvSensor {
+                position: absolute;
+                top: 1mm;
+                left: 1mm;
+                width: 3mm;
+                height: 2mm;
+                background-color: #dddddd;
+                border-inline: 0.5mm solid #005500;
+                border-block: 0.25mm solid #005500;
+            }
+
+            .logo {
+                font-size: 3mm;
+            }
+
             .displayRow {
                 display: block;
+                width: 35mm;
+                height: 10mm;
+                padding-inline: calc(calc(34mm - calc(2.11mm * 8) - calc(2.34mm * 7)) / 2);
+                padding-block: calc(calc(9mm - 3.7mm) / 2);
                 background-color: #222222;
-                margin-block: 0.5rem;
-                padding: 0.5rem;
+                border: 0.5mm solid #777777;
+            }
+
+            .inputArea {
+                display: flex;
+                gap: 3mm;
+                align-items: center;
+            }
+
+            .button.push {
+                position: relative;
+                width: 6mm;
+                height: 6mm;
+                background-color: #cccccc;
+                border: 0.5mm solid #222222;
+                border-radius: 1mm;
+            }
+
+            .button.push::before {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                width: 60%;
+                height: 60%;
+                background-color: #444444;
+                border-radius: 50%;
+                transform: translate(-50%, -50%);
+                content: "";
+            }
+
+            .button.push::after {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                width: 60%;
+                height: 60%;
+                z-index: 1;
+                transform: translate(-50%, -50%);
+                content: "";
+            }
+
+            .button.push:hover::after {
+                background-color: #ffffff77;
+            }
+
+            .button.push span {
+                position: absolute;
+                top: 110%;
+                left: 50%;
+                color: white;
+                font-family: "Brass Mono";
+                font-size: 2mm;
+                font-weight: bold;
+                text-align: center;
+                transform: translateX(-50%);
+            }
+
+            .joystick {
+                position: relative;
+                display: grid;
+                width: 10mm;
+                height: 10mm;
+                background-color: #cccccc;
+                border: 0.5mm solid #222222;
+                border-radius: 1mm;
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .joystick::before {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                width: 75%;
+                height: 75%;
+                background-color: #777777;
+                border-radius: 50%;
+                transform: translate(-50%, -50%);
+                content: "";
+            }
+
+            .joystick::after {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                width: 35%;
+                height: 35%;
+                background-color: #444444;
+                border-radius: 25%;
+                transform: translate(-50%, -50%);
+                transition: 0.25s transform;
+                content: "";
+            }
+
+            .joystick:has(button[data-button="3"]:active)::after {
+                transform: translate(-50%, -90%);
+            }
+
+            .joystick:has(button[data-button="4"]:active)::after {
+                transform: translate(-50%, -10%);
+            }
+
+            .joystick:has(button[data-button="5"]:active)::after {
+                transform: translate(-90%, -50%);
+            }
+
+            .joystick:has(button[data-button="6"]:active)::after {
+                transform: translate(-10%, -50%);
+            }
+
+            .joystick button {
+                background-color: transparent;
+                border: none;
+                z-index: 1;
+            }
+
+            .joystick button:hover {
+                background-color: #ffffff77;
+            }
+
+            div:has(#actualSize) {
+                margin-top: 1rem;
+            }
+
+            #domainLink {
+                margin-top: 2rem;
+            }
+
+            #domainLink img {
+                height: 1.5rem;
             }
         </style>
     </head>
     <body>
-        <h1>Hello, world!</h1>
-        <canvas width="0" height="0" class="displayRow"></canvas>
-        <canvas width="0" height="0" class="displayRow"></canvas>
-        <button data-button="1" class="button">BACK</button>
-        <button data-button="2" class="button">HOME</button>
-        <button data-button="3" class="button">UP</button>
-        <button data-button="4" class="button">DOWN</button>
-        <button data-button="5" class="button">LEFT</button>
-        <button data-button="6" class="button">RIGHT</button>
-        <button data-button="7" class="button">SELECT</button>
+        <h1>DigiCron Simulator</h1>
+        <div class="device">
+            <div class="uvSensor" title="UV and visible light sensor"></div>
+            <div class="logo">DIGICRON</div>
+            <canvas width="0" height="0" class="displayRow"></canvas>
+            <canvas width="0" height="0" class="displayRow"></canvas>
+            <div class="inputArea">
+                <button data-button="1" class="button push" aria-label="Back"><span>BACK</span></button>
+                <div class="joystick">
+                    <div class="spacer"></div>
+                    <button data-button="3" class="button" title="Up" aria-label="Up"></button>
+                    <div class="spacer"></div>
+                    <button data-button="5" class="button" title="Left" aria-label="Left"></button>
+                    <button data-button="7" class="button" title="Select" aria-label="Select"></button>
+                    <button data-button="6" class="button" title="Right" aria-label="Right"></button>
+                    <div class="spacer"></div>
+                    <button data-button="4" class="button" title="Down" aria-label="Down"></button>
+                    <div class="spacer"></div>
+                </div>
+                <button data-button="2" class="button push" aria-label="Home"><span>HOME</span></button>
+            </div>
+        </div>
+        <div>
+            <input type="checkbox" id="actualSize"> <label for="actualSize">Actual size (accuracy varies per device)</label>
+        </div>
+        <a href="https://devicefuture.org" target="_blank" id="domainLink">
+            <img src="media/domain.png">
+        </a>
         <script src="../build/digicron.js"></script>
         <script>
             const DISPLAY_CELL_WIDTH = 5;
             const DISPLAY_CELL_HEIGHT = 7;
             const DISPLAY_COLUMNS = 8;
             const DISPLAY_PIXELS_PER_DOT = 4;
-            const DISPLAY_CELL_HORIZONTAL_PADDING = 8;
-            const DISPLAY_CELL_VERTICAL_PADDING = 8;
+            const DISPLAY_CELL_HORIZONTAL_PADDING = 16;
 
             var displayRows = [...document.querySelectorAll(".displayRow")];
 

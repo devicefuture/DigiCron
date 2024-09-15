@@ -23,17 +23,35 @@
 #define JOY_RIGHT_PIN 11
 #define JOY_SELECT_PIN 13
 
-timing::EarthTime timeKeeper(2024, 1, 1, 0, 0, 0);
+timing::EarthTime timeKeeper(2024, 1, 1, 12, 0, 0);
 
 ui::Screen* testScreen = new ui::Screen();
 
-ui::Icon happyIcon = ui::constructIcon(
+ui::Icon tmIcon = ui::constructIcon(
+    "###  "
+    " #   "
+    "     "
+    "## ##"
+    "# # #"
+);
+
+ui::Icon notificationsIcon = ui::constructIcon(
+    "  #  "
+    "  #  "
     " ### "
     "#####"
-    "# # #"
     "#####"
-    "# # #"
-    "## ##"
+    "#####"
+    "  #  "
+);
+
+ui::Icon batteryIcon = ui::constructIcon(
+    "  #  "
+    " ### "
+    " # # "
+    " ### "
+    " ### "
+    " ### "
     " ### "
 );
 
@@ -54,6 +72,21 @@ class MainScreen : public ui::Screen {
             switch (mode) {
                 case 0:
                 {
+                    printf("%02d:%02d:%02d",
+                        timeKeeper.hour() % 100,
+                        timeKeeper.minute() % 100,
+                        timeKeeper.second() % 100
+                    );
+
+                    print(notificationsIcon);
+                    print("3     ");
+                    print(batteryIcon);
+
+                    break;
+                }
+
+                case 1:
+                {
                     printf("%02d/%02d/%02d%02d:%02d:%02d",
                         timeKeeper.day() % 100,
                         timeKeeper.month() % 100,
@@ -66,7 +99,7 @@ class MainScreen : public ui::Screen {
                     break;
                 }
 
-                case 1:
+                case 2:
                 {
                     printf("%02d:%02d:%02d.%03d",
                         timeKeeper.hour() % 100,
@@ -78,7 +111,7 @@ class MainScreen : public ui::Screen {
                     break;
                 }
 
-                case 2:
+                case 3:
                 {
                     printf("Battery %s %03d%%",
                         power::isCharging() ? "chg" : "dsc",
@@ -88,7 +121,7 @@ class MainScreen : public ui::Screen {
                     break;
                 }
 
-                case 3:
+                case 4:
                 {
                     printf("Battery %1.4f V",
                         power::getBatteryVoltage()
@@ -119,7 +152,7 @@ class MainScreen : public ui::Screen {
 
                         mode++;
 
-                        if (mode > 3) {
+                        if (mode > 4) {
                             mode = 0;
                         }
 
@@ -151,8 +184,8 @@ void setup() {
 
     ui::currentScreen = testScreen;
 
-    testScreen->print("Hello,  world! ");
-    testScreen->print(happyIcon);
+    testScreen->print(" device  future");
+    testScreen->print(tmIcon);
 }
 
 void loop() {
