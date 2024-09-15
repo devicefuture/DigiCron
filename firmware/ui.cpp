@@ -1,9 +1,12 @@
 #ifndef DC_SIMULATOR
     #include "HCMS39xx.h"
-    #include "font5x7.h"
+#else
+    #include <stdio.h>
+    #include <stdarg.h>
 #endif
 
 #include <Arduino.h>
+#include "font5x7.h"
 
 #include "ui.h"
 #include "input.h"
@@ -61,7 +64,19 @@ void ui::Screen::print(char* chars) {
     }
 }
 
-void ui::Screen::print(String format, ...) {
+void ui::Screen::print(Icon icon) {
+    if (_currentPosition >= display::CHAR_COUNT) {
+        return;
+    }
+
+    for (unsigned int offset = 0; offset < display::CHAR_COLUMNS; offset++) {
+        displayData[(_currentPosition * display::CHAR_COLUMNS) + offset] = icon.iconData[offset];
+    }
+
+    _currentPosition++;
+}
+
+void ui::Screen::printf(String format, ...) {
     va_list args;
     char formatCharArray[33];
     char outputCharArray[17];
@@ -73,18 +88,6 @@ void ui::Screen::print(String format, ...) {
     va_end(args);
 
     print(outputCharArray);
-}
-
-void ui::Screen::print(Icon icon) {
-    if (_currentPosition >= display::CHAR_COUNT) {
-        return;
-    }
-
-    for (unsigned int offset = 0; offset < display::CHAR_COLUMNS; offset++) {
-        displayData[(_currentPosition * display::CHAR_COLUMNS) + offset] = icon.iconData[offset];
-    }
-
-    _currentPosition++;
 }
 
 void ui::renderCurrentScreen() {

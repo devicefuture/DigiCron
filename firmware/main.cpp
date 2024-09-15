@@ -54,7 +54,7 @@ class MainScreen : public ui::Screen {
             switch (mode) {
                 case 0:
                 {
-                    print("%02d/%02d/%02d%02d:%02d:%02d",
+                    printf("%02d/%02d/%02d%02d:%02d:%02d",
                         timeKeeper.day() % 100,
                         timeKeeper.month() % 100,
                         timeKeeper.year() % 100,
@@ -68,7 +68,7 @@ class MainScreen : public ui::Screen {
 
                 case 1:
                 {
-                    print("%02d:%02d:%02d.%03d",
+                    printf("%02d:%02d:%02d.%03d",
                         timeKeeper.hour() % 100,
                         timeKeeper.minute() % 100,
                         timeKeeper.second() % 100,
@@ -80,7 +80,7 @@ class MainScreen : public ui::Screen {
 
                 case 2:
                 {
-                    print("Battery %s %03d%%",
+                    printf("Battery %s %03d%%",
                         power::isCharging() ? "chg" : "dsc",
                         (int)round(power::getBatteryLevel())
                     );
@@ -90,7 +90,7 @@ class MainScreen : public ui::Screen {
 
                 case 3:
                 {
-                    print("Battery %1.4f V",
+                    printf("Battery %1.4f V",
                         power::getBatteryVoltage()
                     );
 
@@ -125,6 +125,8 @@ class MainScreen : public ui::Screen {
 
                         break;
                     }
+
+                    default: break;
                 }
             }
 

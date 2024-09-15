@@ -36,8 +36,8 @@ namespace ui {
             void print(char c);
             void print(char* chars);
             void print(String string);
-            void print(String format, ...);
             void print(Icon icon);
+            void printf(String format, ...);
 
             virtual void update() {}
             virtual void handleEvent(Event event) {}

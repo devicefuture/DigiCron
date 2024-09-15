@@ -1,3 +1,8 @@
+if [ "$DESKTOP_SESSION" == "gshell" ]; then
+    # Fix when using LiveG OS since `emsdk` confuses LiveG OS for macOS
+    export EMSDK_OS=linux
+fi
+
 if [ "$1" == "--install-dev" ]; then
     if ! [ -x "$(command -v pio)" ]; then
         echo "Installing PlatformIO..."
