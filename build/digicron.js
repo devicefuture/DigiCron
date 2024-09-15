@@ -900,6 +900,9 @@ function dbg(...args) {
 }
 // end include: runtime_debug.js
 // === Body ===
+
+function sendDisplayDataToSimulator(dataPtr,size) { renderDisplayData(new Uint8ClampedArray(HEAPU8.buffer.slice(dataPtr), 0, size)); }
+
 // end include: preamble.js
 
 
@@ -1308,6 +1311,384 @@ function dbg(...args) {
         argPackAdvance: GenericWireTypeSize,
         'readValueFromPointer': floatReadValueFromPointer(name, size),
         destructorFunction: null, // This type does not need a destructor
+      });
+    };
+
+  var createNamedFunction = (name, body) => Object.defineProperty(body, 'name', {
+      value: name
+    });
+  
+  var runDestructors = (destructors) => {
+      while (destructors.length) {
+        var ptr = destructors.pop();
+        var del = destructors.pop();
+        del(ptr);
+      }
+    };
+  
+  
+  function usesDestructorStack(argTypes) {
+      // Skip return value at index 0 - it's not deleted here.
+      for (var i = 1; i < argTypes.length; ++i) {
+        // The type does not define a destructor function - must use dynamic stack
+        if (argTypes[i] !== null && argTypes[i].destructorFunction === undefined) {
+          return true;
+        }
+      }
+      return false;
+    }
+  
+  function newFunc(constructor, argumentList) {
+      if (!(constructor instanceof Function)) {
+        throw new TypeError(`new_ called with constructor type ${typeof(constructor)} which is not a function`);
+      }
+      /*
+       * Previously, the following line was just:
+       *   function dummy() {};
+       * Unfortunately, Chrome was preserving 'dummy' as the object's name, even
+       * though at creation, the 'dummy' has the correct constructor name.  Thus,
+       * objects created with IMVU.new would show up in the debugger as 'dummy',
+       * which isn't very helpful.  Using IMVU.createNamedFunction addresses the
+       * issue.  Doubly-unfortunately, there's no way to write a test for this
+       * behavior.  -NRD 2013.02.22
+       */
+      var dummy = createNamedFunction(constructor.name || 'unknownFunctionName', function(){});
+      dummy.prototype = constructor.prototype;
+      var obj = new dummy;
+  
+      var r = constructor.apply(obj, argumentList);
+      return (r instanceof Object) ? r : obj;
+    }
+  
+  function createJsInvoker(argTypes, isClassMethodFunc, returns, isAsync) {
+      var needsDestructorStack = usesDestructorStack(argTypes);
+      var argCount = argTypes.length - 2;
+      var argsList = [];
+      var argsListWired = ['fn'];
+      if (isClassMethodFunc) {
+        argsListWired.push('thisWired');
+      }
+      for (var i = 0; i < argCount; ++i) {
+        argsList.push(`arg${i}`)
+        argsListWired.push(`arg${i}Wired`)
+      }
+      argsList = argsList.join(',')
+      argsListWired = argsListWired.join(',')
+  
+      var invokerFnBody = `
+        return function (${argsList}) {
+        if (arguments.length !== ${argCount}) {
+          throwBindingError('function ' + humanName + ' called with ' + arguments.length + ' arguments, expected ${argCount}');
+        }`;
+  
+      if (needsDestructorStack) {
+        invokerFnBody += "var destructors = [];\n";
+      }
+  
+      var dtorStack = needsDestructorStack ? "destructors" : "null";
+      var args1 = ["humanName", "throwBindingError", "invoker", "fn", "runDestructors", "retType", "classParam"];
+  
+      if (isClassMethodFunc) {
+        invokerFnBody += `var thisWired = classParam['toWireType'](${dtorStack}, this);\n`;
+      }
+  
+      for (var i = 0; i < argCount; ++i) {
+        invokerFnBody += `var arg${i}Wired = argType${i}['toWireType'](${dtorStack}, arg${i});\n`;
+        args1.push(`argType${i}`);
+      }
+  
+      invokerFnBody += (returns || isAsync ? "var rv = ":"") + `invoker(${argsListWired});\n`;
+  
+      var returnVal = returns ? "rv" : "";
+  
+      if (needsDestructorStack) {
+        invokerFnBody += "runDestructors(destructors);\n";
+      } else {
+        for (var i = isClassMethodFunc?1:2; i < argTypes.length; ++i) { // Skip return value at index 0 - it's not deleted here. Also skip class type if not a method.
+          var paramName = (i === 1 ? "thisWired" : ("arg"+(i - 2)+"Wired"));
+          if (argTypes[i].destructorFunction !== null) {
+            invokerFnBody += `${paramName}_dtor(${paramName});\n`;
+            args1.push(`${paramName}_dtor`);
+          }
+        }
+      }
+  
+      if (returns) {
+        invokerFnBody += "var ret = retType['fromWireType'](rv);\n" +
+                         "return ret;\n";
+      } else {
+      }
+  
+      invokerFnBody += "}\n";
+  
+      invokerFnBody = `if (arguments.length !== ${args1.length}){ throw new Error(humanName + "Expected ${args1.length} closure arguments " + arguments.length + " given."); }\n${invokerFnBody}`;
+      return [args1, invokerFnBody];
+    }
+  function craftInvokerFunction(humanName, argTypes, classType, cppInvokerFunc, cppTargetFunc, /** boolean= */ isAsync) {
+      // humanName: a human-readable string name for the function to be generated.
+      // argTypes: An array that contains the embind type objects for all types in the function signature.
+      //    argTypes[0] is the type object for the function return value.
+      //    argTypes[1] is the type object for function this object/class type, or null if not crafting an invoker for a class method.
+      //    argTypes[2...] are the actual function parameters.
+      // classType: The embind type object for the class to be bound, or null if this is not a method of a class.
+      // cppInvokerFunc: JS Function object to the C++-side function that interops into C++ code.
+      // cppTargetFunc: Function pointer (an integer to FUNCTION_TABLE) to the target C++ function the cppInvokerFunc will end up calling.
+      // isAsync: Optional. If true, returns an async function. Async bindings are only supported with JSPI.
+      var argCount = argTypes.length;
+  
+      if (argCount < 2) {
+        throwBindingError("argTypes array size mismatch! Must at least get return value and 'this' types!");
+      }
+  
+      assert(!isAsync, 'Async bindings are only supported with JSPI.');
+  
+      var isClassMethodFunc = (argTypes[1] !== null && classType !== null);
+  
+      // Free functions with signature "void function()" do not need an invoker that marshalls between wire types.
+  // TODO: This omits argument count check - enable only at -O3 or similar.
+  //    if (ENABLE_UNSAFE_OPTS && argCount == 2 && argTypes[0].name == "void" && !isClassMethodFunc) {
+  //       return FUNCTION_TABLE[fn];
+  //    }
+  
+      // Determine if we need to use a dynamic stack to store the destructors for the function parameters.
+      // TODO: Remove this completely once all function invokers are being dynamically generated.
+      var needsDestructorStack = usesDestructorStack(argTypes);
+  
+      var returns = (argTypes[0].name !== "void");
+  
+    // Builld the arguments that will be passed into the closure around the invoker
+    // function.
+    var closureArgs = [humanName, throwBindingError, cppInvokerFunc, cppTargetFunc, runDestructors, argTypes[0], argTypes[1]];
+    for (var i = 0; i < argCount - 2; ++i) {
+      closureArgs.push(argTypes[i+2]);
+    }
+    if (!needsDestructorStack) {
+      for (var i = isClassMethodFunc?1:2; i < argTypes.length; ++i) { // Skip return value at index 0 - it's not deleted here. Also skip class type if not a method.
+        if (argTypes[i].destructorFunction !== null) {
+          closureArgs.push(argTypes[i].destructorFunction);
+        }
+      }
+    }
+  
+    let [args, invokerFnBody] = createJsInvoker(argTypes, isClassMethodFunc, returns, isAsync);
+    args.push(invokerFnBody);
+    var invokerFn = newFunc(Function, args)(...closureArgs);
+      return createNamedFunction(humanName, invokerFn);
+    }
+  
+  var ensureOverloadTable = (proto, methodName, humanName) => {
+      if (undefined === proto[methodName].overloadTable) {
+        var prevFunc = proto[methodName];
+        // Inject an overload resolver function that routes to the appropriate overload based on the number of arguments.
+        proto[methodName] = function(...args) {
+          // TODO This check can be removed in -O3 level "unsafe" optimizations.
+          if (!proto[methodName].overloadTable.hasOwnProperty(args.length)) {
+            throwBindingError(`Function '${humanName}' called with an invalid number of arguments (${args.length}) - expects one of (${proto[methodName].overloadTable})!`);
+          }
+          return proto[methodName].overloadTable[args.length].apply(this, args);
+        };
+        // Move the previous function into the overload table.
+        proto[methodName].overloadTable = [];
+        proto[methodName].overloadTable[prevFunc.argCount] = prevFunc;
+      }
+    };
+  
+  /** @param {number=} numArguments */
+  var exposePublicSymbol = (name, value, numArguments) => {
+      if (Module.hasOwnProperty(name)) {
+        if (undefined === numArguments || (undefined !== Module[name].overloadTable && undefined !== Module[name].overloadTable[numArguments])) {
+          throwBindingError(`Cannot register public name '${name}' twice`);
+        }
+  
+        // We are exposing a function with the same name as an existing function. Create an overload table and a function selector
+        // that routes between the two.
+        ensureOverloadTable(Module, name, name);
+        if (Module.hasOwnProperty(numArguments)) {
+          throwBindingError(`Cannot register multiple overloads of a function with the same number of arguments (${numArguments})!`);
+        }
+        // Add the new function into the overload table.
+        Module[name].overloadTable[numArguments] = value;
+      }
+      else {
+        Module[name] = value;
+        if (undefined !== numArguments) {
+          Module[name].numArguments = numArguments;
+        }
+      }
+    };
+  
+  var heap32VectorToArray = (count, firstElement) => {
+      var array = [];
+      for (var i = 0; i < count; i++) {
+        // TODO(https://github.com/emscripten-core/emscripten/issues/17310):
+        // Find a way to hoist the `>> 2` or `>> 3` out of this loop.
+        array.push(HEAPU32[(((firstElement)+(i * 4))>>2)]);
+      }
+      return array;
+    };
+  
+  
+  /** @param {number=} numArguments */
+  var replacePublicSymbol = (name, value, numArguments) => {
+      if (!Module.hasOwnProperty(name)) {
+        throwInternalError('Replacing nonexistent public symbol');
+      }
+      // If there's an overload table for this symbol, replace the symbol in the overload table instead.
+      if (undefined !== Module[name].overloadTable && undefined !== numArguments) {
+        Module[name].overloadTable[numArguments] = value;
+      }
+      else {
+        Module[name] = value;
+        Module[name].argCount = numArguments;
+      }
+    };
+  
+  
+  
+  var dynCallLegacy = (sig, ptr, args) => {
+      sig = sig.replace(/p/g, 'i')
+      assert(('dynCall_' + sig) in Module, `bad function pointer type - dynCall function not found for sig '${sig}'`);
+      if (args?.length) {
+        // j (64-bit integer) must be passed in as two numbers [low 32, high 32].
+        assert(args.length === sig.substring(1).replace(/j/g, '--').length);
+      } else {
+        assert(sig.length == 1);
+      }
+      var f = Module['dynCall_' + sig];
+      return f(ptr, ...args);
+    };
+  
+  var wasmTableMirror = [];
+  
+  /** @type {WebAssembly.Table} */
+  var wasmTable;
+  var getWasmTableEntry = (funcPtr) => {
+      var func = wasmTableMirror[funcPtr];
+      if (!func) {
+        if (funcPtr >= wasmTableMirror.length) wasmTableMirror.length = funcPtr + 1;
+        wasmTableMirror[funcPtr] = func = wasmTable.get(funcPtr);
+      }
+      assert(wasmTable.get(funcPtr) == func, 'JavaScript-side Wasm function table mirror is out of date!');
+      return func;
+    };
+  
+  var dynCall = (sig, ptr, args = []) => {
+      // Without WASM_BIGINT support we cannot directly call function with i64 as
+      // part of their signature, so we rely on the dynCall functions generated by
+      // wasm-emscripten-finalize
+      if (sig.includes('j')) {
+        return dynCallLegacy(sig, ptr, args);
+      }
+      assert(getWasmTableEntry(ptr), `missing table entry in dynCall: ${ptr}`);
+      var rtn = getWasmTableEntry(ptr)(...args);
+      return rtn;
+    };
+  var getDynCaller = (sig, ptr) => {
+      assert(sig.includes('j') || sig.includes('p'), 'getDynCaller should only be called with i64 sigs')
+      return (...args) => dynCall(sig, ptr, args);
+    };
+  
+  
+  var embind__requireFunction = (signature, rawFunction) => {
+      signature = readLatin1String(signature);
+  
+      function makeDynCaller() {
+        if (signature.includes('j')) {
+          return getDynCaller(signature, rawFunction);
+        }
+        return getWasmTableEntry(rawFunction);
+      }
+  
+      var fp = makeDynCaller();
+      if (typeof fp != "function") {
+          throwBindingError(`unknown function pointer with signature ${signature}: ${rawFunction}`);
+      }
+      return fp;
+    };
+  
+  
+  
+  var extendError = (baseErrorType, errorName) => {
+      var errorClass = createNamedFunction(errorName, function(message) {
+        this.name = errorName;
+        this.message = message;
+  
+        var stack = (new Error(message)).stack;
+        if (stack !== undefined) {
+          this.stack = this.toString() + '\n' +
+              stack.replace(/^Error(:[^\n]*)?\n/, '');
+        }
+      });
+      errorClass.prototype = Object.create(baseErrorType.prototype);
+      errorClass.prototype.constructor = errorClass;
+      errorClass.prototype.toString = function() {
+        if (this.message === undefined) {
+          return this.name;
+        } else {
+          return `${this.name}: ${this.message}`;
+        }
+      };
+  
+      return errorClass;
+    };
+  var UnboundTypeError;
+  
+  
+  
+  var getTypeName = (type) => {
+      var ptr = ___getTypeName(type);
+      var rv = readLatin1String(ptr);
+      _free(ptr);
+      return rv;
+    };
+  var throwUnboundTypeError = (message, types) => {
+      var unboundTypes = [];
+      var seen = {};
+      function visit(type) {
+        if (seen[type]) {
+          return;
+        }
+        if (registeredTypes[type]) {
+          return;
+        }
+        if (typeDependencies[type]) {
+          typeDependencies[type].forEach(visit);
+          return;
+        }
+        unboundTypes.push(type);
+        seen[type] = true;
+      }
+      types.forEach(visit);
+  
+      throw new UnboundTypeError(`${message}: ` + unboundTypes.map(getTypeName).join([', ']));
+    };
+  
+  
+  var getFunctionName = (signature) => {
+      signature = signature.trim();
+      const argsIndex = signature.indexOf("(");
+      if (argsIndex !== -1) {
+        assert(signature[signature.length - 1] == ")", "Parentheses for argument names should match.");
+        return signature.substr(0, argsIndex);
+      } else {
+        return signature;
+      }
+    };
+  var __embind_register_function = (name, argCount, rawArgTypesAddr, signature, rawInvoker, fn, isAsync) => {
+      var argTypes = heap32VectorToArray(argCount, rawArgTypesAddr);
+      name = readLatin1String(name);
+      name = getFunctionName(name);
+  
+      rawInvoker = embind__requireFunction(signature, rawInvoker);
+  
+      exposePublicSymbol(name, function() {
+        throwUnboundTypeError(`Cannot call ${name} due to unbound types`, argTypes);
+      }, argCount - 1);
+  
+      whenDependentTypesAreResolved([], argTypes, (argTypes) => {
+        var invokerArgsArray = [argTypes[0] /* return value */, null /* no class 'this'*/].concat(argTypes.slice(1) /* actual params */);
+        replacePublicSymbol(name, craftInvokerFunction(name, invokerArgsArray, null /* no class 'this'*/, rawInvoker, fn, isAsync), argCount - 1);
+        return [];
       });
     };
 
@@ -5207,19 +5588,6 @@ function dbg(...args) {
     };
   
   
-  var wasmTableMirror = [];
-  
-  /** @type {WebAssembly.Table} */
-  var wasmTable;
-  var getWasmTableEntry = (funcPtr) => {
-      var func = wasmTableMirror[funcPtr];
-      if (!func) {
-        if (funcPtr >= wasmTableMirror.length) wasmTableMirror.length = funcPtr + 1;
-        wasmTableMirror[funcPtr] = func = wasmTable.get(funcPtr);
-      }
-      assert(wasmTable.get(funcPtr) == func, 'JavaScript-side Wasm function table mirror is out of date!');
-      return func;
-    };
   var _emscripten_set_main_loop = (func, fps, simulateInfiniteLoop) => {
       var browserIterationFunc = getWasmTableEntry(func);
       setMainLoop(browserIterationFunc, fps, simulateInfiniteLoop);
@@ -5421,6 +5789,7 @@ embind_init_charCodes();
 BindingError = Module['BindingError'] = class BindingError extends Error { constructor(message) { super(message); this.name = 'BindingError'; }};
 InternalError = Module['InternalError'] = class InternalError extends Error { constructor(message) { super(message); this.name = 'InternalError'; }};
 init_emval();;
+UnboundTypeError = Module['UnboundTypeError'] = extendError(Error, 'UnboundTypeError');;
 
   FS.createPreloadedFile = FS_createPreloadedFile;
   FS.staticInit();
@@ -5461,6 +5830,8 @@ var wasmImports = {
   /** @export */
   _embind_register_float: __embind_register_float,
   /** @export */
+  _embind_register_function: __embind_register_function,
+  /** @export */
   _embind_register_integer: __embind_register_integer,
   /** @export */
   _embind_register_memory_view: __embind_register_memory_view,
@@ -5491,7 +5862,9 @@ var wasmImports = {
   /** @export */
   fd_seek: _fd_seek,
   /** @export */
-  fd_write: _fd_write
+  fd_write: _fd_write,
+  /** @export */
+  sendDisplayDataToSimulator
 };
 var wasmExports = createWasm();
 var ___wasm_call_ctors = createExportWrapper('__wasm_call_ctors', 0);
@@ -5499,8 +5872,8 @@ var ___getTypeName = createExportWrapper('__getTypeName', 1);
 var _main = Module['_main'] = createExportWrapper('__main_argc_argv', 2);
 var _free = createExportWrapper('free', 1);
 var _fflush = createExportWrapper('fflush', 1);
-var _strerror = createExportWrapper('strerror', 1);
 var _malloc = createExportWrapper('malloc', 1);
+var _strerror = createExportWrapper('strerror', 1);
 var _emscripten_stack_init = () => (_emscripten_stack_init = wasmExports['emscripten_stack_init'])();
 var _emscripten_stack_get_free = () => (_emscripten_stack_get_free = wasmExports['emscripten_stack_get_free'])();
 var _emscripten_stack_get_base = () => (_emscripten_stack_get_base = wasmExports['emscripten_stack_get_base'])();
@@ -5509,7 +5882,7 @@ var __emscripten_stack_restore = (a0) => (__emscripten_stack_restore = wasmExpor
 var __emscripten_stack_alloc = (a0) => (__emscripten_stack_alloc = wasmExports['_emscripten_stack_alloc'])(a0);
 var _emscripten_stack_get_current = () => (_emscripten_stack_get_current = wasmExports['emscripten_stack_get_current'])();
 var dynCall_jiji = Module['dynCall_jiji'] = createExportWrapper('dynCall_jiji', 5);
-var ___emscripten_embedded_file_data = Module['___emscripten_embedded_file_data'] = 68240;
+var ___emscripten_embedded_file_data = Module['___emscripten_embedded_file_data'] = 69168;
 
 // include: postamble.js
 // === Auto-generated postamble setup entry stuff ===
@@ -5547,9 +5920,6 @@ var missingLibrarySymbols = [
   'getExecutableName',
   'listenOnce',
   'autoResumeAudioContext',
-  'dynCallLegacy',
-  'getDynCaller',
-  'dynCall',
   'runtimeKeepalivePush',
   'runtimeKeepalivePop',
   'asmjsMangle',
@@ -5678,21 +6048,10 @@ var missingLibrarySymbols = [
   'setErrNo',
   'demangle',
   'stackTrace',
-  'getTypeName',
-  'getFunctionName',
   'getFunctionArgsName',
-  'heap32VectorToArray',
   'requireRegisteredType',
-  'usesDestructorStack',
   'createJsInvokerSignature',
-  'createJsInvoker',
   'init_embind',
-  'throwUnboundTypeError',
-  'ensureOverloadTable',
-  'exposePublicSymbol',
-  'replacePublicSymbol',
-  'extendError',
-  'createNamedFunction',
   'getBasestPointer',
   'registerInheritedInstance',
   'unregisterInheritedInstance',
@@ -5700,10 +6059,6 @@ var missingLibrarySymbols = [
   'getInheritedInstanceCount',
   'getLiveInheritedInstances',
   'enumReadValueFromPointer',
-  'runDestructors',
-  'newFunc',
-  'craftInvokerFunction',
-  'embind__requireFunction',
   'genericPointerToWireType',
   'constNoSmartPtrRawPointerToWireType',
   'nonConstNoSmartPtrRawPointerToWireType',
@@ -5772,6 +6127,9 @@ var unexportedSymbols = [
   'warnOnce',
   'readEmAsmArgsArray',
   'jstoi_s',
+  'dynCallLegacy',
+  'getDynCaller',
+  'dynCall',
   'handleException',
   'keepRuntimeAlive',
   'callUserCallback',
@@ -5865,10 +6223,21 @@ var unexportedSymbols = [
   'embind_charCodes',
   'embind_init_charCodes',
   'readLatin1String',
+  'getTypeName',
+  'getFunctionName',
+  'heap32VectorToArray',
+  'usesDestructorStack',
+  'createJsInvoker',
   'UnboundTypeError',
   'PureVirtualError',
   'GenericWireTypeSize',
   'EmValType',
+  'throwUnboundTypeError',
+  'ensureOverloadTable',
+  'exposePublicSymbol',
+  'replacePublicSymbol',
+  'extendError',
+  'createNamedFunction',
   'embindRepr',
   'registeredInstances',
   'registeredPointers',
@@ -5876,6 +6245,10 @@ var unexportedSymbols = [
   'integerReadValueFromPointer',
   'floatReadValueFromPointer',
   'readPointer',
+  'runDestructors',
+  'newFunc',
+  'craftInvokerFunction',
+  'embind__requireFunction',
   'finalizationRegistry',
   'detachFinalizer_deps',
   'deletionQueue',

@@ -2,13 +2,71 @@
 <html>
     <head>
         <title>DigiCron Simulator</title>
+        <style>
+            .displayRow {
+                display: block;
+                background-color: #222222;
+                margin-block: 0.5rem;
+                padding: 0.5rem;
+            }
+        </style>
     </head>
     <body>
         <h1>Hello, world!</h1>
+        <canvas width="0" height="0" class="displayRow"></canvas>
+        <canvas width="0" height="0" class="displayRow"></canvas>
         <script src="../build/digicron.js"></script>
         <script>
+            const DISPLAY_CELL_WIDTH = 5;
+            const DISPLAY_CELL_HEIGHT = 7;
+            const DISPLAY_COLUMNS = 8;
+            const DISPLAY_PIXELS_PER_DOT = 4;
+            const DISPLAY_CELL_HORIZONTAL_PADDING = 8;
+            const DISPLAY_CELL_VERTICAL_PADDING = 8;
+
+            var displayRows = [...document.querySelectorAll(".displayRow")];
+
+            displayRows.forEach(function(row) {
+                row.width = (DISPLAY_CELL_WIDTH * DISPLAY_COLUMNS * DISPLAY_PIXELS_PER_DOT) + ((DISPLAY_COLUMNS - 1) * DISPLAY_CELL_HORIZONTAL_PADDING);
+                row.height = DISPLAY_CELL_HEIGHT * DISPLAY_PIXELS_PER_DOT;
+            });
+
+            function renderDisplayData(data) {
+                var rowContexts = displayRows.map((row) => row.getContext("2d"));
+
+                for (var row = 0; row < rowContexts.length; row++) {
+                    var context = rowContexts[row];
+
+                    displayRows[row].width = displayRows[row].width;
+                    displayRows[row].height = displayRows[row].height;
+
+                    for (var column = 0; column < DISPLAY_COLUMNS; column++) {
+                        for (var cellY = 0; cellY < DISPLAY_CELL_HEIGHT; cellY++) {
+                            for (var cellX = 0; cellX < DISPLAY_CELL_WIDTH; cellX++) {
+                                var cellByte = data[(((row * DISPLAY_COLUMNS) + column) * DISPLAY_CELL_WIDTH) + cellX];
+
+                                context.fillStyle = ((cellByte >> cellY) & 0b1) ? "#00ff00" : "#ffffff22";
+
+                                context.fillRect(
+                                    (column * DISPLAY_CELL_WIDTH * DISPLAY_PIXELS_PER_DOT) + (column * DISPLAY_CELL_HORIZONTAL_PADDING) + (cellX * DISPLAY_PIXELS_PER_DOT),
+                                    cellY * DISPLAY_PIXELS_PER_DOT,
+                                    DISPLAY_PIXELS_PER_DOT - 1,
+                                    DISPLAY_PIXELS_PER_DOT - 1
+                                );
+                            }
+                        }
+                    }
+                }
+
+                requestAnimationFrame(function() {
+                    Module.display_render();
+                });
+            }
+
             Module.onRuntimeInitialized = function() {
                 console.log("Runtime initialised");
+
+                Module.display_render();
             };
         </script>
     </body>
