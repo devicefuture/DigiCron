@@ -11,6 +11,7 @@
 #include "ui.h"
 #include "input.h"
 #include "display.h"
+#include "timing.h"
 
 input::Button ui::lastButton;
 ui::Screen* ui::currentScreen;
@@ -25,6 +26,7 @@ void ui::Icon::setPixel(unsigned int x, unsigned int y, bool value) {
 
 ui::Screen::Screen() {
     clear();
+    resetScroll();
 }
 
 void ui::Screen::clear() {
@@ -35,8 +37,18 @@ void ui::Screen::clear() {
     _currentPosition = 0;
 }
 
+void ui::Screen::setPosition(unsigned int column, unsigned int row) {
+    _currentPosition = (row * display::CHAR_COLUMNS) + column;
+}
+
 void ui::Screen::print(char c) {
     if (_currentPosition >= display::CHAR_COUNT) {
+        return;
+    }
+
+    if (c == '\n') {
+        _currentPosition += display::COLUMNS - (_currentPosition % display::COLUMNS);
+
         return;
     }
 
@@ -88,6 +100,36 @@ void ui::Screen::printf(String format, ...) {
     va_end(args);
 
     print(outputCharArray);
+}
+
+void ui::Screen::printRepeated(String string, unsigned int times) {
+    for (unsigned int i = 0; i < times; i++) {
+        print(string);
+    }
+}
+
+void ui::Screen::scroll(String string, unsigned int maxLength) {
+    if (string.length() <= maxLength) {
+        print(string);
+        printRepeated(" ", maxLength - string.length());
+    }
+
+    unsigned int maxTime = SCROLL_DELAY + (SCROLL_INTERVAL * (string.length() + 1));
+    unsigned int currentTime = (timing::getCurrentTick() - _scrollStartTime) % maxTime;
+    unsigned int scrollPosition = 0;
+
+    if (currentTime > SCROLL_DELAY) {
+        scrollPosition = (currentTime - SCROLL_DELAY) / SCROLL_INTERVAL;
+    }
+
+    String part = string.substring(scrollPosition, scrollPosition + maxLength);
+
+    print(part);
+    printRepeated(" ", maxLength - part.length());
+}
+
+void ui::Screen::resetScroll() {
+    _scrollStartTime = timing::getCurrentTick();
 }
 
 void ui::renderCurrentScreen() {

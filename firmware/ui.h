@@ -7,6 +7,9 @@
 #include "display.h"
 
 namespace ui {
+    const unsigned int SCROLL_DELAY = 1000;
+    const unsigned int SCROLL_INTERVAL = 250;
+
     enum EventType {
         BUTTON_DOWN,
         BUTTON_UP
@@ -33,17 +36,22 @@ namespace ui {
             Screen();
 
             void clear();
+            void setPosition(unsigned int x, unsigned int y);
             void print(char c);
             void print(char* chars);
             void print(String string);
             void print(Icon icon);
             void printf(String format, ...);
+            void printRepeated(String string, unsigned int times);
+            void scroll(String string, unsigned int maxLength = display::COLUMNS);
+            void resetScroll();
 
             virtual void update() {}
             virtual void handleEvent(Event event) {}
 
         private:
             unsigned int _currentPosition = 0;
+            unsigned long _scrollStartTime = 0;
     };
 
     extern input::Button lastButton;

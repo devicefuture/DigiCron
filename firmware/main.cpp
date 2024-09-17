@@ -129,6 +129,14 @@ class MainScreen : public ui::Screen {
 
                     break;
                 }
+
+                case 5:
+                {
+                    print("NOTICE\n");
+                    scroll("This is a demo of using the scrolling feature!");
+
+                    break;
+                }
             }
         }
 
@@ -150,9 +158,11 @@ class MainScreen : public ui::Screen {
                     {
                         print("Button    SELECT");
 
+                        resetScroll();
+
                         mode++;
 
-                        if (mode > 4) {
+                        if (mode > 5) {
                             mode = 0;
                         }
 
