@@ -37,11 +37,11 @@ ui::Icon tmIcon = ui::constructIcon(
 );
 
 ui::Icon notificationsIcon = ui::constructIcon(
-    "  #  "
+    "     "
     "  #  "
     " ### "
-    "#####"
-    "#####"
+    " ### "
+    " ### "
     "#####"
     "  #  "
 );
