@@ -9,6 +9,7 @@
     #include <stdio.h>
 #endif
 
+#include "datatypes.h"
 #include "timing.h"
 #include "power.h"
 #include "display.h"
@@ -54,6 +55,9 @@ ui::Icon batteryIcon = ui::constructIcon(
     " ### "
     " ### "
 );
+
+dataTypes::List<String> mainMenuItems;
+ui::Menu* mainMenu = new ui::Menu(mainMenuItems);
 
 class MainScreen : public ui::Screen {
     public:
@@ -175,6 +179,10 @@ class MainScreen : public ui::Screen {
 
             if (event.type == ui::EventType::BUTTON_UP) {
                 buttonIsDown = false;
+
+                if (event.data.button == input::Button::HOME) {
+                    ui::currentScreen = mainMenu;
+                }
             }
         }
 };
@@ -187,6 +195,21 @@ long lastTick = 0;
 void setup() {
     Serial.begin(115200);
     Serial.println("Hello, world!");
+
+    mainMenu->items.push(new String("NOTIFS"));
+    mainMenu->items.push(new String("APPS"));
+    mainMenu->items.push(new String("CONFIG"));
+    mainMenu->items.push(new String("REALLY LONG NAME"));
+    mainMenu->items.push(new String("ANOTHER"));
+    mainMenu->items.push(new String("ENDLESS"));
+
+    mainMenu->onCancel = []() {
+        ui::currentScreen = mainScreen;
+    };
+
+    mainMenu->onSelect = [](unsigned int selectedIndex) {
+        ui::currentScreen = mainScreen;
+    };
 
     timing::init();
     display::init();
@@ -206,7 +229,9 @@ void loop() {
 
     lastTick = currentTick;
 
-    ui::currentScreen = millis() < 3000 ? testScreen : mainScreen;
+    if (ui::currentScreen == testScreen && millis() > 3000) {
+        ui::currentScreen = mainScreen;
+    }
 
     ui::renderCurrentScreen();
 }

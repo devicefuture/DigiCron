@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 
+#include "datatypes.h"
 #include "input.h"
 #include "display.h"
 
@@ -49,9 +50,30 @@ namespace ui {
             virtual void update() {}
             virtual void handleEvent(Event event) {}
 
-        private:
+        protected:
             unsigned int _currentPosition = 0;
             unsigned long _scrollStartTime = 0;
+    };
+
+    class Menu : public Screen {
+        public:
+            typedef void (*CancellationCallback)();
+            typedef void (*SelectionCallback)(unsigned int selectedIndex);
+
+            dataTypes::List<String> items;
+            CancellationCallback onCancel = nullptr;
+            SelectionCallback onSelect = nullptr;
+
+            Menu(dataTypes::List<String> menuItems) : Screen() {
+                items = menuItems;
+            }
+
+            void update() override;
+            void handleEvent(Event event) override;
+
+        protected:
+            unsigned int _currentIndex = 0;
+            unsigned int _scrollPosition = 0;
     };
 
     extern input::Button lastButton;

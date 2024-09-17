@@ -16,6 +16,15 @@
 input::Button ui::lastButton;
 ui::Screen* ui::currentScreen;
 
+ui::Icon menuSelectionIcon = ui::constructIcon(
+    "     "
+    "  #  "
+    "   # "
+    "#####"
+    "   # "
+    "  #  "
+);
+
 void ui::Icon::setPixel(unsigned int x, unsigned int y, bool value) {
     if (value) {
         iconData[x] |= 1 << y;
@@ -38,7 +47,7 @@ void ui::Screen::clear() {
 }
 
 void ui::Screen::setPosition(unsigned int column, unsigned int row) {
-    _currentPosition = (row * display::CHAR_COLUMNS) + column;
+    _currentPosition = (row * display::COLUMNS) + column;
 }
 
 void ui::Screen::print(char c) {
@@ -112,6 +121,8 @@ void ui::Screen::scroll(String string, unsigned int maxLength) {
     if (string.length() <= maxLength) {
         print(string);
         printRepeated(" ", maxLength - string.length());
+
+        return;
     }
 
     unsigned int maxTime = SCROLL_DELAY + (SCROLL_INTERVAL * (string.length() + 1));
@@ -177,4 +188,92 @@ ui::Icon ui::constructIcon(String pixels) {
     }
 
     return icon;
+}
+
+void ui::Menu::update() {
+    clear();
+
+    if (items.length() == 0) {
+        print("(Empty)");
+
+        return;
+    }
+
+    if (_currentIndex >= items.length()) {
+        _currentIndex = items.length() - 1;
+    }
+
+    if ((int)_currentIndex < _scrollPosition) {
+        _scrollPosition = _currentIndex;
+    }
+
+    if ((int)_currentIndex > _scrollPosition + (display::ROWS - 1)) {
+        _scrollPosition = _currentIndex - 1;
+    }
+
+    for (unsigned int row = 0; row < display::ROWS; row++) {
+        unsigned int i = row + _scrollPosition;
+
+        setPosition(0, row);
+
+        if (i == _currentIndex) {
+            print(menuSelectionIcon);
+            scroll(*items[i], display::COLUMNS - 1);
+        } else {
+            print(" ");
+            print((*items[i]).substring(0, display::COLUMNS - 1));
+        }
+    }
+}
+
+void ui::Menu::handleEvent(Event event) {
+    if (event.type == EventType::BUTTON_DOWN) {
+        switch (event.data.button) {
+            case input::Button::BACK:
+            {
+                if (onCancel) onCancel();
+
+                break;
+            }
+
+            case input::Button::UP:
+            {
+                if (_currentIndex > 0) {
+                    _currentIndex--;
+                } else {
+                    _currentIndex = items.length() - 1;
+                }
+
+                resetScroll();
+
+                break;
+            }
+
+            case input::Button::DOWN:
+            {
+                if (_currentIndex < items.length() - 1) {
+                    _currentIndex++;
+                } else {
+                    _currentIndex = 0;
+                }
+
+                resetScroll();
+
+                break;
+            }
+
+            case input::Button::SELECT:
+            {
+                if (_currentIndex < items.length()) {
+                    if (onSelect) onSelect(_currentIndex);
+                } else {
+                    if (onCancel) onCancel();
+                }
+
+                break;
+            }
+
+            default: break;
+        }
+    }
 }
