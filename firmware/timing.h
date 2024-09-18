@@ -97,6 +97,8 @@ namespace timing {
             struct LeapAdjustment leapAdjustmentToday() override;
     };
 
+    extern timing::EarthTime earthTime;
+
     unsigned long getCurrentTick();
 
     void init();

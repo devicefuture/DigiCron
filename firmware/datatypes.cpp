@@ -1,6 +1,7 @@
 #include <Arduino.h>
 
 #include "datatypes.h"
+#include "ui.h"
 
 template<typename T> T* store(T value) {
     auto storedValue = new dataTypes::StoredValue<T>(value);
@@ -354,3 +355,4 @@ template<typename T> dataTypes::List<T> dataTypes::List<T>::concat(dataTypes::Li
 }
 
 template class dataTypes::List<String>;
+template class dataTypes::List<ui::Screen>;

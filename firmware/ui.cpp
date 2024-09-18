@@ -12,9 +12,14 @@
 #include "input.h"
 #include "display.h"
 #include "timing.h"
+#include "proc.h"
+#include "home.h"
 
 input::Button ui::lastButton;
 ui::Screen* ui::currentScreen;
+proc::Process* ui::foregroundProcess = nullptr;
+proc::Process* ui::lastNonHomeProcess = nullptr;
+dataTypes::List<ui::Screen> ui::screenStack;
 
 ui::Icon menuSelectionIcon = ui::constructIcon(
     "     "
@@ -143,34 +148,38 @@ void ui::Screen::resetScroll() {
     _scrollStartTime = timing::getCurrentTick();
 }
 
-void ui::renderCurrentScreen() {
-    input::Button currentButton = input::getButtonStatus();
+void ui::Screen::open(bool urgent) {
+    screenStack.push(this);
 
-    if (currentButton != lastButton) {
-        if (lastButton != input::Button::NONE) {
-            Event buttonUpEvent = {
-                .type = EventType::BUTTON_UP,
-                .data = {.button = lastButton}
-            };
-
-            currentScreen->handleEvent(buttonUpEvent);
-        }
-
-        if (currentButton != input::Button::NONE) {
-            Event buttonDownEvent = {
-                .type = EventType::BUTTON_DOWN,
-                .data = {.button = currentButton}
-            };
-
-            currentScreen->handleEvent(buttonDownEvent);
-        }
-
-        lastButton = currentButton;
+    if (urgent) {
+        foregroundProcess = ownerProcess;
     }
 
-    currentScreen->update();
+    determineCurrentScreen();
+}
 
-    display::render(currentScreen->displayData);
+void ui::Screen::close() {
+    int i = screenStack.indexOf(this);
+
+    if (i < 0) {
+        return;
+    }
+
+    screenStack.remove(i);
+
+    determineCurrentScreen();
+}
+
+void ui::Screen::swapWith(ui::Screen* currentScreen) {
+    int i = screenStack.indexOf(currentScreen);
+
+    if (i < 0) {
+        return;
+    }
+
+    screenStack.set(i, this);
+
+    determineCurrentScreen();
 }
 
 ui::Icon ui::constructIcon(String pixels) {
@@ -226,12 +235,19 @@ void ui::Menu::update() {
     }
 }
 
+void ui::Menu::open(bool urgent) {
+    _currentIndex = 0;
+    _scrollPosition = 0;
+
+    ui::Screen::open(urgent);
+}
+
 void ui::Menu::handleEvent(Event event) {
     if (event.type == EventType::BUTTON_DOWN) {
         switch (event.data.button) {
             case input::Button::BACK:
             {
-                if (onCancel) onCancel();
+                if (onCancel) onCancel(this);
 
                 break;
             }
@@ -265,9 +281,9 @@ void ui::Menu::handleEvent(Event event) {
             case input::Button::SELECT:
             {
                 if (_currentIndex < items.length()) {
-                    if (onSelect) onSelect(_currentIndex);
+                    if (onSelect) onSelect(this, _currentIndex);
                 } else {
-                    if (onCancel) onCancel();
+                    if (onCancel) onCancel(this);
                 }
 
                 break;
@@ -277,3 +293,86 @@ void ui::Menu::handleEvent(Event event) {
         }
     }
 }
+
+ui::Screen* ui::determineCurrentScreen() {
+    if (screenStack.length() > 0) {
+        bool anyScreensFoundInForeground = false;
+
+        screenStack.start();
+
+        while (ui::Screen* screen = screenStack.next()) {
+            if (screen->ownerProcess != foregroundProcess) {
+                continue;
+            }
+
+            currentScreen = screen;
+            anyScreensFoundInForeground = true;
+        }
+
+        if (!anyScreensFoundInForeground) {
+            ui::Screen* lastScreen = screenStack[-1];
+
+            if (lastScreen) {
+                currentScreen = lastScreen;
+                foregroundProcess = lastScreen->ownerProcess;
+            }
+        }
+    }
+
+    if (foregroundProcess != &home::homeProcess) {
+        lastNonHomeProcess = foregroundProcess;
+    }
+
+    return currentScreen;
+}
+
+void ui::renderCurrentScreen() {
+    input::Button currentButton = input::getButtonStatus();
+
+    if (currentButton != lastButton) {
+        if (lastButton != input::Button::NONE) {
+            Event buttonUpEvent = {
+                .type = EventType::BUTTON_UP,
+                .data = {.button = lastButton}
+            };
+
+            currentScreen->handleEvent(buttonUpEvent);
+        }
+
+        if (currentButton != input::Button::NONE) {
+            Event buttonDownEvent = {
+                .type = EventType::BUTTON_DOWN,
+                .data = {.button = currentButton}
+            };
+
+            currentScreen->handleEvent(buttonDownEvent);
+
+            if (currentButton == input::Button::HOME) {
+                if (currentScreen == &home::homeScreen) {
+                    if (lastNonHomeProcess) {
+                        foregroundProcess = lastNonHomeProcess;
+
+                        determineCurrentScreen();
+                    }
+                } else if (currentScreen->canGoHome) {
+                    foregroundProcess = &home::homeProcess;
+
+                    determineCurrentScreen();
+                }
+            }
+        }
+
+        lastButton = currentButton;
+    }
+
+    currentScreen->update();
+
+    display::render(currentScreen->displayData);
+}
+
+template<typename T>
+void ui::defaultCancellationCallback(T* self) {
+    self->close();
+}
+
+template void ui::defaultCancellationCallback<ui::Menu>(ui::Menu* self);

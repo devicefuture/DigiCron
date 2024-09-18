@@ -11,6 +11,8 @@ const int daysInEarthMonth[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
 unsigned long currentTick = 0;
 unsigned int currentMillisecondOffset = 0;
 
+timing::EarthTime timing::earthTime(2024, 1, 1, 12, 0, 0);
+
 timing::Time::Time(int year, unsigned int month, unsigned int day, unsigned int hour, unsigned int minute, unsigned int second) {
     _year = 0;
     _dayOfYear = 0;

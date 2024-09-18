@@ -6,10 +6,14 @@
 #include "datatypes.h"
 #include "input.h"
 #include "display.h"
+#include "proc.h"
 
 namespace ui {
     const unsigned int SCROLL_DELAY = 1000;
     const unsigned int SCROLL_INTERVAL = 250;
+
+    template <typename T>
+    void defaultCancellationCallback(T* self);
 
     enum EventType {
         BUTTON_DOWN,
@@ -32,6 +36,9 @@ namespace ui {
 
     class Screen {
         public:
+            proc::Process* ownerProcess = nullptr;
+            bool canGoHome = true;
+
             char displayData[display::DATA_SIZE];
 
             Screen();
@@ -47,6 +54,10 @@ namespace ui {
             void scroll(String string, unsigned int maxLength = display::COLUMNS);
             void resetScroll();
 
+            virtual void open(bool urgent = false);
+            virtual void close();
+            virtual void swapWith(Screen* currentScreen);
+
             virtual void update() {}
             virtual void handleEvent(Event event) {}
 
@@ -57,16 +68,21 @@ namespace ui {
 
     class Menu : public Screen {
         public:
-            typedef void (*CancellationCallback)();
-            typedef void (*SelectionCallback)(unsigned int selectedIndex);
+            typedef void (*CancellationCallback)(Menu* self);
+            typedef void (*SelectionCallback)(Menu* self, unsigned int selectedIndex);
 
             dataTypes::List<String> items;
-            CancellationCallback onCancel = nullptr;
+
+            CancellationCallback onCancel = defaultCancellationCallback<Menu>;
             SelectionCallback onSelect = nullptr;
+
+            Menu() : Screen() {};
 
             Menu(dataTypes::List<String> menuItems) : Screen() {
                 items = menuItems;
             }
+
+            void open(bool urgent = false) override;
 
             void update() override;
             void handleEvent(Event event) override;
@@ -78,7 +94,11 @@ namespace ui {
 
     extern input::Button lastButton;
     extern Screen* currentScreen;
+    extern proc::Process* foregroundProcess;
+    extern proc::Process* lastNonHomeProcess;
+    extern dataTypes::List<Screen> screenStack;
 
+    Screen* determineCurrentScreen();
     void renderCurrentScreen();
 
     Icon constructIcon(String pixels);
