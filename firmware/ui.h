@@ -82,7 +82,7 @@ namespace ui {
                 items = menuItems;
             }
 
-            void open(bool urgent = false) override;
+            virtual void open(bool urgent = false) override;
 
             void update() override;
             void handleEvent(Event event) override;
@@ -90,6 +90,17 @@ namespace ui {
         protected:
             unsigned int _currentIndex = 0;
             unsigned int _scrollPosition = 0;
+    };
+
+    class ContextualMenu : public Menu {
+        public:
+            String title;
+
+            ContextualMenu(String menuTitle) : Menu() {
+                title = menuTitle;
+            }
+
+            void update() override;
     };
 
     extern input::Button lastButton;

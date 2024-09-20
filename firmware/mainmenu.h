@@ -12,7 +12,13 @@ namespace mainMenu {
             MainMenuScreen();
     };
 
+    class AppsMenuScreen : public ui::ContextualMenu {
+        public:
+            AppsMenuScreen();
+    };
+
     extern MainMenuScreen mainMenuScreen;
+    extern AppsMenuScreen appsMenuScreen;
 }
 
 #endif

@@ -30,6 +30,16 @@ ui::Icon menuSelectionIcon = ui::constructIcon(
     "  #  "
 );
 
+ui::Icon menuScrollableIcon = ui::constructIcon(
+    "  #  "
+    " ### "
+    "# # #"
+    "  #  "
+    "# # #"
+    " ### "
+    "  #  "
+);
+
 void ui::Icon::setPixel(unsigned int x, unsigned int y, bool value) {
     if (value) {
         iconData[x] |= 1 << y;
@@ -292,6 +302,25 @@ void ui::Menu::handleEvent(Event event) {
             default: break;
         }
     }
+}
+
+void ui::ContextualMenu::update() {
+    clear();
+
+    scroll(title);
+
+    if (items.length() == 0) {
+        print("(Empty)");
+
+        return;
+    }
+
+    if (_currentIndex >= items.length()) {
+        _currentIndex = items.length() - 1;
+    }
+
+    scroll(*items[_currentIndex], display::COLUMNS - 1);
+    print(menuScrollableIcon);
 }
 
 ui::Screen* ui::determineCurrentScreen() {
