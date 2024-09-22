@@ -11,6 +11,7 @@
 namespace ui {
     const unsigned int SCROLL_DELAY = 1000;
     const unsigned int SCROLL_INTERVAL = 250;
+    const unsigned int POPUP_TRANSITION_DURATION = 250;
 
     template <typename T>
     void defaultCancellationCallback(T* self);
@@ -18,6 +19,17 @@ namespace ui {
     enum EventType {
         BUTTON_DOWN,
         BUTTON_UP
+    };
+
+    enum PopupTransitionState {
+        NONE,
+        OPENING,
+        CLOSING
+    };
+
+    enum PenMode {
+        OFF,
+        ON
     };
 
     struct Event {
@@ -31,7 +43,7 @@ namespace ui {
         public:
             char iconData[display::CHAR_COLUMNS];
 
-            void setPixel(unsigned int x, unsigned int y, bool value);
+            void setPixel(unsigned int x, unsigned int y, PenMode value);
     };
 
     class Screen {
@@ -44,7 +56,8 @@ namespace ui {
             Screen();
 
             void clear();
-            void setPosition(unsigned int x, unsigned int y);
+            void setPosition(unsigned int column, unsigned int row);
+            void setPixel(unsigned int x, unsigned int y, PenMode value);
             void print(char c);
             void print(char* chars);
             void print(String string);
@@ -53,6 +66,8 @@ namespace ui {
             void printRepeated(String string, unsigned int times);
             void scroll(String string, unsigned int maxLength = display::COLUMNS);
             void resetScroll();
+            void rect(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, PenMode value);
+            void filledRect(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, PenMode value);
 
             virtual void open(bool urgent = false);
             virtual void close();
@@ -60,6 +75,9 @@ namespace ui {
 
             virtual void update() {}
             virtual void handleEvent(Event event) {}
+
+            virtual void _update();
+            virtual void _handleEvent(Event event);
 
         protected:
             unsigned int _currentPosition = 0;
@@ -101,6 +119,19 @@ namespace ui {
             }
 
             void update() override;
+    };
+
+    class Popup : public Screen {
+        public:
+            void open(bool urgent = false) override;
+            void close() override;
+
+            void _update() override;
+            void _handleEvent(Event event) override;
+
+        protected:
+            PopupTransitionState _transitionState = PopupTransitionState::NONE;
+            unsigned long _transitionEndsAt = 0;
     };
 
     extern input::Button lastButton;

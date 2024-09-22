@@ -40,8 +40,8 @@ ui::Icon menuScrollableIcon = ui::constructIcon(
     "  #  "
 );
 
-void ui::Icon::setPixel(unsigned int x, unsigned int y, bool value) {
-    if (value) {
+void ui::Icon::setPixel(unsigned int x, unsigned int y, ui::PenMode value) {
+    if (value == PenMode::ON) {
         iconData[x] |= 1 << y;
     } else {
         iconData[x] &= ~(1 << y);
@@ -63,6 +63,28 @@ void ui::Screen::clear() {
 
 void ui::Screen::setPosition(unsigned int column, unsigned int row) {
     _currentPosition = (row * display::COLUMNS) + column;
+}
+
+void ui::Screen::setPixel(unsigned int x, unsigned int y, ui::PenMode value) {
+    if (x >= display::WIDTH) {
+        return;
+    }
+
+    unsigned int offset = x + ((y / display::CHAR_ROWS) * display::WIDTH);
+
+    if (offset > display::DATA_SIZE) {
+        return;
+    }
+
+    char* bytePointer = displayData + offset;
+
+    y %= display::CHAR_ROWS;
+
+    if (value == PenMode::ON) {
+        *bytePointer |= 1 << y;
+    } else {
+        *bytePointer &= ~(1 << y);
+    }
 }
 
 void ui::Screen::print(char c) {
@@ -158,6 +180,26 @@ void ui::Screen::resetScroll() {
     _scrollStartTime = timing::getCurrentTick();
 }
 
+void ui::Screen::rect(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, PenMode value) {
+    for (unsigned int x = x1; x <= x2; x++) {
+        setPixel(x, y1, value);
+        setPixel(x, y2, value);
+    }
+
+    for (unsigned int y = y1; y <= y2; y++) {
+        setPixel(x1, y, value);
+        setPixel(x2, y, value);
+    }
+}
+
+void ui::Screen::filledRect(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, PenMode value) {
+    for (unsigned int y = y1; y <= y2; y++) {
+        for (unsigned int x = x1; x <= x2; x++) {
+            setPixel(x, y, value);
+        }
+    }
+}
+
 void ui::Screen::open(bool urgent) {
     screenStack.push(this);
 
@@ -192,6 +234,14 @@ void ui::Screen::swapWith(ui::Screen* currentScreen) {
     determineCurrentScreen();
 }
 
+void ui::Screen::_update() {
+    update();
+}
+
+void ui::Screen::_handleEvent(ui::Event event) {
+    handleEvent(event);
+}
+
 ui::Icon ui::constructIcon(String pixels) {
     Icon icon;
 
@@ -203,7 +253,7 @@ ui::Icon ui::constructIcon(String pixels) {
             break;
         }
 
-        icon.setPixel(x, y, pixels[i] != ' ');
+        icon.setPixel(x, y, pixels[i] != ' ' ? PenMode::ON : PenMode::OFF);
     }
 
     return icon;
@@ -323,6 +373,56 @@ void ui::ContextualMenu::update() {
     print(menuScrollableIcon);
 }
 
+void ui::Popup::open(bool urgent) {
+    _transitionState = PopupTransitionState::OPENING;
+    _transitionEndsAt = timing::getCurrentTick() + POPUP_TRANSITION_DURATION;
+
+    Screen::open(urgent);
+}
+
+void ui::Popup::close() {
+    _transitionState = PopupTransitionState::CLOSING;
+    _transitionEndsAt = timing::getCurrentTick() + POPUP_TRANSITION_DURATION;
+}
+
+void ui::Popup::_update() {
+    unsigned long currentTick = timing::getCurrentTick();
+    int rectInset = -1;
+
+    if (_transitionState != PopupTransitionState::NONE) {
+        if (currentTick < _transitionEndsAt) {
+            unsigned long transitionTime = (
+                _transitionState == PopupTransitionState::OPENING ?
+                _transitionEndsAt - currentTick :
+                currentTick - (_transitionEndsAt - POPUP_TRANSITION_DURATION)
+            );
+
+            rectInset = (transitionTime * display::CHAR_ROWS) / POPUP_TRANSITION_DURATION;
+
+            clear();
+            rect(rectInset * 2, rectInset, display::WIDTH - (rectInset * 2), display::HEIGHT - rectInset, PenMode::ON);
+
+            return;
+        } else {
+            clear();
+
+            if (_transitionState == PopupTransitionState::CLOSING) {
+                Screen::close();
+            }
+
+            _transitionState = PopupTransitionState::NONE;
+        }
+    }
+
+    update();
+}
+
+void ui::Popup::_handleEvent(ui::Event event) {
+    if (_transitionState == PopupTransitionState::NONE) {
+        handleEvent(event);
+    }
+}
+
 ui::Screen* ui::determineCurrentScreen() {
     if (screenStack.length() > 0) {
         bool anyScreensFoundInForeground = false;
@@ -365,7 +465,7 @@ void ui::renderCurrentScreen() {
                 .data = {.button = lastButton}
             };
 
-            currentScreen->handleEvent(buttonUpEvent);
+            currentScreen->_handleEvent(buttonUpEvent);
         }
 
         if (currentButton != input::Button::NONE) {
@@ -374,7 +474,7 @@ void ui::renderCurrentScreen() {
                 .data = {.button = currentButton}
             };
 
-            currentScreen->handleEvent(buttonDownEvent);
+            currentScreen->_handleEvent(buttonDownEvent);
 
             if (currentButton == input::Button::HOME) {
                 if (currentScreen == &home::homeScreen) {
@@ -394,7 +494,7 @@ void ui::renderCurrentScreen() {
         lastButton = currentButton;
     }
 
-    currentScreen->update();
+    currentScreen->_update();
 
     display::render(currentScreen->displayData);
 }

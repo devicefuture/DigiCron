@@ -3,10 +3,30 @@
 #include "mainmenu.h"
 #include "proc.h"
 #include "ui.h"
+#include "input.h"
 
 proc::Process mainMenu::mainMenuProcess;
 mainMenu::MainMenuScreen mainMenu::mainMenuScreen;
 mainMenu::AppsMenuScreen mainMenu::appsMenuScreen;
+
+class TestPopup : public ui::Popup {
+    proc::Process* ownerProcess = &mainMenu::mainMenuProcess;
+
+    void update() {
+        clear();
+        print("Test\npopup!");
+    }
+
+    void handleEvent(ui::Event event) {
+        if (event.type == ui::EventType::BUTTON_DOWN) {
+            if (event.data.button == input::Button::BACK) {
+                close();
+            }
+        }
+    }
+};
+
+TestPopup testPopup;
 
 mainMenu::MainMenuScreen::MainMenuScreen() : ui::Menu() {
     ownerProcess = &mainMenuProcess;
@@ -19,6 +39,10 @@ mainMenu::MainMenuScreen::MainMenuScreen() : ui::Menu() {
     items.push(new String("ENDLESS"));
 
     onSelect = [](ui::Menu* self, unsigned int selectedIndex) {
+        if (*self->items[selectedIndex] == "NOTIFS") {
+            testPopup.open(true);
+        }
+
         if (*self->items[selectedIndex] == "APPS") {
             mainMenu::appsMenuScreen.open();
         }
