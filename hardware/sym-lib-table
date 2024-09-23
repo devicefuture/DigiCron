@@ -1,0 +1,5 @@
+(sym_lib_table
+  (lib (name "MDBT50")(type "Legacy")(uri "${KIPRJMOD}/lib/MDBT50/MDBT50.lib")(options "")(descr ""))
+  (lib (name "Type-C")(type "Legacy")(uri "${KIPRJMOD}/lib/USB-C/Type-C.lib")(options "")(descr ""))
+  (lib (name "2024-09-23_21-18-26")(type "KiCad")(uri "${KIPRJMOD}/lib/HCMS-x91x/2024-09-23_21-18-26.kicad_sym")(options "")(descr ""))
+)

@@ -1,3 +1,5 @@
+# Firmware
+
 .pio
 .vscode
 CMakeFiles
@@ -6,3 +8,25 @@ cmake_install.cmake
 CMakeCache.txt
 Makefile
 *.a
+
+# Hardware
+
+hardware/*.000
+hardware/*.bak
+hardware/*.bck
+hardware/*.kicad_pcb-bak
+hardware/*.kicad_sch-bak
+hardware/*-backups
+hardware/*.kicad_prl
+hardware/*.sch-bak
+hardware/*~
+hardware/_autosave-*
+hardware/*.tmp
+hardware/*-save.pro
+hardware/*-save.kicad_pcb
+hardware/fp-info-cache
+hardware/*.net
+hardware/*.dsn
+hardware/*.ses
+hardware/*.xml
+hardware/*.csv

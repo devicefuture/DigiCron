@@ -7,3 +7,9 @@
 [submodule "devdeps/emsdk"]
 	path = devdeps/emsdk
 	url = https://github.com/juj/emsdk
+[submodule "hardware/lib/MDBT50"]
+	path = hardware/lib/MDBT50
+	url = https://github.com/famichu/kicad_libs_MDBT50.git
+[submodule "hardware/lib/USB-C"]
+	path = hardware/lib/USB-C
+	url = https://github.com/ai03-2725/Type-C.pretty.git

@@ -1,0 +1,5 @@
+(fp_lib_table
+  (lib (name "footprints")(type "KiCad")(uri "${KIPRJMOD}/lib/HCMS-x91x/footprints.pretty")(options "")(descr ""))
+  (lib (name "MDBT50")(type "KiCad")(uri "${KIPRJMOD}/lib/MDBT50/MDBT50.pretty")(options "")(descr ""))
+  (lib (name "USB-C")(type "KiCad")(uri "${KIPRJMOD}/lib/USB-C")(options "")(descr ""))
+)
