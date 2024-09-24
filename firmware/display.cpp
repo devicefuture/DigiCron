@@ -1,7 +1,7 @@
 #include "display.h"
 
 #ifndef DC_SIMULATOR
-    HCMS39xx display::driver(16, DATA_PIN, RS_PIN, CLOCK_PIN, ENABLE_PIN);
+    HCMS39xx display::driver(16, DATA_PIN, RS_PIN, CLOCK_PIN, ENABLE_PIN, BLANK_PIN);
 #else
     #include <emscripten.h>
     #include <emscripten/bind.h>

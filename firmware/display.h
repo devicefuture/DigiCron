@@ -9,7 +9,7 @@
 #define RS_PIN A1
 #define CLOCK_PIN A2
 #define ENABLE_PIN A3
-#define RESET_PIN A4
+#define BLANK_PIN A4
 
 namespace display {
     const unsigned int CHAR_COLUMNS = 5;
