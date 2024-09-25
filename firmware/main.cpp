@@ -16,6 +16,7 @@
 #include "ui.h"
 #include "input.h"
 #include "home.h"
+#include "proc.h"
 
 #define BACK_BTN_PIN 6
 #define HOME_BTN_PIN 5
