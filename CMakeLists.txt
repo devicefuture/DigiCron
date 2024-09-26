@@ -38,6 +38,7 @@ add_definitions(
 )
 
 target_compile_options(digicron PRIVATE
+    -Iapptest
     -Wno-main
     -Wno-unused-command-line-argument
     -Wno-delete-incomplete

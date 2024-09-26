@@ -10,7 +10,10 @@ namespace proc {
 
     enum WasmError {
         NONE,
-        INIT_FAILURE
+        INIT_FAILURE,
+        PARSE_FAILURE,
+        LOAD_FAILURE,
+        RUN_FAILURE
     };
 
     extern unsigned int pidCounter;
@@ -28,7 +31,7 @@ namespace proc {
 
     class WasmProcess : public Process {
         public:
-            WasmProcess(char* code);
+            WasmProcess(char* code, unsigned int codeSize);
 
             bool isRunning() override;
             void step();
@@ -36,6 +39,7 @@ namespace proc {
         protected:
             IM3Environment _environment;
             IM3Runtime _runtime;
+            IM3Module _module;
             WasmError _error = WasmError::NONE;
             bool _running = true;
     };
