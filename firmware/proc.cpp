@@ -24,8 +24,6 @@ m3ApiRawFunction(dc_log) {
     m3ApiSuccess();
 }
 
-#define FATAL(msg, ...) { Serial.printf("Fatal: " msg "\n", ##__VA_ARGS__); return; }
-
 #include <wasm3.h>
 #include <m3_env.h>
 
