@@ -1,4 +1,5 @@
 #include "proc.h"
+#include "api.h"
 
 unsigned int proc::pidCounter = 0;
 
@@ -13,19 +14,6 @@ unsigned int proc::Process::getPid() {
 bool proc::Process::isRunning() {
     return true;
 }
-
-m3ApiRawFunction(dc_log) {
-    m3ApiGetArgMem(uint8_t*, text)
-    m3ApiGetArg(uint32_t, length)
-
-    Serial.write(text, length);
-    Serial.println();
-
-    m3ApiSuccess();
-}
-
-#include <wasm3.h>
-#include <m3_env.h>
 
 proc::WasmProcess::WasmProcess(char* code, unsigned int codeSize) : proc::Process() {
     _environment = m3_NewEnvironment();
@@ -44,9 +32,7 @@ proc::WasmProcess::WasmProcess(char* code, unsigned int codeSize) : proc::Proces
         return;
     }
 
-    const char* MODULE_NAME = "digicron";
-
-    m3_LinkRawFunction(_runtime->modules, MODULE_NAME, "log", "v(*i)", &dc_log);
+    api::linkFunctions(_runtime);
 
     IM3Function startFunction;
 
