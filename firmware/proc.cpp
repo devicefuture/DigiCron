@@ -45,8 +45,6 @@ proc::WasmProcess::WasmProcess(char* code, unsigned int codeSize) : proc::Proces
     api::linkFunctions(_runtime);
 
     IM3Function startFunction;
-
-    Serial.println("ok");
     if (
         m3_FindFunction(&startFunction, _runtime, "_start") ||
         m3_FindFunction(&_stepFunction, _runtime, "_step")
