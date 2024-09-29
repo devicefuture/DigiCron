@@ -69,6 +69,8 @@ void loop() {
         proc::WasmProcess testProcess((char*)app_wasm, app_wasm_len);
     }
 
+    proc::stepProcesses();
+
     ui::renderCurrentScreen();
 }
 

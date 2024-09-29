@@ -9,15 +9,21 @@
 #define WASM_CONSTRUCTOR __attribute__((constructor))
 
 void setup();
+void loop();
 
 extern "C" {
 
 WASM_IMPORT("digicron", "log") void dc_log(uint8_t* text, uint8_t length);
+WASM_IMPORT("digicron", "stop") void dc_stop();
 
-void _start() {
+}
+
+WASM_EXPORT void _start() {
     setup();
 }
 
+WASM_EXPORT void _step() {
+    loop();
 }
 
 #endif

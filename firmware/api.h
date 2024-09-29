@@ -5,6 +5,7 @@
 
 namespace api {
     m3ApiRawFunction(log);
+    m3ApiRawFunction(stop);
 
     void linkFunctions(IM3Runtime runtime);
 }
