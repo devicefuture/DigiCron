@@ -10,6 +10,7 @@ m3ApiRawFunction(api::log) {
 
     Serial.write(text, length);
     Serial.println();
+    Serial.flush();
 
     m3ApiSuccess();
 }

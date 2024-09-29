@@ -9,6 +9,8 @@ void setup() {
 void loop() {
     if (count >= 10) {
         dc_stop();
+
+        return;
     }
 
     dc_log((uint8_t*)"Hello again!", 12);

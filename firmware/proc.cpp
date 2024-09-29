@@ -84,7 +84,7 @@ void proc::stepProcesses() {
     processes.start();
 
     while (auto process = processes.next()) {
-        if (process->isRunning()) {
+        if (process && process->isRunning()) {
             process->step();
         }
     }

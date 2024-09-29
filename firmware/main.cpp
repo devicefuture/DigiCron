@@ -53,6 +53,12 @@ void setup() {
 
     testScreen->print(" device  future");
     testScreen->print(tmIcon);
+
+    #ifndef DC_SIMULATOR
+        while (true) {
+            loop();
+        }
+    #endif
 }
 
 void loop() {
@@ -70,7 +76,6 @@ void loop() {
     }
 
     proc::stepProcesses();
-
     ui::renderCurrentScreen();
 }
 
