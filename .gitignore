@@ -9,6 +9,9 @@ CMakeCache.txt
 Makefile
 *.a
 
+firmware/_*.cpp
+firmware/_*.h
+
 # Hardware
 
 hardware/*.000
