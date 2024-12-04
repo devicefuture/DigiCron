@@ -9,12 +9,9 @@ CMakeCache.txt
 Makefile
 *.a
 
-firmware/_*.cpp
-firmware/_*.h
-
 # App library
 
-applib/_digicron-imports.h
+tools/api/_*.h
 
 # Hardware
 

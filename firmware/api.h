@@ -1,9 +1,9 @@
-#ifndef API_H_
-#define API_H_
+#ifndef OLDAPI_H_
+#define OLDAPI_H_
 
 #include <wasm3.h>
 
-namespace api {
+namespace oldApi {
     m3ApiRawFunction(log);
     m3ApiRawFunction(stop);
 

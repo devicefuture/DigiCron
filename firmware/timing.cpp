@@ -28,6 +28,12 @@ timing::Time::Time(int year, unsigned int dayOfYear, unsigned long millisecondOf
     _millisecondOfDay = millisecondOfDay;
 }
 
+timing::Time::Time() {
+    _year = 0;
+    _dayOfYear = 0;
+    _millisecondOfDay = 0;
+}
+
 bool timing::Time::inLeapMillisecond() {
     struct LeapAdjustment leapAdjustment = leapAdjustmentToday();
 

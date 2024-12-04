@@ -1,3 +1,5 @@
+dc_log
+dc_stop
 dc_timing_EarthTime_new
 dc_timing_EarthTime_newUsingMilliseconds
 dc_timing_EarthTime_daysInYear
@@ -29,7 +31,6 @@ dc_ui_Screen_setPosition
 dc_ui_Screen_setPixel
 dc_ui_Screen_printName
 dc_ui_Screen_print
-dc_ui_Screen_printString
 dc_ui_Screen_printIcon
 dc_ui_Screen_printRepeated
 dc_ui_Screen_scroll
@@ -39,3 +40,5 @@ dc_ui_Screen_filledRect
 dc_ui_Screen_open
 dc_ui_Screen_close
 dc_ui_Screen_swapWith
+dc_test_TestClass_new
+dc_test_TestClass_nextRandomNumber

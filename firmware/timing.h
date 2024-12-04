@@ -25,6 +25,7 @@ namespace timing {
 
             Time(int year, unsigned int month, unsigned int day, unsigned int hour = 0, unsigned int minute = 0, unsigned int second = 0);
             Time(int year, unsigned int dayOfYear, unsigned long millisecondOfDay = 0);
+            Time();
 
             virtual unsigned int daysInYear() {return 1;}
             virtual unsigned int daysInMonth(unsigned int month) {return daysInYear();}
@@ -77,6 +78,7 @@ namespace timing {
             };
 
             EarthTimeNonLeaping(int year, unsigned int dayOfYear, unsigned long millisecondOfDay = 0) : Time(year, dayOfYear, millisecondOfDay) {};
+            EarthTimeNonLeaping() : Time() {}
 
             unsigned int daysInYear() override;
             unsigned int daysInMonth(unsigned int month) override;

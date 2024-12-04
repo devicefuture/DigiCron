@@ -4,7 +4,7 @@
 #include "api.h"
 #include "proc.h"
 
-m3ApiRawFunction(api::log) {
+m3ApiRawFunction(oldApi::log) {
     m3ApiGetArgMem(uint8_t*, text)
     m3ApiGetArg(uint32_t, length)
 
@@ -15,14 +15,14 @@ m3ApiRawFunction(api::log) {
     m3ApiSuccess();
 }
 
-m3ApiRawFunction(api::stop) {
+m3ApiRawFunction(oldApi::stop) {
     ((proc::WasmProcess*)runtime->userdata)->stop();
 
     m3ApiSuccess();
 }
 
-void api::linkFunctions(IM3Runtime runtime) {
-    const char* MODULE_NAME = "digicron";
+void oldApi::linkFunctions(IM3Runtime runtime) {
+    const char* MODULE_NAME = "digicronold";
 
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "log", "v(*i)", &log);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "stop", "v()", &stop);

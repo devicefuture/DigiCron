@@ -3,6 +3,7 @@
 #include "datatypes.h"
 #include "proc.h"
 #include "ui.h"
+#include "_api.h"
 
 template<typename T> T* store(T value) {
     auto storedValue = new dataTypes::StoredValue<T>(value);
@@ -358,3 +359,4 @@ template<typename T> dataTypes::List<T> dataTypes::List<T>::concat(dataTypes::Li
 template class dataTypes::List<String>;
 template class dataTypes::List<proc::Process>;
 template class dataTypes::List<ui::Screen>;
+template class dataTypes::List<api::StoredInstance>;

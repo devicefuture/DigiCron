@@ -3,8 +3,8 @@
 wasicc -Os \
     -z stack-size=4096 \
     -Wl,--initial-memory=65536 \
-    -Wl,--allow-undefined-file=api.syms \
+    -Wl,--allow-undefined-file=applib/digicron.syms \
     -Wl,--strip-all -nostdlib \
-    app.cpp -o app.wasm
+    apptest/app.cpp -o apptest/app.wasm
 
-xxd -i app.wasm > app.wasm.h
+xxd -i apptest/app.wasm > apptest/app.wasm.h
