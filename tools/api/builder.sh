@@ -181,6 +181,8 @@ function method {
 
     echo ");" >> applib/_digicron-imports.h
     echo ")"
+
+    echo $INTERNAL_NAME >> applib/digicron.syms
 }
 
 function constructor {
