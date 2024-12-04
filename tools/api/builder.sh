@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "Running API builder..."
+
 export NAMESPACE=
 export ENUM=
 export CLASS=
@@ -23,14 +25,7 @@ function namespace {
     export NAMESPACE=$1
 
     echo namespace $NAMESPACE { >> applib/digicron.h
-}
-
-function _closeClass {
-    if [ "$CLASS" != "" ]; then
-        echo "    };" >> applib/digicron.h
-
-        export CLASS=
-    fi
+    echo Including namespace: dc::$NAMESPACE
 }
 
 function enum {
@@ -41,21 +36,33 @@ function enum {
     export LAST_NAMESPACE_MEMBER=$1
 
     echo "    enum $1 {" >> applib/digicron.h
+    echo -n "Including enum: dc::$NAMESPACE::$1 {"
 
     shift
 
     while (($#)); do
         echo -n "        $1" >> applib/digicron.h
+        echo -n $1
 
         shift
 
         if (($#)); then
             echo "," >> applib/digicron.h
+            echo -n ", "
         fi
     done
 
     echo >> applib/digicron.h
     echo "    };" >> applib/digicron.h
+    echo "}"
+}
+
+function _closeClass {
+    if [ "$CLASS" != "" ]; then
+        echo "    };" >> applib/digicron.h
+
+        export CLASS=
+    fi
 }
 
 function class {
@@ -70,26 +77,31 @@ function class {
 
     echo "    class $CLASS {" >> applib/digicron.h
     echo "        public:" >> applib/digicron.h
+    echo Including class: dc::$NAMESPACE::$CLASS
 }
 
 function method {
     echo -n "            $1 $2(" >> applib/digicron.h
+    echo -n "Including class method: $1 dc::$NAMESPACE::$CLASS::$2("
 
     shift
     shift
 
     while (($#)); do
         echo -n "$1 $2" >> applib/digicron.h
+        echo -n "$1 $2"
 
         shift
         shift
 
         if (($#)); then
             echo -n ", " >> applib/digicron.h
+            echo -n ", "
         fi
     done
 
     echo ");" >> applib/digicron.h
+    echo ")"
 }
 
 > firmware/_api.cpp
