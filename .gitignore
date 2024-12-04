@@ -12,6 +12,10 @@ Makefile
 firmware/_*.cpp
 firmware/_*.h
 
+# App library
+
+applib/_digicron-imports.h
+
 # Hardware
 
 hardware/*.000
