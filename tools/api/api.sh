@@ -67,4 +67,5 @@ namespace test
     class TestClass
         constructor "unsigned int" seed
 
+        method "unsigned int" add "unsigned int" value "unsigned int" value2
         method "unsigned int" nextRandomNumber

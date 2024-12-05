@@ -52,6 +52,10 @@ template<typename T> dataTypes::_ListItem<T>* dataTypes::List<T>::getItemAtIndex
     auto currentItemPtr = _firstItemPtr;
 
     while (index > 0) {
+        if (!currentItemPtr) {
+            return nullptr;
+        }
+
         currentItemPtr = currentItemPtr->nextItemPtr;
         index--;
     }

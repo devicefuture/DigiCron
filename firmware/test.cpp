@@ -5,11 +5,17 @@
 test::TestClass::TestClass(unsigned int seed) {
     Serial.println("Hello from the test class!");
 
-    _counter = seed * 123;
+    _counter = seed;
 }
 
 test::TestClass::TestClass() {
     TestClass(0);
+}
+
+unsigned int test::TestClass::add(unsigned int value, unsigned int value2) {
+    Serial.printf("Add method called with values %d and %d\n", value, value2);
+
+    return value + value2;
 }
 
 unsigned int test::TestClass::nextRandomNumber() {

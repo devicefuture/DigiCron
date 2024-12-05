@@ -126,6 +126,7 @@ function method {
 
         echo -n "WASM_IMPORT(\"digicron\", \"$INTERNAL_NAME\") _dc_Sid $INTERNAL_NAME(" >> tools/api/_digicron-imports.h
         echo -n "    m3_LinkRawFunction(runtime->modules, MODULE_NAME, \"$INTERNAL_NAME\", \"i(" >> tools/api/_api-linker.h
+        echo "    m3ApiReturnType(Sid)" >> firmware/_api.cpp
 
         shift
     else
@@ -140,7 +141,12 @@ function method {
                 shortReturnType=v ;;
         esac
 
-        echo -n "    m3_LinkRawFunction(runtime->modules, MODULE_NAME, \"$INTERNAL_NAME\", \"$shortReturnType(" >> tools/api/_api-linker.h
+        echo -n "    m3_LinkRawFunction(runtime->modules, MODULE_NAME, \"$INTERNAL_NAME\", \"$shortReturnType(i" >> tools/api/_api-linker.h
+
+        if [ "$RETURN_TYPE" != "void" ]; then
+            echo "    m3ApiReturnType($returnType)" >> firmware/_api.cpp
+        fi
+    
         echo "    m3ApiGetArg(Sid, _sid)" >> firmware/_api.cpp
 
         shift
@@ -227,7 +233,6 @@ function method {
         echo ") {_sid = $INTERNAL_NAME($passArgs);}" >> applib/digicron.h
 
         (
-            echo "    m3ApiReturnType(Sid)"
             echo
             echo -n "    auto instance = new $NAMESPACE::$CLASS("
         ) >> firmware/_api.cpp
@@ -236,7 +241,6 @@ function method {
 
         if [ "$returnType" != "void" ]; then
             (
-                echo "    m3ApiReturnType($returnType)"
                 echo
                 echo -n "    $returnType result = api::getBySid<$NAMESPACE::$CLASS>(Type::${NAMESPACE}_$CLASS, _sid)->$name("
             ) >> firmware/_api.cpp
@@ -320,7 +324,7 @@ template<typename T> api::Sid api::store(api::Type type, T* instance) {
     storedInstance->type = type;
     storedInstance->instance = instance;
 
-    return api::storedInstances.push(storedInstance);
+    return api::storedInstances.push(storedInstance) - 1;
 }
 
 EOF
@@ -391,11 +395,13 @@ template<typename T> _dc_Sid _dc_getClassSid(T* instance) {
     return instance->_getSid();
 }
 
-WASM_EXPORT void _start() {
+int main() {}
+
+WASM_EXPORT void _setup() {
     setup();
 }
 
-WASM_EXPORT void _step() {
+WASM_EXPORT void _loop() {
     loop();
 }
 

@@ -65,6 +65,7 @@ namespace api {
     m3ApiRawFunction(dc_ui_Screen_close);
     m3ApiRawFunction(dc_ui_Screen_swapWith);
     m3ApiRawFunction(dc_test_TestClass_new);
+    m3ApiRawFunction(dc_test_TestClass_add);
     m3ApiRawFunction(dc_test_TestClass_nextRandomNumber);
 
     void linkFunctions(IM3Runtime runtime);

@@ -7,6 +7,7 @@ namespace test {
             TestClass(unsigned int seed);
             TestClass();
 
+            unsigned int add(unsigned int value, unsigned int value2);
             unsigned int nextRandomNumber();
 
         private:
