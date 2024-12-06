@@ -54,6 +54,7 @@ namespace ui {
             char displayData[display::DATA_SIZE];
 
             Screen();
+            Screen(proc::Process* process);
 
             void clear();
             void setPosition(unsigned int column, unsigned int row);

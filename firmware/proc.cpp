@@ -25,7 +25,7 @@ void proc::Process::step() {}
 
 proc::WasmProcess::WasmProcess(char* code, unsigned int codeSize) : proc::Process() {
     _environment = m3_NewEnvironment();
-    _runtime = m3_NewRuntime(_environment, WASM_STACK_SLOTS, NULL);
+    _runtime = m3_NewRuntime(_environment, WASM_STACK_SLOTS, this);
     _runtime->userdata = this;
 
     if (!_runtime) {

@@ -45,7 +45,7 @@ namespace ui
         method "void" setPixel "unsigned int" x "unsigned int" y "ENUM ui::PenMode" value
 
     class Screen
-        constructor
+        PASS_PROCESS=true constructor
 
         method "void" clear
         method "void" setPosition "unsigned int" column "unsigned int" row

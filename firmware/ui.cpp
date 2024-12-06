@@ -53,6 +53,12 @@ ui::Screen::Screen() {
     resetScroll();
 }
 
+ui::Screen::Screen(proc::Process* process) {
+    ownerProcess = process;
+
+    Screen();
+}
+
 void ui::Screen::clear() {
     for (unsigned int i = 0; i < sizeof(displayData); i++) {
         displayData[i] = 0;

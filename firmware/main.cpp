@@ -18,8 +18,6 @@
 #include "home.h"
 #include "proc.h"
 
-#include "app.wasm.h"
-
 #define BACK_BTN_PIN 6
 #define HOME_BTN_PIN 5
 #define JOY_UP_PIN 10
@@ -72,7 +70,7 @@ void loop() {
     if (ui::currentScreen == testScreen && millis() > 3000) {
         home::homeScreen.open(true);
 
-        proc::WasmProcess testProcess((char*)apptest_app_wasm, apptest_app_wasm_len);
+        // proc::WasmProcess testProcess((char*)apptest_app_wasm, apptest_app_wasm_len);
     }
 
     proc::stepProcesses();

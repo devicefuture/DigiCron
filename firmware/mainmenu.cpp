@@ -5,6 +5,8 @@
 #include "ui.h"
 #include "input.h"
 
+#include "app.wasm.h"
+
 proc::Process mainMenu::mainMenuProcess;
 mainMenu::MainMenuScreen mainMenu::mainMenuScreen;
 mainMenu::AppsMenuScreen mainMenu::appsMenuScreen;
@@ -60,4 +62,8 @@ mainMenu::AppsMenuScreen::AppsMenuScreen() : ui::ContextualMenu("APPS") {
     items.push(new String("atto"));
     items.push(new String("Calc"));
     items.push(new String("Cronogotchi"));
+
+    onSelect = [](ui::Menu* self, unsigned int selectedIndex) {
+        new proc::WasmProcess((char*)apptest_app_wasm, apptest_app_wasm_len);
+    };
 }

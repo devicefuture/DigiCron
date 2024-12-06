@@ -1674,7 +1674,7 @@ function sendDisplayDataToSimulator(dataPtr,size) { renderDisplayData(new Uint8C
         return signature;
       }
     };
-  var __embind_register_function = (name, argCount, rawArgTypesAddr, signature, rawInvoker, fn, isAsync, isNonnullReturn) => {
+  var __embind_register_function = (name, argCount, rawArgTypesAddr, signature, rawInvoker, fn, isAsync) => {
       var argTypes = heap32VectorToArray(argCount, rawArgTypesAddr);
       name = readLatin1String(name);
       name = getFunctionName(name);
@@ -5883,7 +5883,7 @@ var __emscripten_stack_alloc = (a0) => (__emscripten_stack_alloc = wasmExports['
 var _emscripten_stack_get_current = () => (_emscripten_stack_get_current = wasmExports['emscripten_stack_get_current'])();
 var dynCall_iiiijd = Module['dynCall_iiiijd'] = createExportWrapper('dynCall_iiiijd', 7);
 var dynCall_jiji = Module['dynCall_jiji'] = createExportWrapper('dynCall_jiji', 5);
-var ___emscripten_embedded_file_data = Module['___emscripten_embedded_file_data'] = 80440;
+var ___emscripten_embedded_file_data = Module['___emscripten_embedded_file_data'] = 80456;
 
 // include: postamble.js
 // === Auto-generated postamble setup entry stuff ===

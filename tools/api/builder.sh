@@ -236,6 +236,14 @@ function method {
             echo
             echo -n "    auto instance = new $NAMESPACE::$CLASS("
         ) >> firmware/_api.cpp
+
+        if [ "$PASS_PROCESS" = true ]; then
+            echo -n "(proc::WasmProcess*)runtime->userdata" >> firmware/_api.cpp
+
+            if [ "$firmwareArgs" != "" ]; then
+                echo -n ", " >> firmware/_api.cpp
+            fi
+        fi
     else
         echo ") {return $INTERNAL_NAME($passArgs);}" >> applib/digicron.h
 

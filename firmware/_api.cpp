@@ -284,7 +284,7 @@ m3ApiRawFunction(api::dc_ui_Icon_setPixel) {
 m3ApiRawFunction(api::dc_ui_Screen_new) {
     m3ApiReturnType(Sid)
 
-    auto instance = new ui::Screen();
+    auto instance = new ui::Screen((proc::WasmProcess*)runtime->userdata);
 
     Sid result = api::store<ui::Screen>(Type::ui_Screen, instance);
 

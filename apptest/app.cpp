@@ -1,18 +1,21 @@
 // #include "api.h"
 #include "../applib/digicron.h"
 
+using namespace dc;
+
 int count = 0;
 
-dc::test::TestClass* test;
+test::TestClass* testClass;
+ui::Screen* screen;
 
 void setup() {
     dc_log((uint8_t*)"Hello from the WASM module!", 27);
 
-    test = new dc::test::TestClass(20);
+    testClass = new test::TestClass(20);
 
     dc_log((uint8_t*)"Called test!", 12);
 
-    if (test->add(456, 789) == 1245) {
+    if (testClass->add(456, 789) == 1245) {
         dc_log((uint8_t*)"Adding method works!", 20);
     }
 }
@@ -24,7 +27,7 @@ void loop() {
         return;
     }
 
-    unsigned int randomNumber = test->nextRandomNumber();
+    unsigned int randomNumber = testClass->nextRandomNumber();
 
     uint8_t numberBuffer[5] = {'0', '0', '0', '0'};
 
