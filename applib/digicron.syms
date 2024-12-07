@@ -42,4 +42,5 @@ dc_ui_Screen_close
 dc_ui_Screen_swapWith
 dc_test_TestClass_new
 dc_test_TestClass_add
+dc_test_TestClass_bools
 dc_test_TestClass_nextRandomNumber

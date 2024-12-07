@@ -143,7 +143,7 @@ function method {
 
         echo -n "    m3_LinkRawFunction(runtime->modules, MODULE_NAME, \"$INTERNAL_NAME\", \"$shortReturnType(i" >> tools/api/_api-linker.h
 
-        if [ "$RETURN_TYPE" != "void" ]; then
+        if [ "$returnType" != "void" ]; then
             echo "    m3ApiReturnType($returnType)" >> firmware/_api.cpp
         fi
     

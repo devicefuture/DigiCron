@@ -108,7 +108,6 @@ m3ApiRawFunction(api::dc_timing_EarthTime_postLeapMillisecondOffset) {
 }
 
 m3ApiRawFunction(api::dc_timing_EarthTime_setDate) {
-    m3ApiReturnType(void)
     m3ApiGetArg(Sid, _sid)
     m3ApiGetArg(int, year)
     m3ApiGetArg(unsigned int, month)
@@ -120,7 +119,6 @@ m3ApiRawFunction(api::dc_timing_EarthTime_setDate) {
 }
 
 m3ApiRawFunction(api::dc_timing_EarthTime_setTime) {
-    m3ApiReturnType(void)
     m3ApiGetArg(Sid, _sid)
     m3ApiGetArg(unsigned int, hour)
     m3ApiGetArg(unsigned int, minute)
@@ -132,7 +130,6 @@ m3ApiRawFunction(api::dc_timing_EarthTime_setTime) {
 }
 
 m3ApiRawFunction(api::dc_timing_EarthTime_incrementTime) {
-    m3ApiReturnType(void)
     m3ApiGetArg(Sid, _sid)
     m3ApiGetArg(int, millseconds)
 
@@ -142,7 +139,6 @@ m3ApiRawFunction(api::dc_timing_EarthTime_incrementTime) {
 }
 
 m3ApiRawFunction(api::dc_timing_EarthTime_toLocalTime) {
-    m3ApiReturnType(void)
     m3ApiGetArg(Sid, _sid)
     m3ApiGetArg(int, timeShift)
 
@@ -152,7 +148,6 @@ m3ApiRawFunction(api::dc_timing_EarthTime_toLocalTime) {
 }
 
 m3ApiRawFunction(api::dc_timing_EarthTime_toGlobalTime) {
-    m3ApiReturnType(void)
     m3ApiGetArg(Sid, _sid)
 
     api::getBySid<timing::EarthTime>(Type::timing_EarthTime, _sid)->toGlobalTime();
@@ -270,7 +265,6 @@ m3ApiRawFunction(api::dc_ui_Icon_new) {
 }
 
 m3ApiRawFunction(api::dc_ui_Icon_setPixel) {
-    m3ApiReturnType(void)
     m3ApiGetArg(Sid, _sid)
     m3ApiGetArg(unsigned int, x)
     m3ApiGetArg(unsigned int, y)
@@ -292,7 +286,6 @@ m3ApiRawFunction(api::dc_ui_Screen_new) {
 }
 
 m3ApiRawFunction(api::dc_ui_Screen_clear) {
-    m3ApiReturnType(void)
     m3ApiGetArg(Sid, _sid)
 
     api::getBySid<ui::Screen>(Type::ui_Screen, _sid)->clear();
@@ -301,7 +294,6 @@ m3ApiRawFunction(api::dc_ui_Screen_clear) {
 }
 
 m3ApiRawFunction(api::dc_ui_Screen_setPosition) {
-    m3ApiReturnType(void)
     m3ApiGetArg(Sid, _sid)
     m3ApiGetArg(unsigned int, column)
     m3ApiGetArg(unsigned int, row)
@@ -312,7 +304,6 @@ m3ApiRawFunction(api::dc_ui_Screen_setPosition) {
 }
 
 m3ApiRawFunction(api::dc_ui_Screen_setPixel) {
-    m3ApiReturnType(void)
     m3ApiGetArg(Sid, _sid)
     m3ApiGetArg(unsigned int, x)
     m3ApiGetArg(unsigned int, y)
@@ -324,7 +315,6 @@ m3ApiRawFunction(api::dc_ui_Screen_setPixel) {
 }
 
 m3ApiRawFunction(api::dc_ui_Screen_printName) {
-    m3ApiReturnType(void)
     m3ApiGetArg(Sid, _sid)
     m3ApiGetArg(char, c)
 
@@ -334,7 +324,6 @@ m3ApiRawFunction(api::dc_ui_Screen_printName) {
 }
 
 m3ApiRawFunction(api::dc_ui_Screen_print) {
-    m3ApiReturnType(void)
     m3ApiGetArg(Sid, _sid)
     m3ApiGetArgMem(char*, chars)
 
@@ -344,7 +333,6 @@ m3ApiRawFunction(api::dc_ui_Screen_print) {
 }
 
 m3ApiRawFunction(api::dc_ui_Screen_printIcon) {
-    m3ApiReturnType(void)
     m3ApiGetArg(Sid, _sid)
     m3ApiGetArg(Sid, icon)
 
@@ -354,7 +342,6 @@ m3ApiRawFunction(api::dc_ui_Screen_printIcon) {
 }
 
 m3ApiRawFunction(api::dc_ui_Screen_printRepeated) {
-    m3ApiReturnType(void)
     m3ApiGetArg(Sid, _sid)
     m3ApiGetArgMem(char*, string)
     m3ApiGetArg(unsigned int, times)
@@ -365,7 +352,6 @@ m3ApiRawFunction(api::dc_ui_Screen_printRepeated) {
 }
 
 m3ApiRawFunction(api::dc_ui_Screen_scroll) {
-    m3ApiReturnType(void)
     m3ApiGetArg(Sid, _sid)
     m3ApiGetArgMem(char*, string)
     m3ApiGetArg(unsigned int, maxLength)
@@ -376,7 +362,6 @@ m3ApiRawFunction(api::dc_ui_Screen_scroll) {
 }
 
 m3ApiRawFunction(api::dc_ui_Screen_resetScroll) {
-    m3ApiReturnType(void)
     m3ApiGetArg(Sid, _sid)
 
     api::getBySid<ui::Screen>(Type::ui_Screen, _sid)->resetScroll();
@@ -385,7 +370,6 @@ m3ApiRawFunction(api::dc_ui_Screen_resetScroll) {
 }
 
 m3ApiRawFunction(api::dc_ui_Screen_rect) {
-    m3ApiReturnType(void)
     m3ApiGetArg(Sid, _sid)
     m3ApiGetArg(unsigned int, x1)
     m3ApiGetArg(unsigned int, y1)
@@ -399,7 +383,6 @@ m3ApiRawFunction(api::dc_ui_Screen_rect) {
 }
 
 m3ApiRawFunction(api::dc_ui_Screen_filledRect) {
-    m3ApiReturnType(void)
     m3ApiGetArg(Sid, _sid)
     m3ApiGetArg(unsigned int, x1)
     m3ApiGetArg(unsigned int, y1)
@@ -413,7 +396,6 @@ m3ApiRawFunction(api::dc_ui_Screen_filledRect) {
 }
 
 m3ApiRawFunction(api::dc_ui_Screen_open) {
-    m3ApiReturnType(void)
     m3ApiGetArg(Sid, _sid)
     m3ApiGetArg(bool, urgent)
 
@@ -423,7 +405,6 @@ m3ApiRawFunction(api::dc_ui_Screen_open) {
 }
 
 m3ApiRawFunction(api::dc_ui_Screen_close) {
-    m3ApiReturnType(void)
     m3ApiGetArg(Sid, _sid)
 
     api::getBySid<ui::Screen>(Type::ui_Screen, _sid)->close();
@@ -432,7 +413,6 @@ m3ApiRawFunction(api::dc_ui_Screen_close) {
 }
 
 m3ApiRawFunction(api::dc_ui_Screen_swapWith) {
-    m3ApiReturnType(void)
     m3ApiGetArg(Sid, _sid)
     m3ApiGetArg(Sid, currentScreen)
 
@@ -461,6 +441,17 @@ m3ApiRawFunction(api::dc_test_TestClass_add) {
     unsigned int result = api::getBySid<test::TestClass>(Type::test_TestClass, _sid)->add(value, value2);
 
     m3ApiReturn(result);
+}
+
+m3ApiRawFunction(api::dc_test_TestClass_bools) {
+    m3ApiGetArg(Sid, _sid)
+    m3ApiGetArg(bool, a)
+    m3ApiGetArg(bool, b)
+    m3ApiGetArg(bool, c)
+
+    api::getBySid<test::TestClass>(Type::test_TestClass, _sid)->bools(a, b, c);
+
+    m3ApiSuccess();
 }
 
 m3ApiRawFunction(api::dc_test_TestClass_nextRandomNumber) {
@@ -517,5 +508,6 @@ void api::linkFunctions(IM3Runtime runtime) {
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_swapWith", "v(ii)", &dc_ui_Screen_swapWith);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_test_TestClass_new", "i(i)", &dc_test_TestClass_new);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_test_TestClass_add", "i(iii)", &dc_test_TestClass_add);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_test_TestClass_bools", "v(iiii)", &dc_test_TestClass_bools);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_test_TestClass_nextRandomNumber", "i(i)", &dc_test_TestClass_nextRandomNumber);
 }

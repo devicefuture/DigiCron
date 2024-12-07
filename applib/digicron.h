@@ -64,6 +64,7 @@ WASM_IMPORT("digicron", "dc_ui_Screen_close") void dc_ui_Screen_close(_dc_Sid si
 WASM_IMPORT("digicron", "dc_ui_Screen_swapWith") void dc_ui_Screen_swapWith(_dc_Sid sid, _dc_Sid currentScreen);
 WASM_IMPORT("digicron", "dc_test_TestClass_new") _dc_Sid dc_test_TestClass_new(unsigned int seed);
 WASM_IMPORT("digicron", "dc_test_TestClass_add") unsigned int dc_test_TestClass_add(_dc_Sid sid, unsigned int value, unsigned int value2);
+WASM_IMPORT("digicron", "dc_test_TestClass_bools") void dc_test_TestClass_bools(_dc_Sid sid, bool a, bool b, bool c);
 WASM_IMPORT("digicron", "dc_test_TestClass_nextRandomNumber") unsigned int dc_test_TestClass_nextRandomNumber(_dc_Sid sid);
 
 }
@@ -185,6 +186,7 @@ namespace test {
             TestClass(unsigned int seed) {_sid = dc_test_TestClass_new(seed);}
 
             unsigned int add(unsigned int value, unsigned int value2) {return dc_test_TestClass_add(this->_sid, value, value2);}
+            void bools(bool a, bool b, bool c) {return dc_test_TestClass_bools(this->_sid, a, b, c);}
             unsigned int nextRandomNumber() {return dc_test_TestClass_nextRandomNumber(this->_sid);}
     };
 }

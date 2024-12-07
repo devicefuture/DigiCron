@@ -53,8 +53,10 @@ ui::Screen::Screen() {
     resetScroll();
 }
 
-ui::Screen::Screen(proc::Process* process) {
+ui::Screen::Screen(proc::Process* process) : ui::Screen::Screen() {
     ownerProcess = process;
+
+    Serial.printf("New screen for process %x\n", process);
 
     Screen();
 }
@@ -207,6 +209,8 @@ void ui::Screen::filledRect(unsigned int x1, unsigned int y1, unsigned int x2, u
 }
 
 void ui::Screen::open(bool urgent) {
+    Serial.printf("Opened %x (urgent: %d)\n", ownerProcess, urgent);
+
     screenStack.push(this);
 
     if (urgent) {

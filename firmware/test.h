@@ -8,6 +8,7 @@ namespace test {
             TestClass();
 
             unsigned int add(unsigned int value, unsigned int value2);
+            void bools(bool a, bool b, bool c);
             unsigned int nextRandomNumber();
 
         private:

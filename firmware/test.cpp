@@ -18,6 +18,10 @@ unsigned int test::TestClass::add(unsigned int value, unsigned int value2) {
     return value + value2;
 }
 
+void test::TestClass::bools(bool a, bool b, bool c) {
+    Serial.printf("Bools: %d%d%d\n", a, b, c);
+}
+
 unsigned int test::TestClass::nextRandomNumber() {
     unsigned int number = (_counter++) * 3 + (_counter += _counter % 11) * 8;
 

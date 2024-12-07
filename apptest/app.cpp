@@ -18,6 +18,12 @@ void setup() {
     if (testClass->add(456, 789) == 1245) {
         dc_log((uint8_t*)"Adding method works!", 20);
     }
+
+    testClass->bools(true, false, true);
+
+    screen = new ui::Screen();
+
+    screen->open(true);
 }
 
 void loop() {
