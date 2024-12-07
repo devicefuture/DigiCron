@@ -171,7 +171,7 @@ function method {
 
         case "$argType" in
             "char*"|"STRING")
-                shortArgType=* ;;
+                shortArgType="*" ;;
         esac
 
         if [[ "$argType" =~ ^ENUM\  ]]; then
@@ -202,6 +202,7 @@ function method {
             argType=_dc_String
             internalArgType=_dc_String
             firmwareArgType="char*"
+            firmwareArgCall="String($argName)"
         fi
 
         echo -n "$argType $argName" >> applib/digicron.h

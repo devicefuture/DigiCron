@@ -23,6 +23,7 @@ void setup() {
 
     screen = new ui::Screen();
 
+    screen->print("Hello,\nworld! ");
     screen->open(true);
 }
 

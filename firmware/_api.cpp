@@ -346,7 +346,7 @@ m3ApiRawFunction(api::dc_ui_Screen_printRepeated) {
     m3ApiGetArgMem(char*, string)
     m3ApiGetArg(unsigned int, times)
 
-    api::getBySid<ui::Screen>(Type::ui_Screen, _sid)->printRepeated(string, times);
+    api::getBySid<ui::Screen>(Type::ui_Screen, _sid)->printRepeated(String(string), times);
 
     m3ApiSuccess();
 }
@@ -356,7 +356,7 @@ m3ApiRawFunction(api::dc_ui_Screen_scroll) {
     m3ApiGetArgMem(char*, string)
     m3ApiGetArg(unsigned int, maxLength)
 
-    api::getBySid<ui::Screen>(Type::ui_Screen, _sid)->scroll(string, maxLength);
+    api::getBySid<ui::Screen>(Type::ui_Screen, _sid)->scroll(String(string), maxLength);
 
     m3ApiSuccess();
 }
