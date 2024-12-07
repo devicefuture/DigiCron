@@ -28,6 +28,7 @@ target_include_directories(HCMS39xx PUBLIC ${CMAKE_SOURCE_DIR}/lib/HCMS39xx/src)
 target_include_directories(Wasm3 PUBLIC ${CMAKE_SOURCE_DIR}/lib/wasm3-arduino/src)
 
 file(GLOB SOURCES
+    ${CMAKE_SOURCE_DIR}/common/*.h
     ${CMAKE_SOURCE_DIR}/firmware/*.cpp
 )
 

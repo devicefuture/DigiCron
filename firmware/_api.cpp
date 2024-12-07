@@ -498,8 +498,8 @@ void api::linkFunctions(IM3Runtime runtime) {
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_printName", "v(ii)", &dc_ui_Screen_printName);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_print", "v(i*)", &dc_ui_Screen_print);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_printIcon", "v(ii)", &dc_ui_Screen_printIcon);
-    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_printRepeated", "v(i*i)", &dc_ui_Screen_printRepeated);
-    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_scroll", "v(i*i)", &dc_ui_Screen_scroll);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_printRepeated", "v(iii)", &dc_ui_Screen_printRepeated);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_scroll", "v(iii)", &dc_ui_Screen_scroll);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_resetScroll", "v(i)", &dc_ui_Screen_resetScroll);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_rect", "v(iiiiii)", &dc_ui_Screen_rect);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_filledRect", "v(iiiiii)", &dc_ui_Screen_filledRect);

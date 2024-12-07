@@ -53,8 +53,8 @@ namespace ui
         INTERNAL_NAME=dc_ui_Screen_printName method "void" print "char" c
         method "void" print "char*" chars
         INTERNAL_NAME=dc_ui_Screen_printIcon method "void" print "CLASS ui::Icon" icon
-        method "void" printRepeated "STRING" string "unsigned int" times
-        method "void" scroll "STRING" string "unsigned int" maxLength
+        method "void" printRepeated "String" string "unsigned int" times
+        method "void" scroll "String" string "unsigned int" maxLength
         method "void" resetScroll
         method "void" rect "unsigned int" x1 "unsigned int" y1 "unsigned int" x2 "unsigned int" y2 "ENUM ui::PenMode" value
         method "void" filledRect "unsigned int" x1 "unsigned int" y1 "unsigned int" x2 "unsigned int" y2 "ENUM ui::PenMode" value

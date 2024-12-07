@@ -198,9 +198,10 @@ function method {
             argType="$argType*"
         fi
 
-        if [ "$argType" = "STRING" ]; then
-            argType=_dc_String
-            internalArgType=_dc_String
+        if [ "$argType" = "String" ]; then
+            argType=dataTypes::String
+            internalArgType="char*"
+            internalArgCall="$argName.c_str()"
             firmwareArgType="char*"
             firmwareArgCall="String($argName)"
         fi
@@ -377,6 +378,7 @@ tee -a applib/digicron.h > /dev/null << EOF
 #ifndef DIGICRON_H_
 #define DIGICRON_H_
 
+#include <stdlib.h>
 #include <stdint.h>
 
 #define WASM_EXPORT extern "C" __attribute__((used)) __attribute__((visibility ("default")))
@@ -389,7 +391,6 @@ void loop();
 
 typedef unsigned int _dc_Enum;
 typedef unsigned int _dc_Sid;
-typedef char* _dc_String;
 
 extern "C" {
 
@@ -417,6 +418,10 @@ WASM_EXPORT void _loop() {
 namespace dc {
 
 EOF
+
+cat common/datatypes.h >> applib/digicron.h
+echo >> applib/digicron.h
+echo >> applib/digicron.h
 
 # TODO: Make these functions part of full API
 echo dc_log >> applib/digicron.syms
