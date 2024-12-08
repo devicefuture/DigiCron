@@ -5,7 +5,7 @@
 #include "ui.h"
 #include "_api.h"
 
-#include "../common/datatypes.h"
+#include "common/datatypes.h"
 
 template class dataTypes::List<String>;
 template class dataTypes::List<proc::Process>;

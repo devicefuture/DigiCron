@@ -53,7 +53,7 @@ void setButtonStatus(uint32_t button) {
     currentButton = (input::Button)button;
 }
 
-EMSCRIPTEN_BINDINGS(input) {
+EMSCRIPTEN_BINDINGS(dc_input) {
     emscripten::function("input_setButtonStatus", setButtonStatus);
 }
 

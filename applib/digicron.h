@@ -51,7 +51,7 @@ WASM_IMPORT("digicron", "dc_ui_Screen_new") _dc_Sid dc_ui_Screen_new();
 WASM_IMPORT("digicron", "dc_ui_Screen_clear") void dc_ui_Screen_clear(_dc_Sid sid);
 WASM_IMPORT("digicron", "dc_ui_Screen_setPosition") void dc_ui_Screen_setPosition(_dc_Sid sid, unsigned int column, unsigned int row);
 WASM_IMPORT("digicron", "dc_ui_Screen_setPixel") void dc_ui_Screen_setPixel(_dc_Sid sid, unsigned int x, unsigned int y, _dc_Enum value);
-WASM_IMPORT("digicron", "dc_ui_Screen_printName") void dc_ui_Screen_printName(_dc_Sid sid, char c);
+WASM_IMPORT("digicron", "dc_ui_Screen_printChar") void dc_ui_Screen_printChar(_dc_Sid sid, char c);
 WASM_IMPORT("digicron", "dc_ui_Screen_print") void dc_ui_Screen_print(_dc_Sid sid, char* chars);
 WASM_IMPORT("digicron", "dc_ui_Screen_printIcon") void dc_ui_Screen_printIcon(_dc_Sid sid, _dc_Sid icon);
 WASM_IMPORT("digicron", "dc_ui_Screen_printRepeated") void dc_ui_Screen_printRepeated(_dc_Sid sid, char* string, unsigned int times);
@@ -88,6 +88,10 @@ namespace dc {
 #ifndef DC_COMMON_DATATYPES_H_
 #define DC_COMMON_DATATYPES_H_
 
+#ifndef DIGICRON_H_
+    #include <Arduino.h>
+#endif
+
 template<typename T> T* store(T value);
 template<typename T> T discard(T* itemPtr);
 
@@ -120,6 +124,8 @@ namespace dataTypes {
                 unsigned int length();
                 char charAt(int index);
         };
+    #else
+        typedef String String;
     #endif
 
     template<typename T> class List {
@@ -159,6 +165,234 @@ namespace dataTypes {
             _ListItem<T>* getLastItem();
     };
 }
+
+#endif
+
+namespace timing {
+    class EarthTime {
+        private:
+            _dc_Sid _sid;
+
+        public:
+            _dc_Sid _getSid() {return _sid;}
+
+            EarthTime(int year, unsigned int month, unsigned int day, unsigned int hour, unsigned int minute, unsigned int second) {_sid = dc_timing_EarthTime_new(year, month, day, hour, minute, second);}
+            EarthTime(int year, unsigned int month, unsigned int day, unsigned long millisecondOfDay) {_sid = dc_timing_EarthTime_newUsingMilliseconds(year, month, day, millisecondOfDay);}
+
+            unsigned int daysInYear() {return dc_timing_EarthTime_daysInYear(_sid);}
+            unsigned int daysInMonth(unsigned int month) {return dc_timing_EarthTime_daysInMonth(_sid, month);}
+            unsigned long millisecondsInDay() {return dc_timing_EarthTime_millisecondsInDay(_sid);}
+            bool inLeapMillisecond() {return dc_timing_EarthTime_inLeapMillisecond(_sid);}
+            unsigned long postLeapMillisecondOffset() {return dc_timing_EarthTime_postLeapMillisecondOffset(_sid);}
+            void setDate(int year, unsigned int month, unsigned int day) {return dc_timing_EarthTime_setDate(_sid, year, month, day);}
+            void setTime(unsigned int hour, unsigned int minute, unsigned int second) {return dc_timing_EarthTime_setTime(_sid, hour, minute, second);}
+            void incrementTime(int millseconds) {return dc_timing_EarthTime_incrementTime(_sid, millseconds);}
+            void toLocalTime(int timeShift) {return dc_timing_EarthTime_toLocalTime(_sid, timeShift);}
+            void toGlobalTime() {return dc_timing_EarthTime_toGlobalTime(_sid);}
+            int year() {return dc_timing_EarthTime_year(_sid);}
+            unsigned int month() {return dc_timing_EarthTime_month(_sid);}
+            unsigned int day() {return dc_timing_EarthTime_day(_sid);}
+            unsigned int hour() {return dc_timing_EarthTime_hour(_sid);}
+            unsigned int minute() {return dc_timing_EarthTime_minute(_sid);}
+            unsigned int second() {return dc_timing_EarthTime_second(_sid);}
+            unsigned int millisecond() {return dc_timing_EarthTime_millisecond(_sid);}
+            unsigned int dayOfYear() {return dc_timing_EarthTime_dayOfYear(_sid);}
+            unsigned long millisecondOfDay() {return dc_timing_EarthTime_millisecondOfDay(_sid);}
+            unsigned long millisecondOfDayIgnoringLeap() {return dc_timing_EarthTime_millisecondOfDayIgnoringLeap(_sid);}
+            unsigned int weekday() {return dc_timing_EarthTime_weekday(_sid);}
+    };
+}
+
+namespace ui {
+    enum EventType {
+        BUTTON_DOWN,
+        BUTTON_UP
+    };
+
+    enum PopupTransitionState {
+        NONE,
+        OPENING,
+        CLOSING
+    };
+
+    enum PenMode {
+        OFF,
+        ON
+    };
+
+    class Icon {
+        private:
+            _dc_Sid _sid;
+
+        public:
+            _dc_Sid _getSid() {return _sid;}
+
+            Icon() {_sid = dc_ui_Icon_new();}
+
+            void setPixel(unsigned int x, unsigned int y, ui::PenMode value) {return dc_ui_Icon_setPixel(_sid, x, y, value);}
+    };
+
+    class Screen {
+        private:
+            _dc_Sid _sid;
+
+        public:
+            _dc_Sid _getSid() {return _sid;}
+
+            Screen() {_sid = dc_ui_Screen_new();}
+
+            void clear() {return dc_ui_Screen_clear(_sid);}
+            void setPosition(unsigned int column, unsigned int row) {return dc_ui_Screen_setPosition(_sid, column, row);}
+            void setPixel(unsigned int x, unsigned int y, ui::PenMode value) {return dc_ui_Screen_setPixel(_sid, x, y, value);}
+            void print(char c) {return dc_ui_Screen_printChar(_sid, c);}
+            void print(char* chars) {return dc_ui_Screen_print(_sid, chars);}
+            void print(ui::Icon icon) {return dc_ui_Screen_printIcon(_sid, _dc_getClassSid<ui::Icon>(&icon));}
+            void printRepeated(dataTypes::String string, unsigned int times) {return dc_ui_Screen_printRepeated(_sid, string.c_str(), times);}
+            void scroll(dataTypes::String string, unsigned int maxLength) {return dc_ui_Screen_scroll(_sid, string.c_str(), maxLength);}
+            void resetScroll() {return dc_ui_Screen_resetScroll(_sid);}
+            void rect(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, ui::PenMode value) {return dc_ui_Screen_rect(_sid, x1, y1, x2, y2, value);}
+            void filledRect(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, ui::PenMode value) {return dc_ui_Screen_filledRect(_sid, x1, y1, x2, y2, value);}
+            void open(bool urgent) {return dc_ui_Screen_open(_sid, urgent);}
+            void close() {return dc_ui_Screen_close(_sid);}
+            void swapWith(ui::Screen* currentScreen) {return dc_ui_Screen_swapWith(_sid, _dc_getClassSid<ui::Screen>(currentScreen));}
+    };
+}
+
+namespace test {
+    class TestClass {
+        private:
+            _dc_Sid _sid;
+
+        public:
+            _dc_Sid _getSid() {return _sid;}
+
+            TestClass(unsigned int seed) {_sid = dc_test_TestClass_new(seed);}
+
+            unsigned int add(unsigned int value, unsigned int value2) {return dc_test_TestClass_add(_sid, value, value2);}
+            void bools(bool a, bool b, bool c) {return dc_test_TestClass_bools(_sid, a, b, c);}
+            unsigned int nextRandomNumber() {return dc_test_TestClass_nextRandomNumber(_sid);}
+    };
+}
+
+#ifndef DC_COMMON_DATATYPES_H_
+#define DC_COMMON_DATATYPES_H_
+
+#ifndef DIGICRON_H_
+    #include <Arduino.h>
+#endif
+
+template<typename T> T* store(T value);
+template<typename T> T discard(T* itemPtr);
+
+namespace dataTypes {
+    template<typename T> struct _ListItem {
+        T* valuePtr;
+        _ListItem<T>* nextItemPtr;
+    };
+
+    template<typename T> class StoredValue {
+        public:
+            T value;
+
+            StoredValue<T>(T valueToStore);
+            ~StoredValue<T>();
+    };
+
+    #ifdef DIGICRON_H_
+        class String {
+            private:
+                char* _value = nullptr;
+                unsigned int _length = 0;
+
+            public:
+                String(const char* value);
+
+                char operator[](int index);
+
+                char* c_str();
+                unsigned int length();
+                char charAt(int index);
+        };
+    #else
+        typedef String String;
+    #endif
+
+    template<typename T> class List {
+        public:
+            typedef void (*IterationCallback)(T* itemPtr, unsigned int index);
+            typedef T* (*MappingFunction)(T* itemPtr, unsigned int index);
+            typedef bool (*FilteringFunction)(T* itemPtr, unsigned int index);
+
+            List<T>();
+            ~List<T>();
+
+            T* operator[](int index);
+
+            void start();
+            T* next();
+            unsigned int length();
+            void empty();
+            unsigned int push(T* valuePtr);
+            T* pop();
+            unsigned int unshift(T* valuePtr);
+            T* shift();
+            unsigned int insert(unsigned int index, T* valuePtr);
+            T* remove(unsigned int index);
+            void set(unsigned int index, T* valuePtr);
+            int indexOf(T* valuePtr);
+            void forEach(IterationCallback iterationCallback);
+            List<T> map(MappingFunction mappingFunction);
+            List<T> filter(FilteringFunction filteringFunction);
+            List<T> concat(List<T> otherList);
+
+        private:
+            _ListItem<T>* _firstItemPtr;
+            _ListItem<T>* _currentItemPtr;
+            unsigned int _length;
+
+            _ListItem<T>* getItemAtIndex(int index);
+            _ListItem<T>* getLastItem();
+    };
+}
+
+#endif
+
+#ifndef DC_COMMON_DISPLAY_H_
+#define DC_COMMON_DISPLAY_H_
+
+namespace display {
+    const unsigned int CHAR_COLUMNS = 5;
+    const unsigned int CHAR_ROWS = 7;
+    const unsigned int COLUMNS = 8;
+    const unsigned int ROWS = 2;
+    const unsigned int WIDTH = COLUMNS * CHAR_COLUMNS;
+    const unsigned int HEIGHT = ROWS * CHAR_ROWS;
+    const unsigned int CHAR_COUNT = COLUMNS * ROWS;
+    const unsigned int DATA_SIZE = CHAR_COLUMNS * CHAR_COUNT;
+}
+
+#endif
+
+#ifndef DC_COMMON_UI_H_
+#define DC_COMMON_UI_H_
+
+#ifndef DIGICRON_H_
+    #include "../datatypes.h"
+    #include "../ui.h"
+#endif
+
+namespace ui {
+    Icon constructIcon(dataTypes::String pixels);
+}
+
+#endif
+
+#ifndef DC_COMMON_DATATYPES_CPP_
+#define DC_COMMON_DATATYPES_CPP_
+
+#ifndef DIGICRON_H_
+    #include "datatypes.h"
+#endif
 
 template<typename T> T* store(T value) {
     auto storedValue = new dataTypes::StoredValue<T>(value);
@@ -551,111 +785,36 @@ template<typename T> dataTypes::List<T> dataTypes::List<T>::concat(dataTypes::Li
 
 #endif
 
-namespace timing {
-    class EarthTime {
-        private:
-            _dc_Sid _sid;
+#ifndef DC_COMMON_DISPLAY_CPP_
+#define DC_COMMON_DISPLAY_CPP_
 
-        public:
-            _dc_Sid _getSid() {return _sid;}
+#endif
 
-            EarthTime(int year, unsigned int month, unsigned int day, unsigned int hour, unsigned int minute, unsigned int second) {_sid = dc_timing_EarthTime_new(year, month, day, hour, minute, second);}
-            EarthTime(int year, unsigned int month, unsigned int day, unsigned long millisecondOfDay) {_sid = dc_timing_EarthTime_newUsingMilliseconds(year, month, day, millisecondOfDay);}
+#ifndef DC_COMMON_UI_CPP_
+#define DC_COMMON_UI_CPP_
 
-            unsigned int daysInYear() {return dc_timing_EarthTime_daysInYear(this->_sid);}
-            unsigned int daysInMonth(unsigned int month) {return dc_timing_EarthTime_daysInMonth(this->_sid, month);}
-            unsigned long millisecondsInDay() {return dc_timing_EarthTime_millisecondsInDay(this->_sid);}
-            bool inLeapMillisecond() {return dc_timing_EarthTime_inLeapMillisecond(this->_sid);}
-            unsigned long postLeapMillisecondOffset() {return dc_timing_EarthTime_postLeapMillisecondOffset(this->_sid);}
-            void setDate(int year, unsigned int month, unsigned int day) {return dc_timing_EarthTime_setDate(this->_sid, year, month, day);}
-            void setTime(unsigned int hour, unsigned int minute, unsigned int second) {return dc_timing_EarthTime_setTime(this->_sid, hour, minute, second);}
-            void incrementTime(int millseconds) {return dc_timing_EarthTime_incrementTime(this->_sid, millseconds);}
-            void toLocalTime(int timeShift) {return dc_timing_EarthTime_toLocalTime(this->_sid, timeShift);}
-            void toGlobalTime() {return dc_timing_EarthTime_toGlobalTime(this->_sid);}
-            int year() {return dc_timing_EarthTime_year(this->_sid);}
-            unsigned int month() {return dc_timing_EarthTime_month(this->_sid);}
-            unsigned int day() {return dc_timing_EarthTime_day(this->_sid);}
-            unsigned int hour() {return dc_timing_EarthTime_hour(this->_sid);}
-            unsigned int minute() {return dc_timing_EarthTime_minute(this->_sid);}
-            unsigned int second() {return dc_timing_EarthTime_second(this->_sid);}
-            unsigned int millisecond() {return dc_timing_EarthTime_millisecond(this->_sid);}
-            unsigned int dayOfYear() {return dc_timing_EarthTime_dayOfYear(this->_sid);}
-            unsigned long millisecondOfDay() {return dc_timing_EarthTime_millisecondOfDay(this->_sid);}
-            unsigned long millisecondOfDayIgnoringLeap() {return dc_timing_EarthTime_millisecondOfDayIgnoringLeap(this->_sid);}
-            unsigned int weekday() {return dc_timing_EarthTime_weekday(this->_sid);}
-    };
+#ifndef DIGICRON_H_
+    #include "ui.h"
+#endif
+
+ui::Icon ui::constructIcon(dataTypes::String pixels) {
+    Icon icon;
+
+    for (unsigned int i = 0; i < pixels.length(); i++) {
+        unsigned int x = i % display::CHAR_COLUMNS;
+        unsigned int y = i / display::CHAR_COLUMNS;
+
+        if (y >= 8) {
+            break;
+        }
+
+        icon.setPixel(x, y, pixels[i] != ' ' ? PenMode::ON : PenMode::OFF);
+    }
+
+    return icon;
 }
 
-namespace ui {
-    enum EventType {
-        BUTTON_DOWN,
-        BUTTON_UP
-    };
-
-    enum PopupTransitionState {
-        NONE,
-        OPENING,
-        CLOSING
-    };
-
-    enum PenMode {
-        OFF,
-        ON
-    };
-
-    class Icon {
-        private:
-            _dc_Sid _sid;
-
-        public:
-            _dc_Sid _getSid() {return _sid;}
-
-            Icon() {_sid = dc_ui_Icon_new();}
-
-            void setPixel(unsigned int x, unsigned int y, ui::PenMode value) {return dc_ui_Icon_setPixel(this->_sid, x, y, value);}
-    };
-
-    class Screen {
-        private:
-            _dc_Sid _sid;
-
-        public:
-            _dc_Sid _getSid() {return _sid;}
-
-            Screen() {_sid = dc_ui_Screen_new();}
-
-            void clear() {return dc_ui_Screen_clear(this->_sid);}
-            void setPosition(unsigned int column, unsigned int row) {return dc_ui_Screen_setPosition(this->_sid, column, row);}
-            void setPixel(unsigned int x, unsigned int y, ui::PenMode value) {return dc_ui_Screen_setPixel(this->_sid, x, y, value);}
-            void print(char c) {return dc_ui_Screen_printName(this->_sid, c);}
-            void print(char* chars) {return dc_ui_Screen_print(this->_sid, chars);}
-            void print(ui::Icon icon) {return dc_ui_Screen_printIcon(this->_sid, _dc_getClassSid<ui::Icon>(&icon));}
-            void printRepeated(dataTypes::String string, unsigned int times) {return dc_ui_Screen_printRepeated(this->_sid, string.c_str(), times);}
-            void scroll(dataTypes::String string, unsigned int maxLength) {return dc_ui_Screen_scroll(this->_sid, string.c_str(), maxLength);}
-            void resetScroll() {return dc_ui_Screen_resetScroll(this->_sid);}
-            void rect(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, ui::PenMode value) {return dc_ui_Screen_rect(this->_sid, x1, y1, x2, y2, value);}
-            void filledRect(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, ui::PenMode value) {return dc_ui_Screen_filledRect(this->_sid, x1, y1, x2, y2, value);}
-            void open(bool urgent) {return dc_ui_Screen_open(this->_sid, urgent);}
-            void close() {return dc_ui_Screen_close(this->_sid);}
-            void swapWith(ui::Screen* currentScreen) {return dc_ui_Screen_swapWith(this->_sid, _dc_getClassSid<ui::Screen>(currentScreen));}
-    };
-}
-
-namespace test {
-    class TestClass {
-        private:
-            _dc_Sid _sid;
-
-        public:
-            _dc_Sid _getSid() {return _sid;}
-
-            TestClass(unsigned int seed) {_sid = dc_test_TestClass_new(seed);}
-
-            unsigned int add(unsigned int value, unsigned int value2) {return dc_test_TestClass_add(this->_sid, value, value2);}
-            void bools(bool a, bool b, bool c) {return dc_test_TestClass_bools(this->_sid, a, b, c);}
-            unsigned int nextRandomNumber() {return dc_test_TestClass_nextRandomNumber(this->_sid);}
-    };
-}
+#endif
 
 }
 

@@ -130,7 +130,7 @@ function method {
 
         shift
     else
-        passArgs="this->_sid"
+        passArgs="_sid"
 
         echo -n "WASM_IMPORT(\"digicron\", \"$INTERNAL_NAME\") $1 $INTERNAL_NAME(_dc_Sid sid" >> tools/api/_digicron-imports.h
 
@@ -186,7 +186,7 @@ function method {
             internalArgType=_dc_Sid
             internalArgCall="_dc_getClassSid<$argType>(&$argName)"
             firmwareArgType=Sid
-            firmwareArgCall="*api::getBySid<$argType>(Type::${NAMESPACE}_$CLASS, $argName)"
+            firmwareArgCall="*api::getBySid<$argType>(Type::${argType/::/_}, $argName)"
         fi
 
         if [[ "$argType" =~ ^CLASSPTR\  ]]; then
@@ -194,7 +194,7 @@ function method {
             internalArgType=_dc_Sid
             internalArgCall="_dc_getClassSid<$argType>($argName)"
             firmwareArgType=Sid
-            firmwareArgCall="api::getBySid<$argType>(Type::${NAMESPACE}_$CLASS, $argName)"
+            firmwareArgCall="api::getBySid<$argType>(Type::${argType/::/_}, $argName)"
             argType="$argType*"
         fi
 
@@ -419,7 +419,7 @@ namespace dc {
 
 EOF
 
-cat common/datatypes.h >> applib/digicron.h
+cat firmware/common/datatypes.h >> applib/digicron.h
 echo >> applib/digicron.h
 echo >> applib/digicron.h
 
@@ -444,6 +444,22 @@ tee -a firmware/_api.h > /dev/null << EOF
 
 #endif
 EOF
+
+for header in firmware/common/*.h; do
+    if [ "$header" = "firmware/common/digicron.h" ]; then
+        continue
+    fi
+
+    cat $header >> applib/digicron.h
+    echo >> applib/digicron.h
+    echo >> applib/digicron.h
+done
+
+for header in firmware/common/*.cpp; do
+    cat $header >> applib/digicron.h
+    echo >> applib/digicron.h
+    echo >> applib/digicron.h
+done
 
 tee -a applib/digicron.h > /dev/null << EOF
 }

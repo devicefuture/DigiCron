@@ -15,6 +15,8 @@
 #include "proc.h"
 #include "home.h"
 
+#include "common/ui.h"
+
 input::Button ui::lastButton;
 ui::Screen* ui::currentScreen;
 proc::Process* ui::foregroundProcess = nullptr;
@@ -250,23 +252,6 @@ void ui::Screen::_update() {
 
 void ui::Screen::_handleEvent(ui::Event event) {
     handleEvent(event);
-}
-
-ui::Icon ui::constructIcon(String pixels) {
-    Icon icon;
-
-    for (unsigned int i = 0; i < pixels.length(); i++) {
-        unsigned int x = i % display::CHAR_COLUMNS;
-        unsigned int y = i / display::CHAR_COLUMNS;
-
-        if (y >= 8) {
-            break;
-        }
-
-        icon.setPixel(x, y, pixels[i] != ' ' ? PenMode::ON : PenMode::OFF);
-    }
-
-    return icon;
 }
 
 void ui::Menu::update() {

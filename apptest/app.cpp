@@ -2,11 +2,25 @@
 #include "../applib/digicron.h"
 
 using namespace dc;
+using namespace dc::dataTypes;
 
 int count = 0;
 
 test::TestClass* testClass;
 ui::Screen* screen;
+
+void addr(unsigned int ptr) {
+    uint8_t buffer[8];
+
+    for (unsigned int i = 0; i < 8; i++) {
+        unsigned int j = 7 - i;
+
+        buffer[j] = '0' + (ptr % 10);
+        ptr /= 10;
+    }
+
+    dc_log(buffer, 8);
+}
 
 void setup() {
     dc_log((uint8_t*)"Hello from the WASM module!", 27);
@@ -23,7 +37,16 @@ void setup() {
 
     screen = new ui::Screen();
 
+    ui::Icon smileIcon = ui::constructIcon(
+        "     "
+        " # # "
+        "     "
+        "#   #"
+        " ### "
+    );
+
     screen->print("Hello,\nworld! ");
+    screen->print(smileIcon);
     screen->open(true);
 }
 

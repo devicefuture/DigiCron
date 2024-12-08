@@ -13,8 +13,8 @@ file(GLOB HCMS_SOURCES
 )
 
 file(GLOB WASM3_SOURCES
-    ${CMAKE_SOURCE_DIR}/lib/wasm3-arduino/src/*.c
-    ${CMAKE_SOURCE_DIR}/lib/wasm3-arduino/src/*.h
+    ${CMAKE_SOURCE_DIR}/lib/wasm3/source/*.c
+    ${CMAKE_SOURCE_DIR}/lib/wasm3/source/*.h
 )
 
 add_library(EpoxyDuino STATIC ${EPOXY_SOURCES})
@@ -25,11 +25,11 @@ set_target_properties(HCMS39xx PROPERTIES LINKER_LANGUAGE CXX)
 
 target_include_directories(EpoxyDuino PUBLIC ${CMAKE_SOURCE_DIR}/devdeps/EpoxyDuino/cores/epoxy)
 target_include_directories(HCMS39xx PUBLIC ${CMAKE_SOURCE_DIR}/lib/HCMS39xx/src)
-target_include_directories(Wasm3 PUBLIC ${CMAKE_SOURCE_DIR}/lib/wasm3-arduino/src)
+target_include_directories(Wasm3 PUBLIC ${CMAKE_SOURCE_DIR}/lib/wasm3/source)
 
 file(GLOB SOURCES
-    ${CMAKE_SOURCE_DIR}/common/*.h
     ${CMAKE_SOURCE_DIR}/firmware/*.cpp
+    ${CMAKE_SOURCE_DIR}/firmware/common/*.cpp
 )
 
 add_executable(digicron ${SOURCES})

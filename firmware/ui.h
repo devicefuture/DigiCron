@@ -143,8 +143,8 @@ namespace ui {
 
     Screen* determineCurrentScreen();
     void renderCurrentScreen();
-
-    Icon constructIcon(String pixels);
 }
+
+#include "common/ui.h"
 
 #endif

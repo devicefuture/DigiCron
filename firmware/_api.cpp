@@ -314,7 +314,7 @@ m3ApiRawFunction(api::dc_ui_Screen_setPixel) {
     m3ApiSuccess();
 }
 
-m3ApiRawFunction(api::dc_ui_Screen_printName) {
+m3ApiRawFunction(api::dc_ui_Screen_printChar) {
     m3ApiGetArg(Sid, _sid)
     m3ApiGetArg(char, c)
 
@@ -336,7 +336,7 @@ m3ApiRawFunction(api::dc_ui_Screen_printIcon) {
     m3ApiGetArg(Sid, _sid)
     m3ApiGetArg(Sid, icon)
 
-    api::getBySid<ui::Screen>(Type::ui_Screen, _sid)->print(*api::getBySid<ui::Icon>(Type::ui_Screen, icon));
+    api::getBySid<ui::Screen>(Type::ui_Screen, _sid)->print(*api::getBySid<ui::Icon>(Type::ui_Icon, icon));
 
     m3ApiSuccess();
 }
@@ -495,7 +495,7 @@ void api::linkFunctions(IM3Runtime runtime) {
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_clear", "v(i)", &dc_ui_Screen_clear);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_setPosition", "v(iii)", &dc_ui_Screen_setPosition);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_setPixel", "v(iiii)", &dc_ui_Screen_setPixel);
-    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_printName", "v(ii)", &dc_ui_Screen_printName);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_printChar", "v(ii)", &dc_ui_Screen_printChar);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_print", "v(i*)", &dc_ui_Screen_print);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_printIcon", "v(ii)", &dc_ui_Screen_printIcon);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_printRepeated", "v(iii)", &dc_ui_Screen_printRepeated);

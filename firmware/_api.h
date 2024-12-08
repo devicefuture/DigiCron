@@ -53,7 +53,7 @@ namespace api {
     m3ApiRawFunction(dc_ui_Screen_clear);
     m3ApiRawFunction(dc_ui_Screen_setPosition);
     m3ApiRawFunction(dc_ui_Screen_setPixel);
-    m3ApiRawFunction(dc_ui_Screen_printName);
+    m3ApiRawFunction(dc_ui_Screen_printChar);
     m3ApiRawFunction(dc_ui_Screen_print);
     m3ApiRawFunction(dc_ui_Screen_printIcon);
     m3ApiRawFunction(dc_ui_Screen_printRepeated);

@@ -50,7 +50,7 @@ namespace ui
         method "void" clear
         method "void" setPosition "unsigned int" column "unsigned int" row
         method "void" setPixel "unsigned int" x "unsigned int" y "ENUM ui::PenMode" value
-        INTERNAL_NAME=dc_ui_Screen_printName method "void" print "char" c
+        INTERNAL_NAME=dc_ui_Screen_printChar method "void" print "char" c
         method "void" print "char*" chars
         INTERNAL_NAME=dc_ui_Screen_printIcon method "void" print "CLASS ui::Icon" icon
         method "void" printRepeated "String" string "unsigned int" times

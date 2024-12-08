@@ -29,7 +29,7 @@ dc_ui_Screen_new
 dc_ui_Screen_clear
 dc_ui_Screen_setPosition
 dc_ui_Screen_setPixel
-dc_ui_Screen_printName
+dc_ui_Screen_printChar
 dc_ui_Screen_print
 dc_ui_Screen_printIcon
 dc_ui_Screen_printRepeated
