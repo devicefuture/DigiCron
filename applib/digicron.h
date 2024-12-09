@@ -21,7 +21,7 @@ extern "C" {
 WASM_IMPORT("digicronold", "log") void dc_log(uint8_t* text, uint8_t length);
 WASM_IMPORT("digicronold", "stop") void dc_stop();
 
-WASM_IMPORT("digicron", "dc_getGlobalI32") uint32_t dc_getGlobalI32(char* id);
+WASM_IMPORT("digicron", "dc_getGlobalI32") uint32_t dc_getGlobalI32(const char* id);
 
 WASM_IMPORT("digicron", "dc_timing_EarthTime_new") _dc_Sid dc_timing_EarthTime_new(int year, unsigned int month, unsigned int day, unsigned int hour, unsigned int minute, unsigned int second);
 WASM_IMPORT("digicron", "dc_timing_EarthTime_newUsingMilliseconds") _dc_Sid dc_timing_EarthTime_newUsingMilliseconds(int year, unsigned int month, unsigned int day, unsigned long millisecondOfDay);

@@ -417,7 +417,7 @@ extern "C" {
 WASM_IMPORT("digicronold", "log") void dc_log(uint8_t* text, uint8_t length);
 WASM_IMPORT("digicronold", "stop") void dc_stop();
 
-WASM_IMPORT("digicron", "dc_getGlobalI32") uint32_t dc_getGlobalI32(char* id);
+WASM_IMPORT("digicron", "dc_getGlobalI32") uint32_t dc_getGlobalI32(const char* id);
 
 // {{ imports }}
 

@@ -28,6 +28,9 @@ void setup() {
     dc_log((uint8_t*)"HB", 2);
     addr(dc_getGlobalI32("__heap_base"));
 
+    dc_log((uint8_t*)"MS", 2);
+    addr(__builtin_wasm_memory_size(0) << 16);
+
     testClass = new test::TestClass(20);
 
     dc_log((uint8_t*)"Called test!", 12);
