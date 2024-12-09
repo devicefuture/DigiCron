@@ -25,6 +25,9 @@ void addr(unsigned int ptr) {
 void setup() {
     dc_log((uint8_t*)"Hello from the WASM module!", 27);
 
+    dc_log((uint8_t*)"HB", 2);
+    addr(dc_getGlobalI32("__heap_base"));
+
     testClass = new test::TestClass(20);
 
     dc_log((uint8_t*)"Called test!", 12);

@@ -31,6 +31,23 @@ template<typename T> api::Sid api::store(api::Type type, T* instance) {
     return api::storedInstances.push(storedInstance) - 1;
 }
 
+m3ApiRawFunction(api::dc_getGlobalI32) {
+    m3ApiReturnType(uint32_t)
+    m3ApiGetArgMem(char*, id)
+
+    IM3Global global = m3_FindGlobal(runtime->modules, id);
+
+    if (global) {
+        M3TaggedValue globalValue;
+
+        m3_GetGlobal(global, &globalValue);
+
+        m3ApiReturn(globalValue.value.i32);
+    } else {
+        m3ApiReturn(0);
+    }
+}
+
 m3ApiRawFunction(api::dc_timing_EarthTime_new) {
     m3ApiReturnType(Sid)
     m3ApiGetArg(int, year)
@@ -465,6 +482,8 @@ m3ApiRawFunction(api::dc_test_TestClass_nextRandomNumber) {
 
 void api::linkFunctions(IM3Runtime runtime) {
     const char* MODULE_NAME = "digicron";
+
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_getGlobalI32", "i(*)", &dc_getGlobalI32);
 
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_EarthTime_new", "i(iiiiii)", &dc_timing_EarthTime_new);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_EarthTime_newUsingMilliseconds", "i(iiii)", &dc_timing_EarthTime_newUsingMilliseconds);

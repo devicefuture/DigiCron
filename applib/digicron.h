@@ -3,7 +3,6 @@
 #ifndef DIGICRON_H_
 #define DIGICRON_H_
 
-#include <stdlib.h>
 #include <stdint.h>
 
 #define WASM_EXPORT extern "C" __attribute__((used)) __attribute__((visibility ("default")))
@@ -21,6 +20,8 @@ extern "C" {
 
 WASM_IMPORT("digicronold", "log") void dc_log(uint8_t* text, uint8_t length);
 WASM_IMPORT("digicronold", "stop") void dc_stop();
+
+WASM_IMPORT("digicron", "dc_getGlobalI32") uint32_t dc_getGlobalI32(char* id);
 
 WASM_IMPORT("digicron", "dc_timing_EarthTime_new") _dc_Sid dc_timing_EarthTime_new(int year, unsigned int month, unsigned int day, unsigned int hour, unsigned int minute, unsigned int second);
 WASM_IMPORT("digicron", "dc_timing_EarthTime_newUsingMilliseconds") _dc_Sid dc_timing_EarthTime_newUsingMilliseconds(int year, unsigned int month, unsigned int day, unsigned long millisecondOfDay);
@@ -69,19 +70,39 @@ WASM_IMPORT("digicron", "dc_test_TestClass_nextRandomNumber") unsigned int dc_te
 
 }
 
+WASM_EXPORT_AS("_setup") void _setup() {
+    setup();
+}
+
+WASM_EXPORT_AS("_loop") void _loop() {
+    loop();
+}
+
+typedef unsigned long size_t;
+
+extern "C" {
+    void* malloc(size_t size) {
+        static void* next = (void*)0x1000;
+        void* current = next;
+
+        next = (void*)((size_t)next + size);
+
+        return current;
+    }
+}
+
+void* operator new(size_t size) {
+    return malloc(size);
+}
+
+void* operator new[](size_t size) {
+    return malloc(size);
+}
 template<typename T> _dc_Sid _dc_getClassSid(T* instance) {
     return instance->_getSid();
 }
 
 int main() {}
-
-WASM_EXPORT void _setup() {
-    setup();
-}
-
-WASM_EXPORT void _loop() {
-    loop();
-}
 
 namespace dc {
 

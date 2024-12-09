@@ -1,5 +1,6 @@
 dc_log
 dc_stop
+dc_getGlobalI32
 dc_timing_EarthTime_new
 dc_timing_EarthTime_newUsingMilliseconds
 dc_timing_EarthTime_daysInYear

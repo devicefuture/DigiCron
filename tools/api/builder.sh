@@ -303,6 +303,8 @@ tee -a tools/api/_api-linker.h > /dev/null << EOF
 void api::linkFunctions(IM3Runtime runtime) {
     const char* MODULE_NAME = "digicron";
 
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_getGlobalI32", "i(*)", &dc_getGlobalI32);
+
 EOF
 
 tee -a firmware/_api.cpp > /dev/null << EOF
@@ -337,6 +339,23 @@ template<typename T> api::Sid api::store(api::Type type, T* instance) {
     return api::storedInstances.push(storedInstance) - 1;
 }
 
+m3ApiRawFunction(api::dc_getGlobalI32) {
+    m3ApiReturnType(uint32_t)
+    m3ApiGetArgMem(char*, id)
+
+    IM3Global global = m3_FindGlobal(runtime->modules, id);
+
+    if (global) {
+        M3TaggedValue globalValue;
+
+        m3_GetGlobal(global, &globalValue);
+
+        m3ApiReturn(globalValue.value.i32);
+    } else {
+        m3ApiReturn(0);
+    }
+}
+
 EOF
 
 tee -a firmware/_api.h > /dev/null << EOF
@@ -364,6 +383,8 @@ namespace api {
     template<typename T> T* getBySid(Type type, Sid sid);
     template<typename T> Sid store(Type type, T* instance);
 
+    m3ApiRawFunction(dc_getGlobalI32);
+
 EOF
 
 mkdir -p applib
@@ -378,7 +399,6 @@ tee -a applib/digicron.h > /dev/null << EOF
 #ifndef DIGICRON_H_
 #define DIGICRON_H_
 
-#include <stdlib.h>
 #include <stdint.h>
 
 #define WASM_EXPORT extern "C" __attribute__((used)) __attribute__((visibility ("default")))
@@ -397,23 +417,27 @@ extern "C" {
 WASM_IMPORT("digicronold", "log") void dc_log(uint8_t* text, uint8_t length);
 WASM_IMPORT("digicronold", "stop") void dc_stop();
 
+WASM_IMPORT("digicron", "dc_getGlobalI32") uint32_t dc_getGlobalI32(char* id);
+
 // {{ imports }}
 
 }
+
+WASM_EXPORT_AS("_setup") void _setup() {
+    setup();
+}
+
+WASM_EXPORT_AS("_loop") void _loop() {
+    loop();
+}
+
+// {{ stdlib }}
 
 template<typename T> _dc_Sid _dc_getClassSid(T* instance) {
     return instance->_getSid();
 }
 
 int main() {}
-
-WASM_EXPORT void _setup() {
-    setup();
-}
-
-WASM_EXPORT void _loop() {
-    loop();
-}
 
 namespace dc {
 
@@ -426,6 +450,7 @@ echo >> applib/digicron.h
 # TODO: Make these functions part of full API
 echo dc_log >> applib/digicron.syms
 echo dc_stop >> applib/digicron.syms
+echo dc_getGlobalI32 >> applib/digicron.syms
 
 export -f _closeNamespace namespace _closeClass class method constructor
 
@@ -473,4 +498,5 @@ sed -i -e "\|// {{ includes }}|{r tools/api/_api-includes.h" -e "d}" firmware/_a
 sed -i -e "\|// {{ templates }}|{r tools/api/_api-templates.h" -e "d}" firmware/_api.cpp
 sed -i -e "\|// {{ includes }}|{r tools/api/_api-includes.h" -e "d}" firmware/_api.h
 sed -i "s|/\* {{ tagTypes }} \*/|$TAG_TYPES|" firmware/_api.h
+sed -i -e "\|// {{ stdlib }}|{r tools/api/digicron-stdlib.h" -e "d}" applib/digicron.h
 sed -i -e "\|// {{ imports }}|{r tools/api/_digicron-imports.h" -e "d}" applib/digicron.h

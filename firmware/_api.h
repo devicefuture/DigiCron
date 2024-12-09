@@ -24,6 +24,8 @@ namespace api {
     template<typename T> T* getBySid(Type type, Sid sid);
     template<typename T> Sid store(Type type, T* instance);
 
+    m3ApiRawFunction(dc_getGlobalI32);
+
     m3ApiRawFunction(dc_timing_EarthTime_new);
     m3ApiRawFunction(dc_timing_EarthTime_newUsingMilliseconds);
     m3ApiRawFunction(dc_timing_EarthTime_daysInYear);
