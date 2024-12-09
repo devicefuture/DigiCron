@@ -108,16 +108,31 @@ extern "C" {
         for (size_t i = 0; i < size; i++) {
             *((char*)destination + size) = value;
         }
+
+
+        return destination;
+    }
+
+    void* memcpy(void* destination, void* source, size_t size) {
+        for (size_t i = 0; i < size; i++) {
+            *((char*)destination + i) = *((char*)source + i);
+        }
+
+        return destination;
     }
 
     void* malloc(size_t size) {
+        _DC_DEBUG_HEAP_LOG("> malloc");
+
         if (size == 0) {
             size = _DC_ALIGN_SIZE;
         }
 
-        size = _DC_ALIGN(size);
+        if (size & _DC_FLAG_USED) {
+            return nullptr;
+        }
 
-        _DC_DEBUG_HEAP_LOG("> malloc");
+        size = _DC_ALIGN(size);
 
         dc::heap::Block* currentBlock = dc::heap::firstFreeBlock;
 
@@ -154,6 +169,7 @@ extern "C" {
 
                 dc::heap::Block* originalBlock = currentBlock;
                 size_t totalUsableSize = originalBlockSize;
+                bool encounteredUsedBlock = false;
                 bool encounteredLastBlock = false;
 
                 _DC_DEBUG_HEAP_LOG("Attempt resize");
@@ -164,7 +180,9 @@ extern "C" {
                     if (_DC_BLOCK_IS_USED(currentBlock)) {
                         _DC_DEBUG_HEAP_LOG("  Encountered used block");
 
-                        continue;
+                        encounteredUsedBlock = true;
+
+                        break;
                     }
 
                     if (_DC_BLOCK_IS_LAST(currentBlock)) {
@@ -179,6 +197,10 @@ extern "C" {
 
                     totalUsableSize += *currentBlock + sizeof(dc::heap::Block);
                 } while (totalUsableSize < size);
+
+                if (encounteredUsedBlock) {
+                    continue;
+                }
 
                 currentBlock = originalBlock;
 
@@ -258,7 +280,67 @@ extern "C" {
         return memory;
     }
 
-    // TODO: Implement `realloc`
+    void* realloc(void* ptr, size_t size) {
+        _DC_DEBUG_HEAP_LOG("> realloc");
+
+        if (!ptr || size & _DC_FLAG_USED) {
+            return nullptr;
+        }
+
+        if (size == 0) {
+            free(ptr);
+
+            return nullptr;
+        }
+
+        size = _DC_ALIGN(size);
+
+        dc::heap::Block* blockPtr = (dc::heap::Block*)ptr;
+        dc::heap::Block* block = blockPtr - sizeof(dc::heap::Block);
+
+        if (size == _DC_BLOCK_SIZE(block)) {
+            _DC_DEBUG_HEAP_LOG("Equal size");
+
+            return ptr;
+        }
+
+        if (_DC_BLOCK_IS_LAST(blockPtr + _DC_BLOCK_SIZE(block))) {
+            // Modify last block to match new size
+
+            _DC_DEBUG_HEAP_LOG("Modify last block");
+
+            *block = _DC_FLAG_USED | _DC_ALIGN(size);
+            *(blockPtr + size) = 0; // Set new position for last block
+
+            return ptr;
+        }
+
+        if (size + sizeof(dc::heap::Block) < _DC_BLOCK_SIZE(block)) {
+            // Truncate current block by splitting truncated portion off into new block
+
+            _DC_DEBUG_HEAP_LOG("Truncate block");
+
+            *(blockPtr + size) = _DC_BLOCK_SIZE(block) - size - sizeof(dc::heap::Block);
+            *block = _DC_FLAG_USED | size;
+
+            return ptr;
+        }
+
+        // Perform full reallocation
+
+        _DC_DEBUG_HEAP_LOG("Fully reallocate");
+
+        void* newPtr = malloc(size);
+
+        if (!newPtr) {
+            return nullptr;
+        }
+
+        memcpy(newPtr, ptr, _DC_BLOCK_SIZE(block));
+        free(ptr);
+
+        return newPtr;
+    }
 }
 
 void* operator new(size_t size) {
