@@ -275,6 +275,18 @@ void operator delete(void* ptr) {
     free(ptr);
 }
 
+void operator delete(void* ptr, size_t size) {
+    free(ptr);
+}
+
 void operator delete[](void* ptr) {
     free(ptr);
+}
+
+void operator delete[](void* ptr, size_t size) {
+    free(ptr);
+}
+
+extern "C" int __cxa_atexit(void (*function)(void*), void* argument, void* handle) {
+    return 0;
 }

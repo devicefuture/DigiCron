@@ -83,10 +83,12 @@ function class {
     (
         echo "    class $CLASS {"
         echo "        private:"
-        echo "            _dc_Sid _sid;"
+        echo "            dc::_Sid _sid;"
         echo
         echo "        public:"
-        echo "            _dc_Sid _getSid() {return _sid;}"
+        echo "            dc::_Sid _getSid() {return _sid;}"
+        echo
+        echo "            ~$CLASS() {_removeStoredInstance(this);}"
         echo
     ) >> applib/digicron.h
 
@@ -124,7 +126,7 @@ function method {
         passArgs=
         shortReturnType=i
 
-        echo -n "WASM_IMPORT(\"digicron\", \"$INTERNAL_NAME\") _dc_Sid $INTERNAL_NAME(" >> tools/api/_digicron-imports.h
+        echo -n "WASM_IMPORT(\"digicron\", \"$INTERNAL_NAME\") dc::_Sid $INTERNAL_NAME(" >> tools/api/_digicron-imports.h
         echo -n "    m3_LinkRawFunction(runtime->modules, MODULE_NAME, \"$INTERNAL_NAME\", \"i(" >> tools/api/_api-linker.h
         echo "    m3ApiReturnType(Sid)" >> firmware/_api.cpp
 
@@ -132,7 +134,7 @@ function method {
     else
         passArgs="_sid"
 
-        echo -n "WASM_IMPORT(\"digicron\", \"$INTERNAL_NAME\") $1 $INTERNAL_NAME(_dc_Sid sid" >> tools/api/_digicron-imports.h
+        echo -n "WASM_IMPORT(\"digicron\", \"$INTERNAL_NAME\") $1 $INTERNAL_NAME(dc::_Sid sid" >> tools/api/_digicron-imports.h
 
         shortReturnType=i
 
@@ -176,23 +178,23 @@ function method {
 
         if [[ "$argType" =~ ^ENUM\  ]]; then
             argType=${argType##ENUM }
-            internalArgType=_dc_Enum
+            internalArgType=dc::_Enum
             firmwareArgType="unsigned int"
             firmwareArgCall="($argType)$argName"
         fi
 
         if [[ "$argType" =~ ^CLASS\  ]]; then
             argType=${argType##CLASS }
-            internalArgType=_dc_Sid
-            internalArgCall="_dc_getClassSid<$argType>(&$argName)"
+            internalArgType=dc::_Sid
+            internalArgCall="$argName._getSid()"
             firmwareArgType=Sid
             firmwareArgCall="*api::getBySid<$argType>(Type::${argType/::/_}, $argName)"
         fi
 
         if [[ "$argType" =~ ^CLASSPTR\  ]]; then
             argType=${argType##CLASSPTR }
-            internalArgType=_dc_Sid
-            internalArgCall="_dc_getClassSid<$argType>($argName)"
+            internalArgType=dc::_Sid
+            internalArgCall="$argName->_getSid()"
             firmwareArgType=Sid
             firmwareArgCall="api::getBySid<$argType>(Type::${argType/::/_}, $argName)"
             argType="$argType*"
@@ -232,7 +234,7 @@ function method {
     done
 
     if [ "$IN_CONSTRUCTOR" = true ]; then
-        echo ") {_sid = $INTERNAL_NAME($passArgs);}" >> applib/digicron.h
+        echo ") {_sid = $INTERNAL_NAME($passArgs); _addStoredInstance(_Type::${NAMESPACE}_$CLASS, this);}" >> applib/digicron.h
 
         (
             echo
@@ -406,11 +408,13 @@ tee -a applib/digicron.h > /dev/null << EOF
 #define WASM_IMPORT(module, name) __attribute__((import_module(module))) __attribute__((import_name(name)))
 #define WASM_CONSTRUCTOR __attribute__((constructor))
 
+namespace dc {
+    typedef unsigned int _Enum;
+    typedef unsigned int _Sid;
+}
+
 void setup();
 void loop();
-
-typedef unsigned int _dc_Enum;
-typedef unsigned int _dc_Sid;
 
 extern "C" {
 
@@ -433,11 +437,6 @@ WASM_EXPORT_AS("_loop") void _loop() {
 
 // {{ stdlib }}
 
-template<typename T> _dc_Sid _dc_getClassSid(T* instance) {
-    return instance->_getSid();
-}
-
-int main() {}
 
 namespace dc {
 
@@ -453,6 +452,61 @@ echo dc_stop >> applib/digicron.syms
 echo dc_getGlobalI32 >> applib/digicron.syms
 
 export -f _closeNamespace namespace _closeClass class method constructor
+
+tee -a applib/digicron.h > /dev/null << EOF
+enum _Type {/* {{ tagTypes }} */};
+
+struct _StoredInstance {
+    _Type type;
+    void* instance;
+};
+
+dataTypes::List<_StoredInstance> _storedInstances;
+
+template<typename T> T* _getBySid(_Type type, _Sid sid) {
+    _storedInstances.start();
+
+    while (_StoredInstance* storedInstance = _storedInstances.next()) {
+        if (storedInstance->type != type) {
+            continue;
+        }
+
+        T* castedInstance = (T*)(storedInstance->instance);
+
+        if (castedInstance->_getSid() == sid) {
+            return castedInstance;
+        }
+    }
+
+    return nullptr;
+}
+
+void _addStoredInstance(_Type type, void* instance) {
+    auto storedInstance = new _StoredInstance();
+
+    storedInstance->type = type;
+    storedInstance->instance = instance;
+
+    _storedInstances.push(storedInstance);
+}
+
+void _removeStoredInstance(void* instance) {
+    _storedInstances.start();
+
+    unsigned int index = 0;
+
+    while (_StoredInstance* storedInstance = _storedInstances.next()) {
+        if (storedInstance->instance == instance) {
+            delete _storedInstances.remove(index);
+
+            return;
+        }
+
+        index++;
+    }
+}
+
+EOF
 
 . tools/api/api.sh
 
@@ -471,7 +525,7 @@ tee -a firmware/_api.h > /dev/null << EOF
 EOF
 
 for header in firmware/common/*.h; do
-    if [ "$header" = "firmware/common/digicron.h" ]; then
+    if [ "$header" = "firmware/common/datatypes.h" ]; then
         continue
     fi
 
@@ -498,5 +552,6 @@ sed -i -e "\|// {{ includes }}|{r tools/api/_api-includes.h" -e "d}" firmware/_a
 sed -i -e "\|// {{ templates }}|{r tools/api/_api-templates.h" -e "d}" firmware/_api.cpp
 sed -i -e "\|// {{ includes }}|{r tools/api/_api-includes.h" -e "d}" firmware/_api.h
 sed -i "s|/\* {{ tagTypes }} \*/|$TAG_TYPES|" firmware/_api.h
+sed -i "s|/\* {{ tagTypes }} \*/|$TAG_TYPES|" applib/digicron.h
 sed -i -e "\|// {{ stdlib }}|{r tools/api/digicron-stdlib.h" -e "d}" applib/digicron.h
 sed -i -e "\|// {{ imports }}|{r tools/api/_digicron-imports.h" -e "d}" applib/digicron.h

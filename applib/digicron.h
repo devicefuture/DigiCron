@@ -10,11 +10,13 @@
 #define WASM_IMPORT(module, name) __attribute__((import_module(module))) __attribute__((import_name(name)))
 #define WASM_CONSTRUCTOR __attribute__((constructor))
 
+namespace dc {
+    typedef unsigned int _Enum;
+    typedef unsigned int _Sid;
+}
+
 void setup();
 void loop();
-
-typedef unsigned int _dc_Enum;
-typedef unsigned int _dc_Sid;
 
 extern "C" {
 
@@ -23,50 +25,50 @@ WASM_IMPORT("digicronold", "stop") void dc_stop();
 
 WASM_IMPORT("digicron", "dc_getGlobalI32") uint32_t dc_getGlobalI32(const char* id);
 
-WASM_IMPORT("digicron", "dc_timing_EarthTime_new") _dc_Sid dc_timing_EarthTime_new(int year, unsigned int month, unsigned int day, unsigned int hour, unsigned int minute, unsigned int second);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_newUsingMilliseconds") _dc_Sid dc_timing_EarthTime_newUsingMilliseconds(int year, unsigned int month, unsigned int day, unsigned long millisecondOfDay);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_daysInYear") unsigned int dc_timing_EarthTime_daysInYear(_dc_Sid sid);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_daysInMonth") unsigned int dc_timing_EarthTime_daysInMonth(_dc_Sid sid, unsigned int month);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_millisecondsInDay") unsigned long dc_timing_EarthTime_millisecondsInDay(_dc_Sid sid);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_inLeapMillisecond") bool dc_timing_EarthTime_inLeapMillisecond(_dc_Sid sid);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_postLeapMillisecondOffset") unsigned long dc_timing_EarthTime_postLeapMillisecondOffset(_dc_Sid sid);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_setDate") void dc_timing_EarthTime_setDate(_dc_Sid sid, int year, unsigned int month, unsigned int day);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_setTime") void dc_timing_EarthTime_setTime(_dc_Sid sid, unsigned int hour, unsigned int minute, unsigned int second);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_incrementTime") void dc_timing_EarthTime_incrementTime(_dc_Sid sid, int millseconds);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_toLocalTime") void dc_timing_EarthTime_toLocalTime(_dc_Sid sid, int timeShift);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_toGlobalTime") void dc_timing_EarthTime_toGlobalTime(_dc_Sid sid);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_year") int dc_timing_EarthTime_year(_dc_Sid sid);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_month") unsigned int dc_timing_EarthTime_month(_dc_Sid sid);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_day") unsigned int dc_timing_EarthTime_day(_dc_Sid sid);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_hour") unsigned int dc_timing_EarthTime_hour(_dc_Sid sid);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_minute") unsigned int dc_timing_EarthTime_minute(_dc_Sid sid);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_second") unsigned int dc_timing_EarthTime_second(_dc_Sid sid);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_millisecond") unsigned int dc_timing_EarthTime_millisecond(_dc_Sid sid);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_dayOfYear") unsigned int dc_timing_EarthTime_dayOfYear(_dc_Sid sid);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_millisecondOfDay") unsigned long dc_timing_EarthTime_millisecondOfDay(_dc_Sid sid);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_millisecondOfDayIgnoringLeap") unsigned long dc_timing_EarthTime_millisecondOfDayIgnoringLeap(_dc_Sid sid);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_weekday") unsigned int dc_timing_EarthTime_weekday(_dc_Sid sid);
-WASM_IMPORT("digicron", "dc_ui_Icon_new") _dc_Sid dc_ui_Icon_new();
-WASM_IMPORT("digicron", "dc_ui_Icon_setPixel") void dc_ui_Icon_setPixel(_dc_Sid sid, unsigned int x, unsigned int y, _dc_Enum value);
-WASM_IMPORT("digicron", "dc_ui_Screen_new") _dc_Sid dc_ui_Screen_new();
-WASM_IMPORT("digicron", "dc_ui_Screen_clear") void dc_ui_Screen_clear(_dc_Sid sid);
-WASM_IMPORT("digicron", "dc_ui_Screen_setPosition") void dc_ui_Screen_setPosition(_dc_Sid sid, unsigned int column, unsigned int row);
-WASM_IMPORT("digicron", "dc_ui_Screen_setPixel") void dc_ui_Screen_setPixel(_dc_Sid sid, unsigned int x, unsigned int y, _dc_Enum value);
-WASM_IMPORT("digicron", "dc_ui_Screen_printChar") void dc_ui_Screen_printChar(_dc_Sid sid, char c);
-WASM_IMPORT("digicron", "dc_ui_Screen_print") void dc_ui_Screen_print(_dc_Sid sid, char* chars);
-WASM_IMPORT("digicron", "dc_ui_Screen_printIcon") void dc_ui_Screen_printIcon(_dc_Sid sid, _dc_Sid icon);
-WASM_IMPORT("digicron", "dc_ui_Screen_printRepeated") void dc_ui_Screen_printRepeated(_dc_Sid sid, char* string, unsigned int times);
-WASM_IMPORT("digicron", "dc_ui_Screen_scroll") void dc_ui_Screen_scroll(_dc_Sid sid, char* string, unsigned int maxLength);
-WASM_IMPORT("digicron", "dc_ui_Screen_resetScroll") void dc_ui_Screen_resetScroll(_dc_Sid sid);
-WASM_IMPORT("digicron", "dc_ui_Screen_rect") void dc_ui_Screen_rect(_dc_Sid sid, unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, _dc_Enum value);
-WASM_IMPORT("digicron", "dc_ui_Screen_filledRect") void dc_ui_Screen_filledRect(_dc_Sid sid, unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, _dc_Enum value);
-WASM_IMPORT("digicron", "dc_ui_Screen_open") void dc_ui_Screen_open(_dc_Sid sid, bool urgent);
-WASM_IMPORT("digicron", "dc_ui_Screen_close") void dc_ui_Screen_close(_dc_Sid sid);
-WASM_IMPORT("digicron", "dc_ui_Screen_swapWith") void dc_ui_Screen_swapWith(_dc_Sid sid, _dc_Sid currentScreen);
-WASM_IMPORT("digicron", "dc_test_TestClass_new") _dc_Sid dc_test_TestClass_new(unsigned int seed);
-WASM_IMPORT("digicron", "dc_test_TestClass_add") unsigned int dc_test_TestClass_add(_dc_Sid sid, unsigned int value, unsigned int value2);
-WASM_IMPORT("digicron", "dc_test_TestClass_bools") void dc_test_TestClass_bools(_dc_Sid sid, bool a, bool b, bool c);
-WASM_IMPORT("digicron", "dc_test_TestClass_nextRandomNumber") unsigned int dc_test_TestClass_nextRandomNumber(_dc_Sid sid);
+WASM_IMPORT("digicron", "dc_timing_EarthTime_new") dc::_Sid dc_timing_EarthTime_new(int year, unsigned int month, unsigned int day, unsigned int hour, unsigned int minute, unsigned int second);
+WASM_IMPORT("digicron", "dc_timing_EarthTime_newUsingMilliseconds") dc::_Sid dc_timing_EarthTime_newUsingMilliseconds(int year, unsigned int month, unsigned int day, unsigned long millisecondOfDay);
+WASM_IMPORT("digicron", "dc_timing_EarthTime_daysInYear") unsigned int dc_timing_EarthTime_daysInYear(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_timing_EarthTime_daysInMonth") unsigned int dc_timing_EarthTime_daysInMonth(dc::_Sid sid, unsigned int month);
+WASM_IMPORT("digicron", "dc_timing_EarthTime_millisecondsInDay") unsigned long dc_timing_EarthTime_millisecondsInDay(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_timing_EarthTime_inLeapMillisecond") bool dc_timing_EarthTime_inLeapMillisecond(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_timing_EarthTime_postLeapMillisecondOffset") unsigned long dc_timing_EarthTime_postLeapMillisecondOffset(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_timing_EarthTime_setDate") void dc_timing_EarthTime_setDate(dc::_Sid sid, int year, unsigned int month, unsigned int day);
+WASM_IMPORT("digicron", "dc_timing_EarthTime_setTime") void dc_timing_EarthTime_setTime(dc::_Sid sid, unsigned int hour, unsigned int minute, unsigned int second);
+WASM_IMPORT("digicron", "dc_timing_EarthTime_incrementTime") void dc_timing_EarthTime_incrementTime(dc::_Sid sid, int millseconds);
+WASM_IMPORT("digicron", "dc_timing_EarthTime_toLocalTime") void dc_timing_EarthTime_toLocalTime(dc::_Sid sid, int timeShift);
+WASM_IMPORT("digicron", "dc_timing_EarthTime_toGlobalTime") void dc_timing_EarthTime_toGlobalTime(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_timing_EarthTime_year") int dc_timing_EarthTime_year(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_timing_EarthTime_month") unsigned int dc_timing_EarthTime_month(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_timing_EarthTime_day") unsigned int dc_timing_EarthTime_day(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_timing_EarthTime_hour") unsigned int dc_timing_EarthTime_hour(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_timing_EarthTime_minute") unsigned int dc_timing_EarthTime_minute(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_timing_EarthTime_second") unsigned int dc_timing_EarthTime_second(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_timing_EarthTime_millisecond") unsigned int dc_timing_EarthTime_millisecond(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_timing_EarthTime_dayOfYear") unsigned int dc_timing_EarthTime_dayOfYear(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_timing_EarthTime_millisecondOfDay") unsigned long dc_timing_EarthTime_millisecondOfDay(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_timing_EarthTime_millisecondOfDayIgnoringLeap") unsigned long dc_timing_EarthTime_millisecondOfDayIgnoringLeap(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_timing_EarthTime_weekday") unsigned int dc_timing_EarthTime_weekday(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_ui_Icon_new") dc::_Sid dc_ui_Icon_new();
+WASM_IMPORT("digicron", "dc_ui_Icon_setPixel") void dc_ui_Icon_setPixel(dc::_Sid sid, unsigned int x, unsigned int y, dc::_Enum value);
+WASM_IMPORT("digicron", "dc_ui_Screen_new") dc::_Sid dc_ui_Screen_new();
+WASM_IMPORT("digicron", "dc_ui_Screen_clear") void dc_ui_Screen_clear(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_ui_Screen_setPosition") void dc_ui_Screen_setPosition(dc::_Sid sid, unsigned int column, unsigned int row);
+WASM_IMPORT("digicron", "dc_ui_Screen_setPixel") void dc_ui_Screen_setPixel(dc::_Sid sid, unsigned int x, unsigned int y, dc::_Enum value);
+WASM_IMPORT("digicron", "dc_ui_Screen_printChar") void dc_ui_Screen_printChar(dc::_Sid sid, char c);
+WASM_IMPORT("digicron", "dc_ui_Screen_print") void dc_ui_Screen_print(dc::_Sid sid, char* chars);
+WASM_IMPORT("digicron", "dc_ui_Screen_printIcon") void dc_ui_Screen_printIcon(dc::_Sid sid, dc::_Sid icon);
+WASM_IMPORT("digicron", "dc_ui_Screen_printRepeated") void dc_ui_Screen_printRepeated(dc::_Sid sid, char* string, unsigned int times);
+WASM_IMPORT("digicron", "dc_ui_Screen_scroll") void dc_ui_Screen_scroll(dc::_Sid sid, char* string, unsigned int maxLength);
+WASM_IMPORT("digicron", "dc_ui_Screen_resetScroll") void dc_ui_Screen_resetScroll(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_ui_Screen_rect") void dc_ui_Screen_rect(dc::_Sid sid, unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, dc::_Enum value);
+WASM_IMPORT("digicron", "dc_ui_Screen_filledRect") void dc_ui_Screen_filledRect(dc::_Sid sid, unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, dc::_Enum value);
+WASM_IMPORT("digicron", "dc_ui_Screen_open") void dc_ui_Screen_open(dc::_Sid sid, bool urgent);
+WASM_IMPORT("digicron", "dc_ui_Screen_close") void dc_ui_Screen_close(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_ui_Screen_swapWith") void dc_ui_Screen_swapWith(dc::_Sid sid, dc::_Sid currentScreen);
+WASM_IMPORT("digicron", "dc_test_TestClass_new") dc::_Sid dc_test_TestClass_new(unsigned int seed);
+WASM_IMPORT("digicron", "dc_test_TestClass_add") unsigned int dc_test_TestClass_add(dc::_Sid sid, unsigned int value, unsigned int value2);
+WASM_IMPORT("digicron", "dc_test_TestClass_bools") void dc_test_TestClass_bools(dc::_Sid sid, bool a, bool b, bool c);
+WASM_IMPORT("digicron", "dc_test_TestClass_nextRandomNumber") unsigned int dc_test_TestClass_nextRandomNumber(dc::_Sid sid);
 
 }
 
@@ -355,14 +357,21 @@ void operator delete(void* ptr) {
     free(ptr);
 }
 
+void operator delete(void* ptr, size_t size) {
+    free(ptr);
+}
+
 void operator delete[](void* ptr) {
     free(ptr);
 }
-template<typename T> _dc_Sid _dc_getClassSid(T* instance) {
-    return instance->_getSid();
+
+void operator delete[](void* ptr, size_t size) {
+    free(ptr);
 }
 
-int main() {}
+extern "C" int __cxa_atexit(void (*function)(void*), void* argument, void* handle) {
+    return 0;
+}
 
 namespace dc {
 
@@ -449,16 +458,70 @@ namespace dataTypes {
 
 #endif
 
+enum _Type {timing_EarthTime, ui_Icon, ui_Screen, test_TestClass};
+
+struct _StoredInstance {
+    _Type type;
+    void* instance;
+};
+
+dataTypes::List<_StoredInstance> _storedInstances;
+
+template<typename T> T* _getBySid(_Type type, _Sid sid) {
+    _storedInstances.start();
+
+    while (_StoredInstance* storedInstance = _storedInstances.next()) {
+        if (storedInstance->type != type) {
+            continue;
+        }
+
+        T* castedInstance = (T*)(storedInstance->instance);
+
+        if (castedInstance->_getSid() == sid) {
+            return castedInstance;
+        }
+    }
+
+    return nullptr;
+}
+
+void _addStoredInstance(_Type type, void* instance) {
+    auto storedInstance = new _StoredInstance();
+
+    storedInstance->type = type;
+    storedInstance->instance = instance;
+
+    _storedInstances.push(storedInstance);
+}
+
+void _removeStoredInstance(void* instance) {
+    _storedInstances.start();
+
+    unsigned int index = 0;
+
+    while (_StoredInstance* storedInstance = _storedInstances.next()) {
+        if (storedInstance->instance == instance) {
+            delete _storedInstances.remove(index);
+
+            return;
+        }
+
+        index++;
+    }
+}
+
 namespace timing {
     class EarthTime {
         private:
-            _dc_Sid _sid;
+            dc::_Sid _sid;
 
         public:
-            _dc_Sid _getSid() {return _sid;}
+            dc::_Sid _getSid() {return _sid;}
 
-            EarthTime(int year, unsigned int month, unsigned int day, unsigned int hour, unsigned int minute, unsigned int second) {_sid = dc_timing_EarthTime_new(year, month, day, hour, minute, second);}
-            EarthTime(int year, unsigned int month, unsigned int day, unsigned long millisecondOfDay) {_sid = dc_timing_EarthTime_newUsingMilliseconds(year, month, day, millisecondOfDay);}
+            ~EarthTime() {_removeStoredInstance(this);}
+
+            EarthTime(int year, unsigned int month, unsigned int day, unsigned int hour, unsigned int minute, unsigned int second) {_sid = dc_timing_EarthTime_new(year, month, day, hour, minute, second); _addStoredInstance(_Type::timing_EarthTime, this);}
+            EarthTime(int year, unsigned int month, unsigned int day, unsigned long millisecondOfDay) {_sid = dc_timing_EarthTime_newUsingMilliseconds(year, month, day, millisecondOfDay); _addStoredInstance(_Type::timing_EarthTime, this);}
 
             unsigned int daysInYear() {return dc_timing_EarthTime_daysInYear(_sid);}
             unsigned int daysInMonth(unsigned int month) {return dc_timing_EarthTime_daysInMonth(_sid, month);}
@@ -503,31 +566,35 @@ namespace ui {
 
     class Icon {
         private:
-            _dc_Sid _sid;
+            dc::_Sid _sid;
 
         public:
-            _dc_Sid _getSid() {return _sid;}
+            dc::_Sid _getSid() {return _sid;}
 
-            Icon() {_sid = dc_ui_Icon_new();}
+            ~Icon() {_removeStoredInstance(this);}
+
+            Icon() {_sid = dc_ui_Icon_new(); _addStoredInstance(_Type::ui_Icon, this);}
 
             void setPixel(unsigned int x, unsigned int y, ui::PenMode value) {return dc_ui_Icon_setPixel(_sid, x, y, value);}
     };
 
     class Screen {
         private:
-            _dc_Sid _sid;
+            dc::_Sid _sid;
 
         public:
-            _dc_Sid _getSid() {return _sid;}
+            dc::_Sid _getSid() {return _sid;}
 
-            Screen() {_sid = dc_ui_Screen_new();}
+            ~Screen() {_removeStoredInstance(this);}
+
+            Screen() {_sid = dc_ui_Screen_new(); _addStoredInstance(_Type::ui_Screen, this);}
 
             void clear() {return dc_ui_Screen_clear(_sid);}
             void setPosition(unsigned int column, unsigned int row) {return dc_ui_Screen_setPosition(_sid, column, row);}
             void setPixel(unsigned int x, unsigned int y, ui::PenMode value) {return dc_ui_Screen_setPixel(_sid, x, y, value);}
             void print(char c) {return dc_ui_Screen_printChar(_sid, c);}
             void print(char* chars) {return dc_ui_Screen_print(_sid, chars);}
-            void print(ui::Icon icon) {return dc_ui_Screen_printIcon(_sid, _dc_getClassSid<ui::Icon>(&icon));}
+            void print(ui::Icon icon) {return dc_ui_Screen_printIcon(_sid, icon._getSid());}
             void printRepeated(dataTypes::String string, unsigned int times) {return dc_ui_Screen_printRepeated(_sid, string.c_str(), times);}
             void scroll(dataTypes::String string, unsigned int maxLength) {return dc_ui_Screen_scroll(_sid, string.c_str(), maxLength);}
             void resetScroll() {return dc_ui_Screen_resetScroll(_sid);}
@@ -535,108 +602,27 @@ namespace ui {
             void filledRect(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, ui::PenMode value) {return dc_ui_Screen_filledRect(_sid, x1, y1, x2, y2, value);}
             void open(bool urgent) {return dc_ui_Screen_open(_sid, urgent);}
             void close() {return dc_ui_Screen_close(_sid);}
-            void swapWith(ui::Screen* currentScreen) {return dc_ui_Screen_swapWith(_sid, _dc_getClassSid<ui::Screen>(currentScreen));}
+            void swapWith(ui::Screen* currentScreen) {return dc_ui_Screen_swapWith(_sid, currentScreen->_getSid());}
     };
 }
 
 namespace test {
     class TestClass {
         private:
-            _dc_Sid _sid;
+            dc::_Sid _sid;
 
         public:
-            _dc_Sid _getSid() {return _sid;}
+            dc::_Sid _getSid() {return _sid;}
 
-            TestClass(unsigned int seed) {_sid = dc_test_TestClass_new(seed);}
+            ~TestClass() {_removeStoredInstance(this);}
+
+            TestClass(unsigned int seed) {_sid = dc_test_TestClass_new(seed); _addStoredInstance(_Type::test_TestClass, this);}
 
             unsigned int add(unsigned int value, unsigned int value2) {return dc_test_TestClass_add(_sid, value, value2);}
             void bools(bool a, bool b, bool c) {return dc_test_TestClass_bools(_sid, a, b, c);}
             unsigned int nextRandomNumber() {return dc_test_TestClass_nextRandomNumber(_sid);}
     };
 }
-
-#ifndef DC_COMMON_DATATYPES_H_
-#define DC_COMMON_DATATYPES_H_
-
-#ifndef DIGICRON_H_
-    #include <Arduino.h>
-#endif
-
-template<typename T> T* store(T value);
-template<typename T> T discard(T* itemPtr);
-
-namespace dataTypes {
-    template<typename T> struct _ListItem {
-        T* valuePtr;
-        _ListItem<T>* nextItemPtr;
-    };
-
-    template<typename T> class StoredValue {
-        public:
-            T value;
-
-            StoredValue<T>(T valueToStore);
-            ~StoredValue<T>();
-    };
-
-    #ifdef DIGICRON_H_
-        class String {
-            private:
-                char* _value = nullptr;
-                unsigned int _length = 0;
-
-            public:
-                String(const char* value);
-
-                char operator[](int index);
-
-                char* c_str();
-                unsigned int length();
-                char charAt(int index);
-        };
-    #else
-        typedef String String;
-    #endif
-
-    template<typename T> class List {
-        public:
-            typedef void (*IterationCallback)(T* itemPtr, unsigned int index);
-            typedef T* (*MappingFunction)(T* itemPtr, unsigned int index);
-            typedef bool (*FilteringFunction)(T* itemPtr, unsigned int index);
-
-            List<T>();
-            ~List<T>();
-
-            T* operator[](int index);
-
-            void start();
-            T* next();
-            unsigned int length();
-            void empty();
-            unsigned int push(T* valuePtr);
-            T* pop();
-            unsigned int unshift(T* valuePtr);
-            T* shift();
-            unsigned int insert(unsigned int index, T* valuePtr);
-            T* remove(unsigned int index);
-            void set(unsigned int index, T* valuePtr);
-            int indexOf(T* valuePtr);
-            void forEach(IterationCallback iterationCallback);
-            List<T> map(MappingFunction mappingFunction);
-            List<T> filter(FilteringFunction filteringFunction);
-            List<T> concat(List<T> otherList);
-
-        private:
-            _ListItem<T>* _firstItemPtr;
-            _ListItem<T>* _currentItemPtr;
-            unsigned int _length;
-
-            _ListItem<T>* getItemAtIndex(int index);
-            _ListItem<T>* getLastItem();
-    };
-}
-
-#endif
 
 #ifndef DC_COMMON_DISPLAY_H_
 #define DC_COMMON_DISPLAY_H_
