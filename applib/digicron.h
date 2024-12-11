@@ -12,7 +12,7 @@
 
 namespace dc {
     typedef unsigned int _Enum;
-    typedef unsigned int _Sid;
+    typedef int _Sid;
 }
 
 void setup();
@@ -70,14 +70,6 @@ WASM_IMPORT("digicron", "dc_test_TestClass_add") unsigned int dc_test_TestClass_
 WASM_IMPORT("digicron", "dc_test_TestClass_bools") void dc_test_TestClass_bools(dc::_Sid sid, bool a, bool b, bool c);
 WASM_IMPORT("digicron", "dc_test_TestClass_nextRandomNumber") unsigned int dc_test_TestClass_nextRandomNumber(dc::_Sid sid);
 
-}
-
-WASM_EXPORT_AS("_setup") void _setup() {
-    setup();
-}
-
-WASM_EXPORT_AS("_loop") void _loop() {
-    loop();
 }
 
 #define _DC_ALIGN_SIZE 4
@@ -486,10 +478,10 @@ template<typename T> T* _getBySid(_Type type, _Sid sid) {
 }
 
 void _addStoredInstance(_Type type, void* instance) {
-    auto storedInstance = new _StoredInstance();
-
-    storedInstance->type = type;
-    storedInstance->instance = instance;
+    auto storedInstance = new _StoredInstance {
+        .type = type,
+        .instance = instance
+    };
 
     _storedInstances.push(storedInstance);
 }
@@ -547,6 +539,19 @@ namespace timing {
     };
 }
 
+namespace input {
+    enum Button {
+        NONE = 0,
+        BACK = 1,
+        HOME = 2,
+        UP = 3,
+        DOWN = 4,
+        LEFT = 5,
+        RIGHT = 6,
+        SELECT = 7
+    };
+}
+
 namespace ui {
     enum EventType {
         BUTTON_DOWN,
@@ -562,6 +567,11 @@ namespace ui {
     enum PenMode {
         OFF,
         ON
+    };
+
+    struct Event {
+        EventType type;
+        union {input::Button button;} data;
     };
 
     class Icon {
@@ -600,6 +610,8 @@ namespace ui {
             void resetScroll() {return dc_ui_Screen_resetScroll(_sid);}
             void rect(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, ui::PenMode value) {return dc_ui_Screen_rect(_sid, x1, y1, x2, y2, value);}
             void filledRect(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, ui::PenMode value) {return dc_ui_Screen_filledRect(_sid, x1, y1, x2, y2, value);}
+            virtual void update() {}
+            virtual void handleEvent(ui::Event event) {}
             void open(bool urgent) {return dc_ui_Screen_open(_sid, urgent);}
             void close() {return dc_ui_Screen_close(_sid);}
             void swapWith(ui::Screen* currentScreen) {return dc_ui_Screen_swapWith(_sid, currentScreen->_getSid());}
@@ -1085,4 +1097,34 @@ ui::Icon ui::constructIcon(dataTypes::String pixels) {
 
 }
 
+WASM_EXPORT_AS("_setup") void _setup() {
+    setup();
+}
+
+WASM_EXPORT_AS("_loop") void _loop() {
+    loop();
+}
+
+#ifndef DIGICRON_H_
+    #define WASM_EXPORT_AS(name)
+#endif
+
+#define _DC_CALLABLE(type, namespace, class, method) WASM_EXPORT_AS("_callable_" #namespace "_" #class "_" #method) type _callable_##namespace##_##class##_##method
+
+#define _DC_MAP_TO_METHOD(namespace, class, method, ...) do { \
+        if (auto instance = dc::_getBySid<dc::namespace::class>(dc::_Type::namespace##_##class, sid)) { \
+            return instance->method(__VA_ARGS__); \
+        } \
+    } while (0);
+
+_DC_CALLABLE(void, ui, Screen, update)(dc::_Sid sid) {
+    _DC_MAP_TO_METHOD(ui, Screen, update);
+}
+
+_DC_CALLABLE(void, ui, Screen, handleButtonEvent)(dc::_Sid sid, dc::ui::EventType eventType, dc::input::Button button) {
+    _DC_MAP_TO_METHOD(ui, Screen, handleEvent, (dc::ui::Event) {
+        .type = eventType,
+        .data.button = button
+    });
+}
 #endif

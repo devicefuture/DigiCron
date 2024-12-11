@@ -6,23 +6,26 @@
 #include <wasm3.h>
 
 #include "timing.h"
+#include "input.h"
 #include "ui.h"
 #include "test.h"
 
 namespace api {
-    typedef unsigned int Sid;
+    typedef int Sid;
 
     enum Type {timing_EarthTime, ui_Icon, ui_Screen, test_TestClass};
 
     struct StoredInstance {
         Type type;
+        proc::Process* ownerProcess;
         void* instance;
     };
 
     extern dataTypes::List<StoredInstance> storedInstances;
 
     template<typename T> T* getBySid(Type type, Sid sid);
-    template<typename T> Sid store(Type type, T* instance);
+    Sid findOwnSid(void* instance);
+    template<typename T> Sid store(Type type, proc::Process* ownerProcess, T* instance);
 
     m3ApiRawFunction(dc_getGlobalI32);
 

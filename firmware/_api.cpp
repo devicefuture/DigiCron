@@ -7,6 +7,7 @@
 #include "proc.h"
 #include "datatypes.h"
 #include "timing.h"
+#include "input.h"
 #include "ui.h"
 #include "test.h"
 
@@ -22,10 +23,27 @@ template<typename T> T* api::getBySid(api::Type type, api::Sid sid) {
     return (T*)storedInstance->instance;
 }
 
-template<typename T> api::Sid api::store(api::Type type, T* instance) {
+api::Sid api::findOwnSid(void* instance) {
+    api::storedInstances.start();
+
+    unsigned int index = 0;
+
+    while (auto storedInstance = api::storedInstances.next()) {
+        if (storedInstance->instance == instance) {
+            return index;
+        }
+
+        index++;
+    }
+
+    return -1;
+}
+
+template<typename T> api::Sid api::store(api::Type type, proc::Process* ownerProcess, T* instance) {
     auto storedInstance = new StoredInstance();
 
     storedInstance->type = type;
+    storedInstance->ownerProcess = ownerProcess;
     storedInstance->instance = instance;
 
     return api::storedInstances.push(storedInstance) - 1;
@@ -59,7 +77,7 @@ m3ApiRawFunction(api::dc_timing_EarthTime_new) {
 
     auto instance = new timing::EarthTime(year, month, day, hour, minute, second);
 
-    Sid result = api::store<timing::EarthTime>(Type::timing_EarthTime, instance);
+    Sid result = api::store<timing::EarthTime>(Type::timing_EarthTime, (proc::WasmProcess*)runtime->userdata, instance);
 
     m3ApiReturn(result);
 }
@@ -73,7 +91,7 @@ m3ApiRawFunction(api::dc_timing_EarthTime_newUsingMilliseconds) {
 
     auto instance = new timing::EarthTime(year, month, day, millisecondOfDay);
 
-    Sid result = api::store<timing::EarthTime>(Type::timing_EarthTime, instance);
+    Sid result = api::store<timing::EarthTime>(Type::timing_EarthTime, (proc::WasmProcess*)runtime->userdata, instance);
 
     m3ApiReturn(result);
 }
@@ -276,7 +294,7 @@ m3ApiRawFunction(api::dc_ui_Icon_new) {
 
     auto instance = new ui::Icon();
 
-    Sid result = api::store<ui::Icon>(Type::ui_Icon, instance);
+    Sid result = api::store<ui::Icon>(Type::ui_Icon, (proc::WasmProcess*)runtime->userdata, instance);
 
     m3ApiReturn(result);
 }
@@ -297,7 +315,7 @@ m3ApiRawFunction(api::dc_ui_Screen_new) {
 
     auto instance = new ui::Screen((proc::WasmProcess*)runtime->userdata);
 
-    Sid result = api::store<ui::Screen>(Type::ui_Screen, instance);
+    Sid result = api::store<ui::Screen>(Type::ui_Screen, (proc::WasmProcess*)runtime->userdata, instance);
 
     m3ApiReturn(result);
 }
@@ -444,7 +462,7 @@ m3ApiRawFunction(api::dc_test_TestClass_new) {
 
     auto instance = new test::TestClass(seed);
 
-    Sid result = api::store<test::TestClass>(Type::test_TestClass, instance);
+    Sid result = api::store<test::TestClass>(Type::test_TestClass, (proc::WasmProcess*)runtime->userdata, instance);
 
     m3ApiReturn(result);
 }

@@ -269,7 +269,7 @@ function method {
     echo ")"
 
     if [ "$IN_CONSTRUCTOR" = true ]; then
-        echo "    Sid result = api::store<$NAMESPACE::$CLASS>(Type::${NAMESPACE}_$CLASS, instance);" >> firmware/_api.cpp
+        echo "    Sid result = api::store<$NAMESPACE::$CLASS>(Type::${NAMESPACE}_$CLASS, (proc::WasmProcess*)runtime->userdata, instance);" >> firmware/_api.cpp
         echo >> firmware/_api.cpp
     fi
 
@@ -293,6 +293,42 @@ function constructor {
     IN_CONSTRUCTOR=true INTERNAL_NAME=$INTERNAL_NAME method $CLASS "$@"
 
     export HAD_CONSTRUCTOR=true
+}
+
+function callable {
+    echo -n "            virtual $1 $2(" >> applib/digicron.h
+
+    shift
+    shift
+
+    while (($#)); do
+        echo -n "$1 $2" >> applib/digicron.h
+
+        shift
+        shift
+
+        if (($#)); then
+            echo -n ", " >> applib/digicron.h
+        fi
+    done
+
+    echo ") {}" >> applib/digicron.h
+}
+
+function struct {
+    echo >> applib/digicron.h
+    echo "    struct $1 {" >> applib/digicron.h
+
+    shift
+
+    while (($#)); do
+        echo "        $1 $2;" >> applib/digicron.h
+
+        shift
+        shift
+    done
+
+    echo "    };" >> applib/digicron.h
 }
 
 > tools/api/_api-linker.h
@@ -332,10 +368,27 @@ template<typename T> T* api::getBySid(api::Type type, api::Sid sid) {
     return (T*)storedInstance->instance;
 }
 
-template<typename T> api::Sid api::store(api::Type type, T* instance) {
+api::Sid api::findOwnSid(void* instance) {
+    api::storedInstances.start();
+
+    unsigned int index = 0;
+
+    while (auto storedInstance = api::storedInstances.next()) {
+        if (storedInstance->instance == instance) {
+            return index;
+        }
+
+        index++;
+    }
+
+    return -1;
+}
+
+template<typename T> api::Sid api::store(api::Type type, proc::Process* ownerProcess, T* instance) {
     auto storedInstance = new StoredInstance();
 
     storedInstance->type = type;
+    storedInstance->ownerProcess = ownerProcess;
     storedInstance->instance = instance;
 
     return api::storedInstances.push(storedInstance) - 1;
@@ -371,19 +424,21 @@ tee -a firmware/_api.h > /dev/null << EOF
 // {{ includes }}
 
 namespace api {
-    typedef unsigned int Sid;
+    typedef int Sid;
 
     enum Type {/* {{ tagTypes }} */};
 
     struct StoredInstance {
         Type type;
+        proc::Process* ownerProcess;
         void* instance;
     };
 
     extern dataTypes::List<StoredInstance> storedInstances;
 
     template<typename T> T* getBySid(Type type, Sid sid);
-    template<typename T> Sid store(Type type, T* instance);
+    Sid findOwnSid(void* instance);
+    template<typename T> Sid store(Type type, proc::Process* ownerProcess, T* instance);
 
     m3ApiRawFunction(dc_getGlobalI32);
 
@@ -410,7 +465,7 @@ tee -a applib/digicron.h > /dev/null << EOF
 
 namespace dc {
     typedef unsigned int _Enum;
-    typedef unsigned int _Sid;
+    typedef int _Sid;
 }
 
 void setup();
@@ -425,14 +480,6 @@ WASM_IMPORT("digicron", "dc_getGlobalI32") uint32_t dc_getGlobalI32(const char* 
 
 // {{ imports }}
 
-}
-
-WASM_EXPORT_AS("_setup") void _setup() {
-    setup();
-}
-
-WASM_EXPORT_AS("_loop") void _loop() {
-    loop();
 }
 
 // {{ stdlib }}
@@ -482,10 +529,10 @@ template<typename T> T* _getBySid(_Type type, _Sid sid) {
 }
 
 void _addStoredInstance(_Type type, void* instance) {
-    auto storedInstance = new _StoredInstance();
-
-    storedInstance->type = type;
-    storedInstance->instance = instance;
+    auto storedInstance = new _StoredInstance {
+        .type = type,
+        .instance = instance
+    };
 
     _storedInstances.push(storedInstance);
 }
@@ -543,6 +590,16 @@ done
 tee -a applib/digicron.h > /dev/null << EOF
 }
 
+WASM_EXPORT_AS("_setup") void _setup() {
+    setup();
+}
+
+WASM_EXPORT_AS("_loop") void _loop() {
+    loop();
+}
+
+// {{ callables }}
+
 #endif
 EOF
 
@@ -555,3 +612,4 @@ sed -i "s|/\* {{ tagTypes }} \*/|$TAG_TYPES|" firmware/_api.h
 sed -i "s|/\* {{ tagTypes }} \*/|$TAG_TYPES|" applib/digicron.h
 sed -i -e "\|// {{ stdlib }}|{r tools/api/digicron-stdlib.h" -e "d}" applib/digicron.h
 sed -i -e "\|// {{ imports }}|{r tools/api/_digicron-imports.h" -e "d}" applib/digicron.h
+sed -i -e "\|// {{ callables }}|{r tools/api/digicron-callables.h" -e "d}" applib/digicron.h

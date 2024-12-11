@@ -45,7 +45,10 @@ proc::WasmProcess::WasmProcess(char* code, unsigned int codeSize) : proc::Proces
     oldApi::linkFunctions(_runtime);
     api::linkFunctions(_runtime);
 
+    IM3Function initFunction;
     IM3Function startFunction;
+
+    bool shouldCallInit = !m3_FindFunction(&initFunction, _runtime, "__wasm_call_ctors");
 
     if (
         m3_FindFunction(&startFunction, _runtime, "_setup") ||
@@ -56,7 +59,15 @@ proc::WasmProcess::WasmProcess(char* code, unsigned int codeSize) : proc::Proces
         return;
     }
 
-    if (m3_CallV(startFunction)) {
+    M3Result result = m3Err_none;
+
+    if (shouldCallInit && (result = m3_CallV(initFunction))) {
+        _error = WasmError::RUN_FAILURE;
+        _running = false;
+        return;
+    }
+
+    if (result = m3_CallV(startFunction)) {
         _error = WasmError::RUN_FAILURE;
         _running = false;
         return;
@@ -82,6 +93,51 @@ void proc::WasmProcess::stop() {
     _running = false;
 }
 
+template<typename... Args> void proc::WasmProcess::callVoid(const char* name, Args... args) {
+    IM3Function function;
+
+    if (m3_FindFunction(&function, _runtime, name)) {
+        return;
+    }
+
+    m3_CallV(function, args...);
+}
+
+template<typename T, typename... Args> T proc::WasmProcess::call(const char* name, T defaultValue, Args... args) {
+    IM3Function function;
+    T result;
+
+    if (
+        m3_FindFunction(&function, _runtime, name) ||
+        m3_CallV(function, args...) ||
+        m3_GetResultsV(function, &result)
+    ) {
+        return defaultValue;
+    }
+
+    return result;
+}
+
+template<typename... Args> void proc::WasmProcess::callVoidOn(void* instance, const char* name, Args... args) {
+    api::Sid sid = api::findOwnSid(instance);
+
+    if (sid < 0) {
+        return;
+    }
+
+    callVoid(name, sid, args...);
+}
+
+template<typename T, typename... Args> T proc::WasmProcess::callOn(void* instance, const char* name, T defaultValue, Args... args) {
+    api::Sid sid = api::findOwnSid(instance);
+
+    if (sid < 0) {
+        return defaultValue;
+    }
+
+    return call(name, sid, args...);
+}
+
 void proc::stepProcesses() {
     processes.start();
 
@@ -97,3 +153,6 @@ M3Result m3_Yield() {
 
     return m3Err_none;
 }
+
+template void proc::WasmProcess::callVoidOn<>(void*, char const*);
+template void proc::WasmProcess::callVoidOn<ui::EventType, input::Button>(void*, char const*, ui::EventType, input::Button);

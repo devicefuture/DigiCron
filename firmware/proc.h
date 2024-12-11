@@ -10,6 +10,11 @@ namespace proc {
     const unsigned int WASM_STACK_SLOTS = 2048;
     const unsigned int NATIVE_STACK_SIZE = 32 * 1024;
 
+    enum ProcessType {
+        SYSTEM,
+        WASM
+    };
+
     enum WasmError {
         NONE,
         INIT_FAILURE,
@@ -24,6 +29,7 @@ namespace proc {
         public:
             Process();
 
+            virtual ProcessType getType() {return ProcessType::SYSTEM;}
             unsigned int getPid();
             virtual bool isRunning();
             virtual void step();
@@ -36,9 +42,14 @@ namespace proc {
         public:
             WasmProcess(char* code, unsigned int codeSize);
 
+            ProcessType getType() override {return ProcessType::WASM;}
             bool isRunning() override;
             void step() override;
             void stop();
+            template<typename... Args> void callVoid(const char* name, Args... args);
+            template<typename T, typename... Args> T call(const char* name, T defaultValue, Args... args);
+            template<typename... Args> void callVoidOn(void* instance, const char* name, Args... args);
+            template<typename T, typename... Args> T callOn(void* instance, const char* name, T defaultValue, Args... args);
 
         protected:
             IM3Environment _environment;

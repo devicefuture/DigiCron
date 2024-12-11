@@ -9,6 +9,48 @@ int count = 0;
 test::TestClass* testClass;
 ui::Screen* screen;
 
+ui::Icon smileIcon = ui::constructIcon(
+    "     "
+    " # # "
+    "     "
+    "#   #"
+    " ### "
+);
+
+class HelloScreen : public ui::Screen {
+    public:
+        void update() {
+            clear();
+
+            if (_selectPressed) {
+                print("Pressed!");
+                print('0' + ((updateCycles / 10) % 10));
+                print('0' + (updateCycles % 10));
+                print(" ");
+            } else {
+                print("Hello,\nworld! ");
+            }
+
+            print(smileIcon);
+
+            updateCycles++;
+        }
+
+        void handleEvent(ui::Event event) {
+            if (event.type == ui::EventType::BUTTON_UP && event.data.button == input::Button::SELECT) {
+                _selectPressed = false;
+            }
+
+            if (event.type == ui::EventType::BUTTON_DOWN && event.data.button == input::Button::SELECT) {
+                _selectPressed = true;
+            }
+        }
+
+    private:
+        bool _selectPressed = false;
+        unsigned int updateCycles = 0;
+};
+
 void addr(unsigned int ptr) {
     uint8_t buffer[8];
 
@@ -41,18 +83,8 @@ void setup() {
 
     testClass->bools(true, false, true);
 
-    screen = new ui::Screen();
+    screen = new HelloScreen();
 
-    ui::Icon smileIcon = ui::constructIcon(
-        "     "
-        " # # "
-        "     "
-        "#   #"
-        " ### "
-    );
-
-    screen->print("Hello,\nworld! ");
-    screen->print(smileIcon);
     screen->open(true);
 }
 

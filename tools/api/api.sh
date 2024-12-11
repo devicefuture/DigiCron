@@ -32,12 +32,25 @@ namespace timing
 
         method "unsigned int" weekday
 
+namespace input
+    enum Button \
+        "NONE = 0" \
+        "BACK = 1" \
+        "HOME = 2" \
+        "UP = 3" \
+        "DOWN = 4" \
+        "LEFT = 5" \
+        "RIGHT = 6" \
+        "SELECT = 7"
+
 namespace ui
     enum EventType BUTTON_DOWN BUTTON_UP
 
     enum PopupTransitionState NONE OPENING CLOSING
 
     enum PenMode OFF ON
+
+    struct Event "EventType" type "union {input::Button button;}" data
 
     class Icon
         constructor
@@ -58,6 +71,9 @@ namespace ui
         method "void" resetScroll
         method "void" rect "unsigned int" x1 "unsigned int" y1 "unsigned int" x2 "unsigned int" y2 "ENUM ui::PenMode" value
         method "void" filledRect "unsigned int" x1 "unsigned int" y1 "unsigned int" x2 "unsigned int" y2 "ENUM ui::PenMode" value
+
+        callable "void" update
+        callable "void" handleEvent "ui::Event" event
 
         method "void" open "bool" urgent
         method "void" close

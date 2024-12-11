@@ -13,6 +13,7 @@
 #include "display.h"
 #include "timing.h"
 #include "proc.h"
+#include "_api.h"
 #include "home.h"
 
 #include "common/ui.h"
@@ -248,10 +249,20 @@ void ui::Screen::swapWith(ui::Screen* currentScreen) {
 
 void ui::Screen::_update() {
     update();
+
+    if (ownerProcess && ownerProcess->getType() == proc::ProcessType::WASM) {
+        ((proc::WasmProcess*)ownerProcess)->callVoidOn(this, "_callable_ui_Screen_update");
+    }
 }
 
 void ui::Screen::_handleEvent(ui::Event event) {
     handleEvent(event);
+
+    if (ownerProcess && ownerProcess->getType() == proc::ProcessType::WASM) {
+        if (event.type == EventType::BUTTON_UP || event.type == EventType::BUTTON_DOWN) {
+            ((proc::WasmProcess*)ownerProcess)->callVoidOn(this, "_callable_ui_Screen_handleButtonEvent", event.type, event.data.button);
+        }
+    }
 }
 
 void ui::Menu::update() {
@@ -409,7 +420,7 @@ void ui::Popup::_update() {
         }
     }
 
-    update();
+    Screen::_update();
 }
 
 void ui::Popup::_handleEvent(ui::Event event) {
