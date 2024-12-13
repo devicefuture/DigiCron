@@ -46,10 +46,10 @@ namespace proc {
             bool isRunning() override;
             void step() override;
             void stop();
-            template<typename... Args> void callVoid(const char* name, Args... args);
-            template<typename T, typename... Args> T call(const char* name, T defaultValue, Args... args);
-            template<typename... Args> void callVoidOn(void* instance, const char* name, Args... args);
-            template<typename T, typename... Args> T callOn(void* instance, const char* name, T defaultValue, Args... args);
+            template<typename ...Args> void callVoid(const char* name, Args... args);
+            template<typename T, typename ...Args> T call(const char* name, T defaultValue, Args... args);
+            template<typename ...Args> void callVoidOn(void* instance, const char* name, Args... args);
+            template<typename T, typename ...Args> T callOn(void* instance, const char* name, T defaultValue, Args... args);
 
         protected:
             IM3Environment _environment;

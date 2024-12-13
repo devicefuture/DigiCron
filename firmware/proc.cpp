@@ -93,7 +93,7 @@ void proc::WasmProcess::stop() {
     _running = false;
 }
 
-template<typename... Args> void proc::WasmProcess::callVoid(const char* name, Args... args) {
+template<typename ...Args> void proc::WasmProcess::callVoid(const char* name, Args... args) {
     IM3Function function;
 
     if (m3_FindFunction(&function, _runtime, name)) {
@@ -103,7 +103,7 @@ template<typename... Args> void proc::WasmProcess::callVoid(const char* name, Ar
     m3_CallV(function, args...);
 }
 
-template<typename T, typename... Args> T proc::WasmProcess::call(const char* name, T defaultValue, Args... args) {
+template<typename T, typename ...Args> T proc::WasmProcess::call(const char* name, T defaultValue, Args... args) {
     IM3Function function;
     T result;
 
@@ -118,7 +118,7 @@ template<typename T, typename... Args> T proc::WasmProcess::call(const char* nam
     return result;
 }
 
-template<typename... Args> void proc::WasmProcess::callVoidOn(void* instance, const char* name, Args... args) {
+template<typename ...Args> void proc::WasmProcess::callVoidOn(void* instance, const char* name, Args... args) {
     api::Sid sid = api::findOwnSid(instance);
 
     if (sid < 0) {
@@ -128,7 +128,7 @@ template<typename... Args> void proc::WasmProcess::callVoidOn(void* instance, co
     callVoid(name, sid, args...);
 }
 
-template<typename T, typename... Args> T proc::WasmProcess::callOn(void* instance, const char* name, T defaultValue, Args... args) {
+template<typename T, typename ...Args> T proc::WasmProcess::callOn(void* instance, const char* name, T defaultValue, Args... args) {
     api::Sid sid = api::findOwnSid(instance);
 
     if (sid < 0) {
