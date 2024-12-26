@@ -13,7 +13,7 @@
 namespace api {
     typedef int Sid;
 
-    enum Type {timing_EarthTime, ui_Icon, ui_Screen, test_TestClass};
+    enum Type {EMPTY, timing_EarthTime, ui_Icon, ui_Screen, test_TestClass};
 
     struct StoredInstance {
         Type type;
@@ -26,8 +26,10 @@ namespace api {
     template<typename T> T* getBySid(Type type, Sid sid);
     Sid findOwnSid(void* instance);
     template<typename T> Sid store(Type type, proc::Process* ownerProcess, T* instance);
+    void deleteBySid(Sid sid);
 
     m3ApiRawFunction(dc_getGlobalI32);
+    m3ApiRawFunction(dc_deleteBySid);
 
     m3ApiRawFunction(dc_timing_EarthTime_new);
     m3ApiRawFunction(dc_timing_EarthTime_newUsingMilliseconds);

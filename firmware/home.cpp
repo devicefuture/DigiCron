@@ -5,7 +5,7 @@
 #include "ui.h"
 #include "mainmenu.h"
 
-ui::Icon notificationsIcon = ui::constructIcon(
+ui::Icon* notificationsIcon = ui::constructIcon(
     "     "
     "  #  "
     " ### "
@@ -15,7 +15,7 @@ ui::Icon notificationsIcon = ui::constructIcon(
     "  #  "
 );
 
-ui::Icon batteryIcon = ui::constructIcon(
+ui::Icon* batteryIcon = ui::constructIcon(
     "  #  "
     " ### "
     " # # "

@@ -24,6 +24,7 @@ WASM_IMPORT("digicronold", "log") void dc_log(uint8_t* text, uint8_t length);
 WASM_IMPORT("digicronold", "stop") void dc_stop();
 
 WASM_IMPORT("digicron", "dc_getGlobalI32") uint32_t dc_getGlobalI32(const char* id);
+WASM_IMPORT("digicron", "dc_deleteBySid") void dc_deleteBySid(dc::_Sid sid);
 
 WASM_IMPORT("digicron", "dc_timing_EarthTime_new") dc::_Sid dc_timing_EarthTime_new(int year, unsigned int month, unsigned int day, unsigned int hour, unsigned int minute, unsigned int second);
 WASM_IMPORT("digicron", "dc_timing_EarthTime_newUsingMilliseconds") dc::_Sid dc_timing_EarthTime_newUsingMilliseconds(int year, unsigned int month, unsigned int day, unsigned long millisecondOfDay);
@@ -450,7 +451,7 @@ namespace dataTypes {
 
 #endif
 
-enum _Type {timing_EarthTime, ui_Icon, ui_Screen, test_TestClass};
+enum _Type {EMPTY, timing_EarthTime, ui_Icon, ui_Screen, test_TestClass};
 
 struct _StoredInstance {
     _Type type;
@@ -510,7 +511,7 @@ namespace timing {
         public:
             dc::_Sid _getSid() {return _sid;}
 
-            ~EarthTime() {_removeStoredInstance(this);}
+            ~EarthTime() {dc_deleteBySid(_sid); _removeStoredInstance(this);}
 
             EarthTime(int year, unsigned int month, unsigned int day, unsigned int hour, unsigned int minute, unsigned int second) {_sid = dc_timing_EarthTime_new(year, month, day, hour, minute, second); _addStoredInstance(_Type::timing_EarthTime, this);}
             EarthTime(int year, unsigned int month, unsigned int day, unsigned long millisecondOfDay) {_sid = dc_timing_EarthTime_newUsingMilliseconds(year, month, day, millisecondOfDay); _addStoredInstance(_Type::timing_EarthTime, this);}
@@ -581,7 +582,7 @@ namespace ui {
         public:
             dc::_Sid _getSid() {return _sid;}
 
-            ~Icon() {_removeStoredInstance(this);}
+            ~Icon() {dc_deleteBySid(_sid); _removeStoredInstance(this);}
 
             Icon() {_sid = dc_ui_Icon_new(); _addStoredInstance(_Type::ui_Icon, this);}
 
@@ -595,7 +596,7 @@ namespace ui {
         public:
             dc::_Sid _getSid() {return _sid;}
 
-            ~Screen() {_removeStoredInstance(this);}
+            ~Screen() {dc_deleteBySid(_sid); _removeStoredInstance(this);}
 
             Screen() {_sid = dc_ui_Screen_new(); _addStoredInstance(_Type::ui_Screen, this);}
 
@@ -604,7 +605,7 @@ namespace ui {
             void setPixel(unsigned int x, unsigned int y, ui::PenMode value) {return dc_ui_Screen_setPixel(_sid, x, y, value);}
             void print(char c) {return dc_ui_Screen_printChar(_sid, c);}
             void print(char* chars) {return dc_ui_Screen_print(_sid, chars);}
-            void print(ui::Icon icon) {return dc_ui_Screen_printIcon(_sid, icon._getSid());}
+            void print(ui::Icon* icon) {return dc_ui_Screen_printIcon(_sid, icon->_getSid());}
             void printRepeated(dataTypes::String string, unsigned int times) {return dc_ui_Screen_printRepeated(_sid, string.c_str(), times);}
             void scroll(dataTypes::String string, unsigned int maxLength) {return dc_ui_Screen_scroll(_sid, string.c_str(), maxLength);}
             void resetScroll() {return dc_ui_Screen_resetScroll(_sid);}
@@ -626,7 +627,7 @@ namespace test {
         public:
             dc::_Sid _getSid() {return _sid;}
 
-            ~TestClass() {_removeStoredInstance(this);}
+            ~TestClass() {dc_deleteBySid(_sid); _removeStoredInstance(this);}
 
             TestClass(unsigned int seed) {_sid = dc_test_TestClass_new(seed); _addStoredInstance(_Type::test_TestClass, this);}
 
@@ -661,7 +662,7 @@ namespace display {
 #endif
 
 namespace ui {
-    Icon constructIcon(dataTypes::String pixels);
+    Icon* constructIcon(dataTypes::String pixels);
 }
 
 #endif
@@ -1076,8 +1077,8 @@ template<typename T> dataTypes::List<T> dataTypes::List<T>::concat(dataTypes::Li
     #include "ui.h"
 #endif
 
-ui::Icon ui::constructIcon(dataTypes::String pixels) {
-    Icon icon;
+ui::Icon* ui::constructIcon(dataTypes::String pixels) {
+    auto icon = new Icon();
 
     for (unsigned int i = 0; i < pixels.length(); i++) {
         unsigned int x = i % display::CHAR_COLUMNS;
@@ -1087,7 +1088,7 @@ ui::Icon ui::constructIcon(dataTypes::String pixels) {
             break;
         }
 
-        icon.setPixel(x, y, pixels[i] != ' ' ? PenMode::ON : PenMode::OFF);
+        icon->setPixel(x, y, pixels[i] != ' ' ? PenMode::ON : PenMode::OFF);
     }
 
     return icon;

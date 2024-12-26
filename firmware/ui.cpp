@@ -24,7 +24,7 @@ proc::Process* ui::foregroundProcess = nullptr;
 proc::Process* ui::lastNonHomeProcess = nullptr;
 dataTypes::List<ui::Screen> ui::screenStack;
 
-ui::Icon menuSelectionIcon = ui::constructIcon(
+ui::Icon* menuSelectionIcon = ui::constructIcon(
     "     "
     "  #  "
     "   # "
@@ -33,7 +33,7 @@ ui::Icon menuSelectionIcon = ui::constructIcon(
     "  #  "
 );
 
-ui::Icon menuScrollableIcon = ui::constructIcon(
+ui::Icon* menuScrollableIcon = ui::constructIcon(
     "  #  "
     " ### "
     "# # #"
@@ -133,13 +133,13 @@ void ui::Screen::print(char* chars) {
     }
 }
 
-void ui::Screen::print(Icon icon) {
+void ui::Screen::print(Icon* icon) {
     if (_currentPosition >= display::CHAR_COUNT) {
         return;
     }
 
     for (unsigned int offset = 0; offset < display::CHAR_COLUMNS; offset++) {
-        displayData[(_currentPosition * display::CHAR_COLUMNS) + offset] = icon.iconData[offset];
+        displayData[(_currentPosition * display::CHAR_COLUMNS) + offset] = icon->iconData[offset];
     }
 
     _currentPosition++;

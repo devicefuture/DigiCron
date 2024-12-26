@@ -40,13 +40,48 @@ api::Sid api::findOwnSid(void* instance) {
 }
 
 template<typename T> api::Sid api::store(api::Type type, proc::Process* ownerProcess, T* instance) {
-    auto storedInstance = new StoredInstance();
+    StoredInstance* storedInstance = nullptr;
+    bool foundStoredInstance = false;
+    unsigned int index = 0;
+
+    api::storedInstances.start();
+
+    while ((storedInstance = api::storedInstances.next())) {
+        if (storedInstance->type == Type::EMPTY) {
+            foundStoredInstance = true;
+            break;
+        }
+
+        index++;
+    }
+
+    if (!storedInstance) {
+        storedInstance = new StoredInstance();
+    }
 
     storedInstance->type = type;
     storedInstance->ownerProcess = ownerProcess;
     storedInstance->instance = instance;
 
-    return api::storedInstances.push(storedInstance) - 1;
+    if (foundStoredInstance) {
+        return index;
+    } else {
+        return api::storedInstances.push(storedInstance) - 1;
+    }
+}
+
+void api::deleteBySid(api::Sid sid) {
+    StoredInstance* storedInstance = api::storedInstances[sid];
+
+    if (!storedInstance || storedInstance->type == Type::EMPTY) {
+        return;
+    }
+
+    delete storedInstance->instance;
+
+    storedInstance->type = Type::EMPTY;
+    storedInstance->ownerProcess = nullptr;
+    storedInstance->instance = nullptr;
 }
 
 m3ApiRawFunction(api::dc_getGlobalI32) {
@@ -64,6 +99,14 @@ m3ApiRawFunction(api::dc_getGlobalI32) {
     } else {
         m3ApiReturn(0);
     }
+}
+
+m3ApiRawFunction(api::dc_deleteBySid) {
+    m3ApiGetArg(Sid, _sid)
+
+    api::deleteBySid(_sid);
+
+    m3ApiSuccess();
 }
 
 m3ApiRawFunction(api::dc_timing_EarthTime_new) {
@@ -371,7 +414,7 @@ m3ApiRawFunction(api::dc_ui_Screen_printIcon) {
     m3ApiGetArg(Sid, _sid)
     m3ApiGetArg(Sid, icon)
 
-    api::getBySid<ui::Screen>(Type::ui_Screen, _sid)->print(*api::getBySid<ui::Icon>(Type::ui_Icon, icon));
+    api::getBySid<ui::Screen>(Type::ui_Screen, _sid)->print(api::getBySid<ui::Icon>(Type::ui_Icon, icon));
 
     m3ApiSuccess();
 }
@@ -502,6 +545,7 @@ void api::linkFunctions(IM3Runtime runtime) {
     const char* MODULE_NAME = "digicron";
 
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_getGlobalI32", "i(*)", &dc_getGlobalI32);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_deleteBySid", "v(i)", &dc_deleteBySid);
 
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_EarthTime_new", "i(iiiiii)", &dc_timing_EarthTime_new);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_EarthTime_newUsingMilliseconds", "i(iiii)", &dc_timing_EarthTime_newUsingMilliseconds);

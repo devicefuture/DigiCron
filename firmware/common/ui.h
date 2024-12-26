@@ -7,7 +7,7 @@
 #endif
 
 namespace ui {
-    Icon constructIcon(dataTypes::String pixels);
+    Icon* constructIcon(dataTypes::String pixels);
 }
 
 #endif

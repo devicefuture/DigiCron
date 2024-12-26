@@ -28,7 +28,7 @@
 
 ui::Screen* testScreen = new ui::Screen();
 
-ui::Icon tmIcon = ui::constructIcon(
+ui::Icon* tmIcon = ui::constructIcon(
     "###  "
     " #   "
     "     "

@@ -7,7 +7,7 @@ export ENUM=
 export CLASS=
 export LAST_NAMESPACE_MEMBER=
 export HAD_CONSTRUCTOR=false
-export TAG_TYPES=
+export TAG_TYPES="EMPTY, "
 
 function _closeNamespace {
     if [ "$NAMESPACE" != "" ]; then
@@ -88,7 +88,7 @@ function class {
         echo "        public:"
         echo "            dc::_Sid _getSid() {return _sid;}"
         echo
-        echo "            ~$CLASS() {_removeStoredInstance(this);}"
+        echo "            ~$CLASS() {dc_deleteBySid(_sid); _removeStoredInstance(this);}"
         echo
     ) >> applib/digicron.h
 
@@ -342,6 +342,7 @@ void api::linkFunctions(IM3Runtime runtime) {
     const char* MODULE_NAME = "digicron";
 
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_getGlobalI32", "i(*)", &dc_getGlobalI32);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_deleteBySid", "v(i)", &dc_deleteBySid);
 
 EOF
 
@@ -385,13 +386,48 @@ api::Sid api::findOwnSid(void* instance) {
 }
 
 template<typename T> api::Sid api::store(api::Type type, proc::Process* ownerProcess, T* instance) {
-    auto storedInstance = new StoredInstance();
+    StoredInstance* storedInstance = nullptr;
+    bool foundStoredInstance = false;
+    unsigned int index = 0;
+
+    api::storedInstances.start();
+
+    while ((storedInstance = api::storedInstances.next())) {
+        if (storedInstance->type == Type::EMPTY) {
+            foundStoredInstance = true;
+            break;
+        }
+
+        index++;
+    }
+
+    if (!storedInstance) {
+        storedInstance = new StoredInstance();
+    }
 
     storedInstance->type = type;
     storedInstance->ownerProcess = ownerProcess;
     storedInstance->instance = instance;
 
-    return api::storedInstances.push(storedInstance) - 1;
+    if (foundStoredInstance) {
+        return index;
+    } else {
+        return api::storedInstances.push(storedInstance) - 1;
+    }
+}
+
+void api::deleteBySid(api::Sid sid) {
+    StoredInstance* storedInstance = api::storedInstances[sid];
+
+    if (!storedInstance || storedInstance->type == Type::EMPTY) {
+        return;
+    }
+
+    delete storedInstance->instance;
+
+    storedInstance->type = Type::EMPTY;
+    storedInstance->ownerProcess = nullptr;
+    storedInstance->instance = nullptr;
 }
 
 m3ApiRawFunction(api::dc_getGlobalI32) {
@@ -409,6 +445,14 @@ m3ApiRawFunction(api::dc_getGlobalI32) {
     } else {
         m3ApiReturn(0);
     }
+}
+
+m3ApiRawFunction(api::dc_deleteBySid) {
+    m3ApiGetArg(Sid, _sid)
+
+    api::deleteBySid(_sid);
+
+    m3ApiSuccess();
 }
 
 EOF
@@ -439,8 +483,10 @@ namespace api {
     template<typename T> T* getBySid(Type type, Sid sid);
     Sid findOwnSid(void* instance);
     template<typename T> Sid store(Type type, proc::Process* ownerProcess, T* instance);
+    void deleteBySid(Sid sid);
 
     m3ApiRawFunction(dc_getGlobalI32);
+    m3ApiRawFunction(dc_deleteBySid);
 
 EOF
 
@@ -477,6 +523,7 @@ WASM_IMPORT("digicronold", "log") void dc_log(uint8_t* text, uint8_t length);
 WASM_IMPORT("digicronold", "stop") void dc_stop();
 
 WASM_IMPORT("digicron", "dc_getGlobalI32") uint32_t dc_getGlobalI32(const char* id);
+WASM_IMPORT("digicron", "dc_deleteBySid") void dc_deleteBySid(dc::_Sid sid);
 
 // {{ imports }}
 
@@ -497,6 +544,7 @@ echo >> applib/digicron.h
 echo dc_log >> applib/digicron.syms
 echo dc_stop >> applib/digicron.syms
 echo dc_getGlobalI32 >> applib/digicron.syms
+echo dc_deleteBySid >> applib/digicron.syms
 
 export -f _closeNamespace namespace _closeClass class method constructor
 

@@ -5,8 +5,8 @@
     #include "ui.h"
 #endif
 
-ui::Icon ui::constructIcon(dataTypes::String pixels) {
-    Icon icon;
+ui::Icon* ui::constructIcon(dataTypes::String pixels) {
+    auto icon = new Icon();
 
     for (unsigned int i = 0; i < pixels.length(); i++) {
         unsigned int x = i % display::CHAR_COLUMNS;
@@ -16,7 +16,7 @@ ui::Icon ui::constructIcon(dataTypes::String pixels) {
             break;
         }
 
-        icon.setPixel(x, y, pixels[i] != ' ' ? PenMode::ON : PenMode::OFF);
+        icon->setPixel(x, y, pixels[i] != ' ' ? PenMode::ON : PenMode::OFF);
     }
 
     return icon;

@@ -9,7 +9,7 @@ int count = 0;
 test::TestClass* testClass;
 ui::Screen* screen;
 
-ui::Icon smileIcon = ui::constructIcon(
+ui::Icon* smileIcon = ui::constructIcon(
     "     "
     " # # "
     "     "
@@ -90,6 +90,8 @@ void setup() {
 
 void loop() {
     if (count >= 10) {
+        delete testClass;
+
         dc_stop();
 
         return;
