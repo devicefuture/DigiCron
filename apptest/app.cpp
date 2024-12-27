@@ -44,6 +44,10 @@ class HelloScreen : public ui::Screen {
             if (event.type == ui::EventType::BUTTON_DOWN && event.data.button == input::Button::SELECT) {
                 _selectPressed = true;
             }
+
+            if (event.type == ui::EventType::BUTTON_DOWN && event.data.button == input::Button::BACK) {
+                dc_stop();
+            }
         }
 
     private:
@@ -90,10 +94,6 @@ void setup() {
 
 void loop() {
     if (count >= 10) {
-        delete testClass;
-
-        dc_stop();
-
         return;
     }
 

@@ -8,6 +8,7 @@ export CLASS=
 export LAST_NAMESPACE_MEMBER=
 export HAD_CONSTRUCTOR=false
 export TAG_TYPES="EMPTY, "
+export TAG_TYPE_DELETES=""
 
 function _closeNamespace {
     if [ "$NAMESPACE" != "" ]; then
@@ -79,6 +80,8 @@ function class {
     export LAST_NAMESPACE_MEMBER=$1
     export HAD_CONSTRUCTOR=false
     export TAG_TYPES="$TAG_TYPES${NAMESPACE}_$CLASS, "
+
+    echo "        case api::Type::${NAMESPACE}_$CLASS: delete ($NAMESPACE::$CLASS*)storedInstance->instance; break;" >> tools/api/_api-deletes.h
 
     (
         echo "    class $CLASS {"
@@ -333,6 +336,7 @@ function struct {
 
 > tools/api/_api-linker.h
 > tools/api/_api-includes.h
+> tools/api/_api-deletes.h
 > tools/api/_api-templates.h
 > firmware/_api.cpp
 > firmware/_api.h
@@ -416,18 +420,23 @@ template<typename T> api::Sid api::store(api::Type type, proc::Process* ownerPro
     }
 }
 
-void api::deleteBySid(api::Sid sid) {
-    StoredInstance* storedInstance = storedInstances[sid];
-
-    if (!storedInstance || storedInstance->type == Type::EMPTY) {
+void deleteStoredInstance(api::StoredInstance* storedInstance) {
+    if (!storedInstance || storedInstance->type == api::Type::EMPTY) {
         return;
     }
 
-    delete storedInstance->instance;
+    switch (storedInstance->type) {
+// {{ deletes }}
+        default: delete storedInstance->instance; break;
+    }
 
-    storedInstance->type = Type::EMPTY;
+    storedInstance->type = api::Type::EMPTY;
     storedInstance->ownerProcess = nullptr;
     storedInstance->instance = nullptr;
+}
+
+void api::deleteBySid(api::Sid sid) {
+    deleteStoredInstance(storedInstances[sid]);
 }
 
 void api::deleteAllByOwnerProcess(proc::Process* ownerProcess) {
@@ -438,11 +447,7 @@ void api::deleteAllByOwnerProcess(proc::Process* ownerProcess) {
             continue;
         }
 
-        delete storedInstance->instance;
-
-        storedInstance->type = Type::EMPTY;
-        storedInstance->ownerProcess = nullptr;
-        storedInstance->instance = nullptr;
+        deleteStoredInstance(storedInstance);
     }
 }
 
@@ -672,6 +677,7 @@ TAG_TYPES=$(echo $TAG_TYPES | sed "s/\(.*\),/\1/")
 
 sed -i -e "\|// {{ includes }}|{r tools/api/_api-includes.h" -e "d}" firmware/_api.cpp
 sed -i -e "\|// {{ templates }}|{r tools/api/_api-templates.h" -e "d}" firmware/_api.cpp
+sed -i -e "\|// {{ deletes }}|{r tools/api/_api-deletes.h" -e "d}" firmware/_api.cpp
 sed -i -e "\|// {{ includes }}|{r tools/api/_api-includes.h" -e "d}" firmware/_api.h
 sed -i "s|/\* {{ tagTypes }} \*/|$TAG_TYPES|" firmware/_api.h
 sed -i "s|/\* {{ tagTypes }} \*/|$TAG_TYPES|" applib/digicron.h
