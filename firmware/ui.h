@@ -56,6 +56,8 @@ namespace ui {
             Screen();
             Screen(proc::Process* process);
 
+            ~Screen();
+
             void clear();
             void setPosition(unsigned int column, unsigned int row);
             void setPixel(unsigned int x, unsigned int y, PenMode value);

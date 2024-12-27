@@ -64,6 +64,10 @@ ui::Screen::Screen(proc::Process* process) : ui::Screen::Screen() {
     Screen();
 }
 
+ui::Screen::~Screen() {
+    close();
+}
+
 void ui::Screen::clear() {
     for (unsigned int i = 0; i < sizeof(displayData); i++) {
         displayData[i] = 0;
@@ -430,6 +434,7 @@ void ui::Popup::_handleEvent(ui::Event event) {
 }
 
 ui::Screen* ui::determineCurrentScreen() {
+    Serial.println("Determine current");
     if (screenStack.length() > 0) {
         bool anyScreensFoundInForeground = false;
 
@@ -440,6 +445,7 @@ ui::Screen* ui::determineCurrentScreen() {
                 continue;
             }
 
+            Serial.println("Set current");
             currentScreen = screen;
             anyScreensFoundInForeground = true;
         }
@@ -448,6 +454,7 @@ ui::Screen* ui::determineCurrentScreen() {
             ui::Screen* lastScreen = screenStack[-1];
 
             if (lastScreen) {
+                Serial.println("Set current NIF");
                 currentScreen = lastScreen;
                 foregroundProcess = lastScreen->ownerProcess;
             }
@@ -462,6 +469,7 @@ ui::Screen* ui::determineCurrentScreen() {
 }
 
 void ui::renderCurrentScreen() {
+    Serial.println("Start rendering");
     input::Button currentButton = input::getButtonStatus();
 
     if (currentButton != lastButton) {

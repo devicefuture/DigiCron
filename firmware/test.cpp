@@ -12,6 +12,10 @@ test::TestClass::TestClass() {
     TestClass(0);
 }
 
+test::TestClass::~TestClass() {
+    Serial.println("Test class destructor called");
+}
+
 unsigned int test::TestClass::add(unsigned int value, unsigned int value2) {
     Serial.printf("Add method called with values %d and %d\n", value, value2);
 

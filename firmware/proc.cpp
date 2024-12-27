@@ -91,6 +91,9 @@ void proc::WasmProcess::step() {
 
 void proc::WasmProcess::stop() {
     _running = false;
+
+    // TODO: Ensure that destructors are called when an app's stored instance is deleted
+    // api::deleteAllByOwnerProcess(this);
 }
 
 template<typename ...Args> void proc::WasmProcess::callVoid(const char* name, Args... args) {

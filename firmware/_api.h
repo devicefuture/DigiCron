@@ -27,6 +27,7 @@ namespace api {
     Sid findOwnSid(void* instance);
     template<typename T> Sid store(Type type, proc::Process* ownerProcess, T* instance);
     void deleteBySid(Sid sid);
+    void deleteAllByOwnerProcess(proc::Process* ownerProcess);
 
     m3ApiRawFunction(dc_getGlobalI32);
     m3ApiRawFunction(dc_deleteBySid);

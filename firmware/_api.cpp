@@ -14,7 +14,7 @@
 dataTypes::List<api::StoredInstance> api::storedInstances;
 
 template<typename T> T* api::getBySid(api::Type type, api::Sid sid) {
-    StoredInstance* storedInstance = api::storedInstances[sid];
+    StoredInstance* storedInstance = storedInstances[sid];
 
     if (!storedInstance || storedInstance->type != type) {
         return new T(); // To ensure an object is always referenced
@@ -24,11 +24,11 @@ template<typename T> T* api::getBySid(api::Type type, api::Sid sid) {
 }
 
 api::Sid api::findOwnSid(void* instance) {
-    api::storedInstances.start();
+    storedInstances.start();
 
     unsigned int index = 0;
 
-    while (auto storedInstance = api::storedInstances.next()) {
+    while (auto storedInstance = storedInstances.next()) {
         if (storedInstance->instance == instance) {
             return index;
         }
@@ -44,9 +44,9 @@ template<typename T> api::Sid api::store(api::Type type, proc::Process* ownerPro
     bool foundStoredInstance = false;
     unsigned int index = 0;
 
-    api::storedInstances.start();
+    storedInstances.start();
 
-    while ((storedInstance = api::storedInstances.next())) {
+    while ((storedInstance = storedInstances.next())) {
         if (storedInstance->type == Type::EMPTY) {
             foundStoredInstance = true;
             break;
@@ -66,22 +66,46 @@ template<typename T> api::Sid api::store(api::Type type, proc::Process* ownerPro
     if (foundStoredInstance) {
         return index;
     } else {
-        return api::storedInstances.push(storedInstance) - 1;
+        return storedInstances.push(storedInstance) - 1;
     }
 }
 
 void api::deleteBySid(api::Sid sid) {
-    StoredInstance* storedInstance = api::storedInstances[sid];
+    StoredInstance* storedInstance = storedInstances[sid];
 
     if (!storedInstance || storedInstance->type == Type::EMPTY) {
         return;
     }
+
+    Serial.printf("Delete stored instance %p\n", storedInstance->instance);
 
     delete storedInstance->instance;
 
     storedInstance->type = Type::EMPTY;
     storedInstance->ownerProcess = nullptr;
     storedInstance->instance = nullptr;
+}
+
+void api::deleteAllByOwnerProcess(proc::Process* ownerProcess) {
+    storedInstances.start();
+
+    Serial.println("About to delete all");
+
+    while (auto storedInstance = storedInstances.next()) {
+        if (storedInstance->type == Type::EMPTY || storedInstance->ownerProcess != ownerProcess) {
+            continue;
+        }
+
+        Serial.printf("Delete %p\n", storedInstance->instance);
+
+        delete storedInstance->instance;
+
+        storedInstance->type = Type::EMPTY;
+        storedInstance->ownerProcess = nullptr;
+        storedInstance->instance = nullptr;
+    }
+
+    Serial.println("Deleted all\n");
 }
 
 m3ApiRawFunction(api::dc_getGlobalI32) {
