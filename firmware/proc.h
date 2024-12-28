@@ -27,15 +27,23 @@ namespace proc {
 
     class Process {
         public:
+            typedef void (*StopCallback)(Process* self);
+
+            StopCallback onStop = nullptr;
+
             Process();
+
+            ~Process();
 
             virtual ProcessType getType() {return ProcessType::SYSTEM;}
             unsigned int getPid();
             virtual bool isRunning();
             virtual void step();
+            virtual void stop();
 
         protected:
             unsigned int _pid;
+            bool _running = true;
     };
 
     class WasmProcess : public Process {
@@ -45,7 +53,7 @@ namespace proc {
             ProcessType getType() override {return ProcessType::WASM;}
             bool isRunning() override;
             void step() override;
-            void stop();
+            void stop() override;
             template<typename ...Args> void callVoid(const char* name, Args... args);
             template<typename T, typename ...Args> T call(const char* name, T defaultValue, Args... args);
             template<typename ...Args> void callVoidOn(void* instance, const char* name, Args... args);
@@ -57,7 +65,6 @@ namespace proc {
             IM3Module _module;
             IM3Function _stepFunction;
             WasmError _error = WasmError::NONE;
-            bool _running = true;
     };
 
     extern dataTypes::List<Process> processes;

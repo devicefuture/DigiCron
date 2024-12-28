@@ -13,15 +13,37 @@ proc::Process::Process() {
     processes.push(this);
 }
 
+proc::Process::~Process() {
+    stop();
+
+    int i = processes.indexOf(this);
+
+    if (i < 0) {
+        return;
+    }
+
+    processes.remove(i);
+}
+
 unsigned int proc::Process::getPid() {
     return _pid;
 }
 
 bool proc::Process::isRunning() {
-    return true;
+    return _running;
 }
 
 void proc::Process::step() {}
+
+void proc::Process::stop() {
+    if (!_running) {
+        return;
+    }
+
+    _running = false;
+
+    onStop(this);
+}
 
 proc::WasmProcess::WasmProcess(char* code, unsigned int codeSize) : proc::Process() {
     _environment = m3_NewEnvironment();
@@ -67,7 +89,7 @@ proc::WasmProcess::WasmProcess(char* code, unsigned int codeSize) : proc::Proces
         return;
     }
 
-    if (result = m3_CallV(startFunction)) {
+    if ((result = m3_CallV(startFunction))) {
         _error = WasmError::RUN_FAILURE;
         _running = false;
         return;
@@ -90,9 +112,16 @@ void proc::WasmProcess::step() {
 }
 
 void proc::WasmProcess::stop() {
-    _running = false;
+    if (!_running) {
+        return;
+    }
+
+    Process::stop();
 
     api::deleteAllByOwnerProcess(this);
+
+    m3_FreeRuntime(_runtime);
+    m3_FreeEnvironment(_environment);
 }
 
 template<typename ...Args> void proc::WasmProcess::callVoid(const char* name, Args... args) {

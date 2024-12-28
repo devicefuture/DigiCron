@@ -64,6 +64,12 @@ mainMenu::AppsMenuScreen::AppsMenuScreen() : ui::ContextualMenu("APPS") {
     items.push(new String("Cronogotchi"));
 
     onSelect = [](ui::Menu* self, unsigned int selectedIndex) {
-        new proc::WasmProcess((char*)apptest_app_wasm, apptest_app_wasm_len);
+        auto process = new proc::WasmProcess((char*)apptest_app_wasm, apptest_app_wasm_len);
+
+        process->onStop = [](proc::Process* process) {
+            delete process;
+
+            Serial.println("WASM process deleted");
+        };
     };
 }
