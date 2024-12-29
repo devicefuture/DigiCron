@@ -7,7 +7,7 @@
 #include "datatypes.h"
 
 namespace proc {
-    const unsigned int WASM_STACK_SLOTS = 2048;
+    const unsigned int WASM_STACK_SLOTS = 4096;
     const unsigned int NATIVE_STACK_SIZE = 32 * 1024;
 
     enum ProcessType {

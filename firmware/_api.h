@@ -76,6 +76,8 @@ namespace api {
     m3ApiRawFunction(dc_test_TestClass_add);
     m3ApiRawFunction(dc_test_TestClass_bools);
     m3ApiRawFunction(dc_test_TestClass_nextRandomNumber);
+    m3ApiRawFunction(dc_test_sayHello);
+    m3ApiRawFunction(dc_test_add);
 
     void linkFunctions(IM3Runtime runtime);
 }

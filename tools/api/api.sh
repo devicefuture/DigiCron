@@ -86,3 +86,6 @@ namespace test
         method "unsigned int" add "unsigned int" value "unsigned int" value2
         method "void" bools "bool" a "bool" b "bool" c
         method "unsigned int" nextRandomNumber
+
+    fn "void" sayHello
+    fn "int" add "int" a "int" b

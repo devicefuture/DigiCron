@@ -70,6 +70,8 @@ WASM_IMPORT("digicron", "dc_test_TestClass_new") dc::_Sid dc_test_TestClass_new(
 WASM_IMPORT("digicron", "dc_test_TestClass_add") unsigned int dc_test_TestClass_add(dc::_Sid sid, unsigned int value, unsigned int value2);
 WASM_IMPORT("digicron", "dc_test_TestClass_bools") void dc_test_TestClass_bools(dc::_Sid sid, bool a, bool b, bool c);
 WASM_IMPORT("digicron", "dc_test_TestClass_nextRandomNumber") unsigned int dc_test_TestClass_nextRandomNumber(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_test_sayHello") void dc_test_sayHello();
+WASM_IMPORT("digicron", "dc_test_add") int dc_test_add(int a, int b);
 
 }
 
@@ -635,6 +637,9 @@ namespace test {
             void bools(bool a, bool b, bool c) {return dc_test_TestClass_bools(_sid, a, b, c);}
             unsigned int nextRandomNumber() {return dc_test_TestClass_nextRandomNumber(_sid);}
     };
+
+    void sayHello() {return dc_test_sayHello();}
+    int add(int a, int b) {return dc_test_add(a, b);}
 }
 
 #ifndef DC_COMMON_DISPLAY_H_

@@ -46,3 +46,5 @@ dc_test_TestClass_new
 dc_test_TestClass_add
 dc_test_TestClass_bools
 dc_test_TestClass_nextRandomNumber
+dc_test_sayHello
+dc_test_add

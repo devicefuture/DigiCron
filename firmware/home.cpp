@@ -28,8 +28,6 @@ ui::Icon* batteryIcon = ui::constructIcon(
 proc::Process home::homeProcess;
 home::HomeScreen home::homeScreen;
 
-#include <Arduino.h>
-
 void home::HomeScreen::update() {
     if (_buttonIsDown) {
         return;

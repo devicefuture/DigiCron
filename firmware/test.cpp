@@ -33,3 +33,13 @@ unsigned int test::TestClass::nextRandomNumber() {
 
     return number;
 }
+
+void test::sayHello() {
+    Serial.println("Hello from the test module!");
+}
+
+int test::add(int a, int b) {
+    Serial.printf("Add function called with values %d and %d\n", a, b);
+
+    return a + b;
+}

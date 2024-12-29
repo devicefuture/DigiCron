@@ -103,7 +103,11 @@ function class {
 
 function method {
     if [ "$INTERNAL_NAME" = "" ]; then
-        local INTERNAL_NAME=dc_${NAMESPACE}_${CLASS}_$2
+        if [ "$OUT_OF_CLASS" = true ]; then
+            local INTERNAL_NAME=dc_${NAMESPACE}_$2
+        else
+            local INTERNAL_NAME=dc_${NAMESPACE}_${CLASS}_$2
+        fi
     fi
 
     name="$2"
@@ -118,7 +122,12 @@ function method {
         export HAD_CONSTRUCTOR=false
     fi
 
-    echo -n "            $nameAndType(" >> applib/digicron.h
+    if [ "$OUT_OF_CLASS" = true ]; then
+        echo -n "    $nameAndType(" >> applib/digicron.h
+    else
+        echo -n "            $nameAndType(" >> applib/digicron.h
+    fi
+
     echo "    m3ApiRawFunction($INTERNAL_NAME);" >> firmware/_api.h
 
     echo "m3ApiRawFunction(api::$INTERNAL_NAME) {" >> firmware/_api.cpp
@@ -135,10 +144,6 @@ function method {
 
         shift
     else
-        passArgs="_sid"
-
-        echo -n "WASM_IMPORT(\"digicron\", \"$INTERNAL_NAME\") $1 $INTERNAL_NAME(dc::_Sid sid" >> tools/api/_digicron-imports.h
-
         shortReturnType=i
 
         case "$1" in
@@ -146,24 +151,42 @@ function method {
                 shortReturnType=v ;;
         esac
 
-        echo -n "    m3_LinkRawFunction(runtime->modules, MODULE_NAME, \"$INTERNAL_NAME\", \"$shortReturnType(i" >> tools/api/_api-linker.h
+        passArgs=
+        prependArg=
+        prependShortArg=
 
         if [ "$returnType" != "void" ]; then
             echo "    m3ApiReturnType($returnType)" >> firmware/_api.cpp
         fi
     
-        echo "    m3ApiGetArg(Sid, _sid)" >> firmware/_api.cpp
+        if [ "$OUT_OF_CLASS" != true ]; then
+            passArgs="_sid"
+            prependArg="dc::_Sid sid"
+            prependShortArg=i
+
+            echo "    m3ApiGetArg(Sid, _sid)" >> firmware/_api.cpp
+        fi
+
+        echo -n "WASM_IMPORT(\"digicron\", \"$INTERNAL_NAME\") $1 $INTERNAL_NAME($prependArg" >> tools/api/_digicron-imports.h
+
+        echo -n "    m3_LinkRawFunction(runtime->modules, MODULE_NAME, \"$INTERNAL_NAME\", \"$shortReturnType($prependShortArg" >> tools/api/_api-linker.h
 
         shift
         shift
 
-        if (($#)); then
+        if [ "$OUT_OF_CLASS" != true ] && (($#)); then
             echo -n ", " >> tools/api/_digicron-imports.h
             passArgs="$passArgs, "
         fi
     fi
 
-    echo -n "Including class method: $1 dc::$NAMESPACE::$CLASS::$2("
+    if [ "$OUT_OF_CLASS" = true ]; then
+        echo -n "Including function: $returnType dc::$NAMESPACE::$name("
+    elif [ "$IN_CONSTRUCTOR" = true ]; then
+        echo -n "Including class constructor: $returnType dc::$NAMESPACE::$CLASS::$CLASS("
+    else
+        echo -n "Including class method: $returnType dc::$NAMESPACE::$CLASS::$name("
+    fi
 
     while (($#)); do
         argType=$1
@@ -254,14 +277,23 @@ function method {
     else
         echo ") {return $INTERNAL_NAME($passArgs);}" >> applib/digicron.h
 
-        if [ "$returnType" != "void" ]; then
-            (
-                echo
-                echo -n "    $returnType result = api::getBySid<$NAMESPACE::$CLASS>(Type::${NAMESPACE}_$CLASS, _sid)->$name("
-            ) >> firmware/_api.cpp
-        else
+        if [ "$passArgs" != "" ]; then
             echo >> firmware/_api.cpp
-            echo -n "    api::getBySid<$NAMESPACE::$CLASS>(Type::${NAMESPACE}_$CLASS, _sid)->$name(" >> firmware/_api.cpp
+        fi
+
+        if [ "$returnType" != "void" ]; then
+
+            if [ "$OUT_OF_CLASS" = true ]; then
+                echo -n "    $returnType result = $NAMESPACE::$name(" >> firmware/_api.cpp
+            else
+                echo -n "    $returnType result = api::getBySid<$NAMESPACE::$CLASS>(Type::${NAMESPACE}_$CLASS, _sid)->$name(" >> firmware/_api.cpp
+            fi
+        else
+            if [ "$OUT_OF_CLASS" = true ]; then
+                echo -n "    $NAMESPACE::$name(" >> firmware/_api.cpp
+            else
+                echo -n "    api::getBySid<$NAMESPACE::$CLASS>(Type::${NAMESPACE}_$CLASS, _sid)->$name(" >> firmware/_api.cpp
+            fi
         fi
     fi
 
@@ -296,6 +328,18 @@ function constructor {
     IN_CONSTRUCTOR=true INTERNAL_NAME=$INTERNAL_NAME method $CLASS "$@"
 
     export HAD_CONSTRUCTOR=true
+}
+
+function fn {
+    _closeClass
+
+    if [ "$LAST_NAMESPACE_MEMBER" != "" ]; then
+        echo "" >> applib/digicron.h
+
+        LAST_NAMESPACE_MEMBER=
+    fi
+
+    OUT_OF_CLASS=true INTERNAL_NAME=$INTERNAL_NAME method "$@"
 }
 
 function callable {

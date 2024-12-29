@@ -77,6 +77,12 @@ void setup() {
     dc_log((uint8_t*)"MS", 2);
     addr(__builtin_wasm_memory_size(0) << 16);
 
+    test::sayHello();
+
+    if (test::add(123, 456) == 579) {
+        dc_log((uint8_t*)"Adding function works!", 22);
+    }
+
     testClass = new test::TestClass(20);
 
     dc_log((uint8_t*)"Called test!", 12);

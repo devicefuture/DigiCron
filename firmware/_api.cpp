@@ -561,6 +561,22 @@ m3ApiRawFunction(api::dc_test_TestClass_nextRandomNumber) {
     m3ApiReturn(result);
 }
 
+m3ApiRawFunction(api::dc_test_sayHello) {
+    test::sayHello();
+
+    m3ApiSuccess();
+}
+
+m3ApiRawFunction(api::dc_test_add) {
+    m3ApiReturnType(int)
+    m3ApiGetArg(int, a)
+    m3ApiGetArg(int, b)
+
+    int result = test::add(a, b);
+
+    m3ApiReturn(result);
+}
+
 void api::linkFunctions(IM3Runtime runtime) {
     const char* MODULE_NAME = "digicron";
 
@@ -611,4 +627,6 @@ void api::linkFunctions(IM3Runtime runtime) {
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_test_TestClass_add", "i(iii)", &dc_test_TestClass_add);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_test_TestClass_bools", "v(iiii)", &dc_test_TestClass_bools);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_test_TestClass_nextRandomNumber", "i(i)", &dc_test_TestClass_nextRandomNumber);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_test_sayHello", "v()", &dc_test_sayHello);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_test_add", "i(ii)", &dc_test_add);
 }

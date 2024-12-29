@@ -16,6 +16,9 @@ namespace test {
         private:
             unsigned int _counter = 0;
     };
+
+    void sayHello();
+    int add(int a, int b);
 }
 
 #endif
