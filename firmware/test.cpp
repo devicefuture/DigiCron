@@ -16,6 +16,11 @@ test::TestClass::~TestClass() {
     Serial.println("Test class destructor called");
 }
 
+void test::TestClass::identify() {
+    Serial.println("This is the test class");
+    Serial.printf("My main counter is %d\n", _counter);
+}
+
 unsigned int test::TestClass::add(unsigned int value, unsigned int value2) {
     Serial.printf("Add method called with values %d and %d\n", value, value2);
 
@@ -32,6 +37,15 @@ unsigned int test::TestClass::nextRandomNumber() {
     Serial.printf("The next random number is: %d\n", number);
 
     return number;
+}
+
+void test::TestSubclass::identify() {
+    Serial.println("This is the test subclass");
+    Serial.printf("My counter is %d\n", _counter);
+}
+
+void test::TestSubclass::subclass() {
+    Serial.println("Called a subclass-only method");
 }
 
 void test::sayHello() {

@@ -1,9 +1,9 @@
 #!/bin/bash
 
 namespace timing
-    class EarthTime
+    class Time
         constructor "int" year "unsigned int" month "unsigned int" day "unsigned int" hour "unsigned int" minute "unsigned int" second
-        INTERNAL_NAME=dc_timing_EarthTime_newUsingMilliseconds constructor "int" year "unsigned int" month "unsigned int" day "unsigned long" millisecondOfDay
+        INTERNAL_NAME=dc_timing_Time_newUsingMilliseconds constructor "int" year "unsigned int" month "unsigned int" day "unsigned long" millisecondOfDay
 
         method "unsigned int" daysInYear
         method "unsigned int" daysInMonth "unsigned int" month
@@ -31,6 +31,10 @@ namespace timing
         method "unsigned long" millisecondOfDayIgnoringLeap
 
         method "unsigned int" weekday
+
+    class EarthTime extends Time
+        OVERRIDE=true constructor "int" year "unsigned int" month "unsigned int" day "unsigned int" hour "unsigned int" minute "unsigned int" second
+        OVERRIDE=true INTERNAL_NAME=dc_timing_EarthTime_newUsingMilliseconds constructor "int" year "unsigned int" month "unsigned int" day "unsigned long" millisecondOfDay
 
 namespace input
     enum Button \
@@ -83,9 +87,16 @@ namespace test
     class TestClass
         constructor "unsigned int" seed
 
+        VIRTUAL=true method "void" identify
         method "unsigned int" add "unsigned int" value "unsigned int" value2
         method "void" bools "bool" a "bool" b "bool" c
         method "unsigned int" nextRandomNumber
+
+    class TestSubclass extends TestClass
+        OVERRIDE=true constructor "unsigned int" seed
+
+        OVERRIDE=true method "void" identify
+        method "void" subclass
 
     fn "void" sayHello
     fn "int" add "int" a "int" b

@@ -80,25 +80,55 @@ function class {
     export LAST_NAMESPACE_MEMBER=$1
     export HAD_CONSTRUCTOR=false
     export TAG_TYPES="$TAG_TYPES${NAMESPACE}_$CLASS, "
+    export CLASS_EXTENDS=
 
     echo "        case api::Type::${NAMESPACE}_$CLASS: delete ($NAMESPACE::$CLASS*)storedInstance->instance; break;" >> tools/api/_api-deletes.h
 
-    (
-        echo "    class $CLASS {"
-        echo "        private:"
-        echo "            dc::_Sid _sid;"
-        echo
-        echo "        public:"
-        echo "            dc::_Sid _getSid() {return _sid;}"
-        echo
-        echo "            ~$CLASS() {dc_deleteBySid(_sid); _removeStoredInstance(this);}"
-        echo
-    ) >> applib/digicron.h
+    if [ "$2" = "extends" ]; then
+        export CLASS_EXTENDS=$3
+
+        (
+            echo "    class $CLASS : public $CLASS_EXTENDS {"
+            echo "        protected:"
+            echo "            $CLASS(_Dummy dummy) : $CLASS_EXTENDS(dummy) {}"
+            echo
+            echo "        public:"
+            echo "            using $CLASS_EXTENDS::$CLASS_EXTENDS;"
+            echo
+        ) >> applib/digicron.h
+
+        echo "        (type == Type::${NAMESPACE}_$CLASS && storedInstance->type == Type::${NAMESPACE}_$CLASS_EXTENDS) ||" >> tools/api/_api-typeinheritance.h
+
+        shift
+        shift
+        shift
+
+        while (($#)); do
+            echo "        (type == Type::${NAMESPACE}_$CLASS && storedInstance->type == Type::${NAMESPACE}_$1) ||" >> tools/api/_api-typeinheritance.h
+            shift
+        done
+
+        echo "Including class: dc::$NAMESPACE::$CLASS (extends $CLASS_EXTENDS)"
+    else
+        (
+            echo "    class $CLASS {"
+            echo "        protected:"
+            echo "            dc::_Sid _sid;"
+            echo
+            echo "            $CLASS(_Dummy dummy) {}"
+            echo
+            echo "        public:"
+            echo "            virtual dc::_Sid _getSid() {return _sid;}"
+            echo
+            echo "            ~$CLASS() {dc_deleteBySid(_sid); _removeStoredInstance(this);}"
+            echo
+        ) >> applib/digicron.h
+
+        echo Including class: dc::$NAMESPACE::$CLASS
+    fi
 
     # echo "template $NAMESPACE::$CLASS* api::getBySid<$NAMESPACE::$CLASS>(api::Type type, api::Sid sid)" >> tools/api/_api-templates.h
     # echo "template api::Sid api::store<$NAMESPACE::$CLASS>(api::Type type, $NAMESPACE::$CLASS* instance)" >> tools/api/_api-templates.h
-
-    echo Including class: dc::$NAMESPACE::$CLASS
 }
 
 function method {
@@ -113,6 +143,9 @@ function method {
     name="$2"
     returnType="$1"
     nameAndType="$1 $2"
+    virtualKeyword=
+    overrideKeyword=
+    superConstructorCall=
 
     if [ "$IN_CONSTRUCTOR" = true ]; then
         nameAndType=$1
@@ -122,10 +155,19 @@ function method {
         export HAD_CONSTRUCTOR=false
     fi
 
+    if [ "$VIRTUAL" = true ]; then
+        virtualKeyword="virtual "
+    fi
+
+    if [ "$OVERRIDE" = true ]; then
+        overrideKeyword=" override"
+        superConstructorCall=" : $CLASS_EXTENDS((_Dummy) {})"
+    fi
+
     if [ "$OUT_OF_CLASS" = true ]; then
         echo -n "    $nameAndType(" >> applib/digicron.h
     else
-        echo -n "            $nameAndType(" >> applib/digicron.h
+        echo -n "            $virtualKeyword$nameAndType(" >> applib/digicron.h
     fi
 
     echo "    m3ApiRawFunction($INTERNAL_NAME);" >> firmware/_api.h
@@ -260,7 +302,7 @@ function method {
     done
 
     if [ "$IN_CONSTRUCTOR" = true ]; then
-        echo ") {_sid = $INTERNAL_NAME($passArgs); _addStoredInstance(_Type::${NAMESPACE}_$CLASS, this);}" >> applib/digicron.h
+        echo ")$superConstructorCall {_sid = $INTERNAL_NAME($passArgs); _addStoredInstance(_Type::${NAMESPACE}_$CLASS, this);}" >> applib/digicron.h
 
         (
             echo
@@ -275,7 +317,7 @@ function method {
             fi
         fi
     else
-        echo ") {return $INTERNAL_NAME($passArgs);}" >> applib/digicron.h
+        echo ")$overrideKeyword {return $INTERNAL_NAME($passArgs);}" >> applib/digicron.h
 
         if [ "$passArgs" != "" ]; then
             echo >> firmware/_api.cpp
@@ -380,8 +422,9 @@ function struct {
 
 > tools/api/_api-linker.h
 > tools/api/_api-includes.h
-> tools/api/_api-deletes.h
+> tools/api/_api-typeinheritance.h
 > tools/api/_api-templates.h
+> tools/api/_api-deletes.h
 > firmware/_api.cpp
 > firmware/_api.h
 
@@ -410,7 +453,12 @@ dataTypes::List<api::StoredInstance> api::storedInstances;
 template<typename T> T* api::getBySid(api::Type type, api::Sid sid) {
     StoredInstance* storedInstance = storedInstances[sid];
 
-    if (!storedInstance || storedInstance->type != type) {
+    if (!storedInstance || (storedInstance->type != type && !(
+        /* {{ typeInheritance }} */
+        false
+    ))) {
+        Serial.println("Inheritance check failed");
+
         return new T(); // To ensure an object is always referenced
     }
 
@@ -578,6 +626,7 @@ tee -a applib/digicron.h > /dev/null << EOF
 namespace dc {
     typedef unsigned int _Enum;
     typedef int _Sid;
+    typedef struct {} _Dummy;
 }
 
 void setup();
@@ -720,6 +769,7 @@ EOF
 TAG_TYPES=$(echo $TAG_TYPES | sed "s/\(.*\),/\1/")
 
 sed -i -e "\|// {{ includes }}|{r tools/api/_api-includes.h" -e "d}" firmware/_api.cpp
+sed -i -e "\|/\* {{ typeInheritance }} \*/|{r tools/api/_api-typeinheritance.h" -e "d}" firmware/_api.cpp
 sed -i -e "\|// {{ templates }}|{r tools/api/_api-templates.h" -e "d}" firmware/_api.cpp
 sed -i -e "\|// {{ deletes }}|{r tools/api/_api-deletes.h" -e "d}" firmware/_api.cpp
 sed -i -e "\|// {{ includes }}|{r tools/api/_api-includes.h" -e "d}" firmware/_api.h

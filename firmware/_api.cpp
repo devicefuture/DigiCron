@@ -16,7 +16,13 @@ dataTypes::List<api::StoredInstance> api::storedInstances;
 template<typename T> T* api::getBySid(api::Type type, api::Sid sid) {
     StoredInstance* storedInstance = storedInstances[sid];
 
-    if (!storedInstance || storedInstance->type != type) {
+    if (!storedInstance || (storedInstance->type != type && !(
+        (type == Type::timing_EarthTime && storedInstance->type == Type::timing_Time) ||
+        (type == Type::test_TestSubclass && storedInstance->type == Type::test_TestClass) ||
+        false
+    ))) {
+        Serial.println("Inheritance check failed");
+
         return new T(); // To ensure an object is always referenced
     }
 
@@ -76,10 +82,12 @@ void deleteStoredInstance(api::StoredInstance* storedInstance) {
     }
 
     switch (storedInstance->type) {
+        case api::Type::timing_Time: delete (timing::Time*)storedInstance->instance; break;
         case api::Type::timing_EarthTime: delete (timing::EarthTime*)storedInstance->instance; break;
         case api::Type::ui_Icon: delete (ui::Icon*)storedInstance->instance; break;
         case api::Type::ui_Screen: delete (ui::Screen*)storedInstance->instance; break;
         case api::Type::test_TestClass: delete (test::TestClass*)storedInstance->instance; break;
+        case api::Type::test_TestSubclass: delete (test::TestSubclass*)storedInstance->instance; break;
         default: delete storedInstance->instance; break;
     }
 
@@ -129,7 +137,7 @@ m3ApiRawFunction(api::dc_deleteBySid) {
     m3ApiSuccess();
 }
 
-m3ApiRawFunction(api::dc_timing_EarthTime_new) {
+m3ApiRawFunction(api::dc_timing_Time_new) {
     m3ApiReturnType(Sid)
     m3ApiGetArg(int, year)
     m3ApiGetArg(unsigned int, month)
@@ -138,216 +146,216 @@ m3ApiRawFunction(api::dc_timing_EarthTime_new) {
     m3ApiGetArg(unsigned int, minute)
     m3ApiGetArg(unsigned int, second)
 
-    auto instance = new timing::EarthTime(year, month, day, hour, minute, second);
+    auto instance = new timing::Time(year, month, day, hour, minute, second);
 
-    Sid result = api::store<timing::EarthTime>(Type::timing_EarthTime, (proc::WasmProcess*)runtime->userdata, instance);
+    Sid result = api::store<timing::Time>(Type::timing_Time, (proc::WasmProcess*)runtime->userdata, instance);
 
     m3ApiReturn(result);
 }
 
-m3ApiRawFunction(api::dc_timing_EarthTime_newUsingMilliseconds) {
+m3ApiRawFunction(api::dc_timing_Time_newUsingMilliseconds) {
     m3ApiReturnType(Sid)
     m3ApiGetArg(int, year)
     m3ApiGetArg(unsigned int, month)
     m3ApiGetArg(unsigned int, day)
     m3ApiGetArg(unsigned long, millisecondOfDay)
 
-    auto instance = new timing::EarthTime(year, month, day, millisecondOfDay);
+    auto instance = new timing::Time(year, month, day, millisecondOfDay);
 
-    Sid result = api::store<timing::EarthTime>(Type::timing_EarthTime, (proc::WasmProcess*)runtime->userdata, instance);
+    Sid result = api::store<timing::Time>(Type::timing_Time, (proc::WasmProcess*)runtime->userdata, instance);
 
     m3ApiReturn(result);
 }
 
-m3ApiRawFunction(api::dc_timing_EarthTime_daysInYear) {
+m3ApiRawFunction(api::dc_timing_Time_daysInYear) {
     m3ApiReturnType(unsigned int)
     m3ApiGetArg(Sid, _sid)
 
-    unsigned int result = api::getBySid<timing::EarthTime>(Type::timing_EarthTime, _sid)->daysInYear();
+    unsigned int result = api::getBySid<timing::Time>(Type::timing_Time, _sid)->daysInYear();
 
     m3ApiReturn(result);
 }
 
-m3ApiRawFunction(api::dc_timing_EarthTime_daysInMonth) {
+m3ApiRawFunction(api::dc_timing_Time_daysInMonth) {
     m3ApiReturnType(unsigned int)
     m3ApiGetArg(Sid, _sid)
     m3ApiGetArg(unsigned int, month)
 
-    unsigned int result = api::getBySid<timing::EarthTime>(Type::timing_EarthTime, _sid)->daysInMonth(month);
+    unsigned int result = api::getBySid<timing::Time>(Type::timing_Time, _sid)->daysInMonth(month);
 
     m3ApiReturn(result);
 }
 
-m3ApiRawFunction(api::dc_timing_EarthTime_millisecondsInDay) {
+m3ApiRawFunction(api::dc_timing_Time_millisecondsInDay) {
     m3ApiReturnType(unsigned long)
     m3ApiGetArg(Sid, _sid)
 
-    unsigned long result = api::getBySid<timing::EarthTime>(Type::timing_EarthTime, _sid)->millisecondsInDay();
+    unsigned long result = api::getBySid<timing::Time>(Type::timing_Time, _sid)->millisecondsInDay();
 
     m3ApiReturn(result);
 }
 
-m3ApiRawFunction(api::dc_timing_EarthTime_inLeapMillisecond) {
+m3ApiRawFunction(api::dc_timing_Time_inLeapMillisecond) {
     m3ApiReturnType(bool)
     m3ApiGetArg(Sid, _sid)
 
-    bool result = api::getBySid<timing::EarthTime>(Type::timing_EarthTime, _sid)->inLeapMillisecond();
+    bool result = api::getBySid<timing::Time>(Type::timing_Time, _sid)->inLeapMillisecond();
 
     m3ApiReturn(result);
 }
 
-m3ApiRawFunction(api::dc_timing_EarthTime_postLeapMillisecondOffset) {
+m3ApiRawFunction(api::dc_timing_Time_postLeapMillisecondOffset) {
     m3ApiReturnType(unsigned long)
     m3ApiGetArg(Sid, _sid)
 
-    unsigned long result = api::getBySid<timing::EarthTime>(Type::timing_EarthTime, _sid)->postLeapMillisecondOffset();
+    unsigned long result = api::getBySid<timing::Time>(Type::timing_Time, _sid)->postLeapMillisecondOffset();
 
     m3ApiReturn(result);
 }
 
-m3ApiRawFunction(api::dc_timing_EarthTime_setDate) {
+m3ApiRawFunction(api::dc_timing_Time_setDate) {
     m3ApiGetArg(Sid, _sid)
     m3ApiGetArg(int, year)
     m3ApiGetArg(unsigned int, month)
     m3ApiGetArg(unsigned int, day)
 
-    api::getBySid<timing::EarthTime>(Type::timing_EarthTime, _sid)->setDate(year, month, day);
+    api::getBySid<timing::Time>(Type::timing_Time, _sid)->setDate(year, month, day);
 
     m3ApiSuccess();
 }
 
-m3ApiRawFunction(api::dc_timing_EarthTime_setTime) {
+m3ApiRawFunction(api::dc_timing_Time_setTime) {
     m3ApiGetArg(Sid, _sid)
     m3ApiGetArg(unsigned int, hour)
     m3ApiGetArg(unsigned int, minute)
     m3ApiGetArg(unsigned int, second)
 
-    api::getBySid<timing::EarthTime>(Type::timing_EarthTime, _sid)->setTime(hour, minute, second);
+    api::getBySid<timing::Time>(Type::timing_Time, _sid)->setTime(hour, minute, second);
 
     m3ApiSuccess();
 }
 
-m3ApiRawFunction(api::dc_timing_EarthTime_incrementTime) {
+m3ApiRawFunction(api::dc_timing_Time_incrementTime) {
     m3ApiGetArg(Sid, _sid)
     m3ApiGetArg(int, millseconds)
 
-    api::getBySid<timing::EarthTime>(Type::timing_EarthTime, _sid)->incrementTime(millseconds);
+    api::getBySid<timing::Time>(Type::timing_Time, _sid)->incrementTime(millseconds);
 
     m3ApiSuccess();
 }
 
-m3ApiRawFunction(api::dc_timing_EarthTime_toLocalTime) {
+m3ApiRawFunction(api::dc_timing_Time_toLocalTime) {
     m3ApiGetArg(Sid, _sid)
     m3ApiGetArg(int, timeShift)
 
-    api::getBySid<timing::EarthTime>(Type::timing_EarthTime, _sid)->toLocalTime(timeShift);
+    api::getBySid<timing::Time>(Type::timing_Time, _sid)->toLocalTime(timeShift);
 
     m3ApiSuccess();
 }
 
-m3ApiRawFunction(api::dc_timing_EarthTime_toGlobalTime) {
+m3ApiRawFunction(api::dc_timing_Time_toGlobalTime) {
     m3ApiGetArg(Sid, _sid)
 
-    api::getBySid<timing::EarthTime>(Type::timing_EarthTime, _sid)->toGlobalTime();
+    api::getBySid<timing::Time>(Type::timing_Time, _sid)->toGlobalTime();
 
     m3ApiSuccess();
 }
 
-m3ApiRawFunction(api::dc_timing_EarthTime_year) {
+m3ApiRawFunction(api::dc_timing_Time_year) {
     m3ApiReturnType(int)
     m3ApiGetArg(Sid, _sid)
 
-    int result = api::getBySid<timing::EarthTime>(Type::timing_EarthTime, _sid)->year();
+    int result = api::getBySid<timing::Time>(Type::timing_Time, _sid)->year();
 
     m3ApiReturn(result);
 }
 
-m3ApiRawFunction(api::dc_timing_EarthTime_month) {
+m3ApiRawFunction(api::dc_timing_Time_month) {
     m3ApiReturnType(unsigned int)
     m3ApiGetArg(Sid, _sid)
 
-    unsigned int result = api::getBySid<timing::EarthTime>(Type::timing_EarthTime, _sid)->month();
+    unsigned int result = api::getBySid<timing::Time>(Type::timing_Time, _sid)->month();
 
     m3ApiReturn(result);
 }
 
-m3ApiRawFunction(api::dc_timing_EarthTime_day) {
+m3ApiRawFunction(api::dc_timing_Time_day) {
     m3ApiReturnType(unsigned int)
     m3ApiGetArg(Sid, _sid)
 
-    unsigned int result = api::getBySid<timing::EarthTime>(Type::timing_EarthTime, _sid)->day();
+    unsigned int result = api::getBySid<timing::Time>(Type::timing_Time, _sid)->day();
 
     m3ApiReturn(result);
 }
 
-m3ApiRawFunction(api::dc_timing_EarthTime_hour) {
+m3ApiRawFunction(api::dc_timing_Time_hour) {
     m3ApiReturnType(unsigned int)
     m3ApiGetArg(Sid, _sid)
 
-    unsigned int result = api::getBySid<timing::EarthTime>(Type::timing_EarthTime, _sid)->hour();
+    unsigned int result = api::getBySid<timing::Time>(Type::timing_Time, _sid)->hour();
 
     m3ApiReturn(result);
 }
 
-m3ApiRawFunction(api::dc_timing_EarthTime_minute) {
+m3ApiRawFunction(api::dc_timing_Time_minute) {
     m3ApiReturnType(unsigned int)
     m3ApiGetArg(Sid, _sid)
 
-    unsigned int result = api::getBySid<timing::EarthTime>(Type::timing_EarthTime, _sid)->minute();
+    unsigned int result = api::getBySid<timing::Time>(Type::timing_Time, _sid)->minute();
 
     m3ApiReturn(result);
 }
 
-m3ApiRawFunction(api::dc_timing_EarthTime_second) {
+m3ApiRawFunction(api::dc_timing_Time_second) {
     m3ApiReturnType(unsigned int)
     m3ApiGetArg(Sid, _sid)
 
-    unsigned int result = api::getBySid<timing::EarthTime>(Type::timing_EarthTime, _sid)->second();
+    unsigned int result = api::getBySid<timing::Time>(Type::timing_Time, _sid)->second();
 
     m3ApiReturn(result);
 }
 
-m3ApiRawFunction(api::dc_timing_EarthTime_millisecond) {
+m3ApiRawFunction(api::dc_timing_Time_millisecond) {
     m3ApiReturnType(unsigned int)
     m3ApiGetArg(Sid, _sid)
 
-    unsigned int result = api::getBySid<timing::EarthTime>(Type::timing_EarthTime, _sid)->millisecond();
+    unsigned int result = api::getBySid<timing::Time>(Type::timing_Time, _sid)->millisecond();
 
     m3ApiReturn(result);
 }
 
-m3ApiRawFunction(api::dc_timing_EarthTime_dayOfYear) {
+m3ApiRawFunction(api::dc_timing_Time_dayOfYear) {
     m3ApiReturnType(unsigned int)
     m3ApiGetArg(Sid, _sid)
 
-    unsigned int result = api::getBySid<timing::EarthTime>(Type::timing_EarthTime, _sid)->dayOfYear();
+    unsigned int result = api::getBySid<timing::Time>(Type::timing_Time, _sid)->dayOfYear();
 
     m3ApiReturn(result);
 }
 
-m3ApiRawFunction(api::dc_timing_EarthTime_millisecondOfDay) {
+m3ApiRawFunction(api::dc_timing_Time_millisecondOfDay) {
     m3ApiReturnType(unsigned long)
     m3ApiGetArg(Sid, _sid)
 
-    unsigned long result = api::getBySid<timing::EarthTime>(Type::timing_EarthTime, _sid)->millisecondOfDay();
+    unsigned long result = api::getBySid<timing::Time>(Type::timing_Time, _sid)->millisecondOfDay();
 
     m3ApiReturn(result);
 }
 
-m3ApiRawFunction(api::dc_timing_EarthTime_millisecondOfDayIgnoringLeap) {
+m3ApiRawFunction(api::dc_timing_Time_millisecondOfDayIgnoringLeap) {
     m3ApiReturnType(unsigned long)
     m3ApiGetArg(Sid, _sid)
 
-    unsigned long result = api::getBySid<timing::EarthTime>(Type::timing_EarthTime, _sid)->millisecondOfDayIgnoringLeap();
+    unsigned long result = api::getBySid<timing::Time>(Type::timing_Time, _sid)->millisecondOfDayIgnoringLeap();
 
     m3ApiReturn(result);
 }
 
-m3ApiRawFunction(api::dc_timing_EarthTime_weekday) {
+m3ApiRawFunction(api::dc_timing_Time_weekday) {
     m3ApiReturnType(unsigned int)
     m3ApiGetArg(Sid, _sid)
 
-    unsigned int result = api::getBySid<timing::EarthTime>(Type::timing_EarthTime, _sid)->weekday();
+    unsigned int result = api::getBySid<timing::Time>(Type::timing_Time, _sid)->weekday();
 
     m3ApiReturn(result);
 }
@@ -530,6 +538,14 @@ m3ApiRawFunction(api::dc_test_TestClass_new) {
     m3ApiReturn(result);
 }
 
+m3ApiRawFunction(api::dc_test_TestClass_identify) {
+    m3ApiGetArg(Sid, _sid)
+
+    api::getBySid<test::TestClass>(Type::test_TestClass, _sid)->identify();
+
+    m3ApiSuccess();
+}
+
 m3ApiRawFunction(api::dc_test_TestClass_add) {
     m3ApiReturnType(unsigned int)
     m3ApiGetArg(Sid, _sid)
@@ -561,6 +577,33 @@ m3ApiRawFunction(api::dc_test_TestClass_nextRandomNumber) {
     m3ApiReturn(result);
 }
 
+m3ApiRawFunction(api::dc_test_TestSubclass_new) {
+    m3ApiReturnType(Sid)
+    m3ApiGetArg(unsigned int, seed)
+
+    auto instance = new test::TestSubclass(seed);
+
+    Sid result = api::store<test::TestSubclass>(Type::test_TestSubclass, (proc::WasmProcess*)runtime->userdata, instance);
+
+    m3ApiReturn(result);
+}
+
+m3ApiRawFunction(api::dc_test_TestSubclass_identify) {
+    m3ApiGetArg(Sid, _sid)
+
+    api::getBySid<test::TestSubclass>(Type::test_TestSubclass, _sid)->identify();
+
+    m3ApiSuccess();
+}
+
+m3ApiRawFunction(api::dc_test_TestSubclass_subclass) {
+    m3ApiGetArg(Sid, _sid)
+
+    api::getBySid<test::TestSubclass>(Type::test_TestSubclass, _sid)->subclass();
+
+    m3ApiSuccess();
+}
+
 m3ApiRawFunction(api::dc_test_sayHello) {
     test::sayHello();
 
@@ -583,29 +626,29 @@ void api::linkFunctions(IM3Runtime runtime) {
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_getGlobalI32", "i(*)", &dc_getGlobalI32);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_deleteBySid", "v(i)", &dc_deleteBySid);
 
-    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_EarthTime_new", "i(iiiiii)", &dc_timing_EarthTime_new);
-    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_EarthTime_newUsingMilliseconds", "i(iiii)", &dc_timing_EarthTime_newUsingMilliseconds);
-    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_EarthTime_daysInYear", "i(i)", &dc_timing_EarthTime_daysInYear);
-    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_EarthTime_daysInMonth", "i(ii)", &dc_timing_EarthTime_daysInMonth);
-    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_EarthTime_millisecondsInDay", "i(i)", &dc_timing_EarthTime_millisecondsInDay);
-    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_EarthTime_inLeapMillisecond", "i(i)", &dc_timing_EarthTime_inLeapMillisecond);
-    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_EarthTime_postLeapMillisecondOffset", "i(i)", &dc_timing_EarthTime_postLeapMillisecondOffset);
-    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_EarthTime_setDate", "v(iiii)", &dc_timing_EarthTime_setDate);
-    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_EarthTime_setTime", "v(iiii)", &dc_timing_EarthTime_setTime);
-    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_EarthTime_incrementTime", "v(ii)", &dc_timing_EarthTime_incrementTime);
-    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_EarthTime_toLocalTime", "v(ii)", &dc_timing_EarthTime_toLocalTime);
-    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_EarthTime_toGlobalTime", "v(i)", &dc_timing_EarthTime_toGlobalTime);
-    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_EarthTime_year", "i(i)", &dc_timing_EarthTime_year);
-    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_EarthTime_month", "i(i)", &dc_timing_EarthTime_month);
-    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_EarthTime_day", "i(i)", &dc_timing_EarthTime_day);
-    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_EarthTime_hour", "i(i)", &dc_timing_EarthTime_hour);
-    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_EarthTime_minute", "i(i)", &dc_timing_EarthTime_minute);
-    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_EarthTime_second", "i(i)", &dc_timing_EarthTime_second);
-    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_EarthTime_millisecond", "i(i)", &dc_timing_EarthTime_millisecond);
-    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_EarthTime_dayOfYear", "i(i)", &dc_timing_EarthTime_dayOfYear);
-    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_EarthTime_millisecondOfDay", "i(i)", &dc_timing_EarthTime_millisecondOfDay);
-    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_EarthTime_millisecondOfDayIgnoringLeap", "i(i)", &dc_timing_EarthTime_millisecondOfDayIgnoringLeap);
-    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_EarthTime_weekday", "i(i)", &dc_timing_EarthTime_weekday);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_Time_new", "i(iiiiii)", &dc_timing_Time_new);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_Time_newUsingMilliseconds", "i(iiii)", &dc_timing_Time_newUsingMilliseconds);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_Time_daysInYear", "i(i)", &dc_timing_Time_daysInYear);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_Time_daysInMonth", "i(ii)", &dc_timing_Time_daysInMonth);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_Time_millisecondsInDay", "i(i)", &dc_timing_Time_millisecondsInDay);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_Time_inLeapMillisecond", "i(i)", &dc_timing_Time_inLeapMillisecond);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_Time_postLeapMillisecondOffset", "i(i)", &dc_timing_Time_postLeapMillisecondOffset);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_Time_setDate", "v(iiii)", &dc_timing_Time_setDate);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_Time_setTime", "v(iiii)", &dc_timing_Time_setTime);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_Time_incrementTime", "v(ii)", &dc_timing_Time_incrementTime);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_Time_toLocalTime", "v(ii)", &dc_timing_Time_toLocalTime);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_Time_toGlobalTime", "v(i)", &dc_timing_Time_toGlobalTime);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_Time_year", "i(i)", &dc_timing_Time_year);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_Time_month", "i(i)", &dc_timing_Time_month);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_Time_day", "i(i)", &dc_timing_Time_day);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_Time_hour", "i(i)", &dc_timing_Time_hour);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_Time_minute", "i(i)", &dc_timing_Time_minute);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_Time_second", "i(i)", &dc_timing_Time_second);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_Time_millisecond", "i(i)", &dc_timing_Time_millisecond);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_Time_dayOfYear", "i(i)", &dc_timing_Time_dayOfYear);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_Time_millisecondOfDay", "i(i)", &dc_timing_Time_millisecondOfDay);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_Time_millisecondOfDayIgnoringLeap", "i(i)", &dc_timing_Time_millisecondOfDayIgnoringLeap);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_Time_weekday", "i(i)", &dc_timing_Time_weekday);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Icon_new", "i()", &dc_ui_Icon_new);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Icon_setPixel", "v(iiii)", &dc_ui_Icon_setPixel);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_new", "i()", &dc_ui_Screen_new);
@@ -624,9 +667,13 @@ void api::linkFunctions(IM3Runtime runtime) {
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_close", "v(i)", &dc_ui_Screen_close);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_swapWith", "v(ii)", &dc_ui_Screen_swapWith);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_test_TestClass_new", "i(i)", &dc_test_TestClass_new);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_test_TestClass_identify", "v(i)", &dc_test_TestClass_identify);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_test_TestClass_add", "i(iii)", &dc_test_TestClass_add);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_test_TestClass_bools", "v(iiii)", &dc_test_TestClass_bools);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_test_TestClass_nextRandomNumber", "i(i)", &dc_test_TestClass_nextRandomNumber);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_test_TestSubclass_new", "i(i)", &dc_test_TestSubclass_new);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_test_TestSubclass_identify", "v(i)", &dc_test_TestSubclass_identify);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_test_TestSubclass_subclass", "v(i)", &dc_test_TestSubclass_subclass);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_test_sayHello", "v()", &dc_test_sayHello);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_test_add", "i(ii)", &dc_test_add);
 }

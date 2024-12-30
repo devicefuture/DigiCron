@@ -13,6 +13,7 @@
 namespace dc {
     typedef unsigned int _Enum;
     typedef int _Sid;
+    typedef struct {} _Dummy;
 }
 
 void setup();
@@ -26,29 +27,29 @@ WASM_IMPORT("digicronold", "stop") void dc_stop();
 WASM_IMPORT("digicron", "dc_getGlobalI32") uint32_t dc_getGlobalI32(const char* id);
 WASM_IMPORT("digicron", "dc_deleteBySid") void dc_deleteBySid(dc::_Sid sid);
 
-WASM_IMPORT("digicron", "dc_timing_EarthTime_new") dc::_Sid dc_timing_EarthTime_new(int year, unsigned int month, unsigned int day, unsigned int hour, unsigned int minute, unsigned int second);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_newUsingMilliseconds") dc::_Sid dc_timing_EarthTime_newUsingMilliseconds(int year, unsigned int month, unsigned int day, unsigned long millisecondOfDay);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_daysInYear") unsigned int dc_timing_EarthTime_daysInYear(dc::_Sid sid);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_daysInMonth") unsigned int dc_timing_EarthTime_daysInMonth(dc::_Sid sid, unsigned int month);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_millisecondsInDay") unsigned long dc_timing_EarthTime_millisecondsInDay(dc::_Sid sid);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_inLeapMillisecond") bool dc_timing_EarthTime_inLeapMillisecond(dc::_Sid sid);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_postLeapMillisecondOffset") unsigned long dc_timing_EarthTime_postLeapMillisecondOffset(dc::_Sid sid);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_setDate") void dc_timing_EarthTime_setDate(dc::_Sid sid, int year, unsigned int month, unsigned int day);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_setTime") void dc_timing_EarthTime_setTime(dc::_Sid sid, unsigned int hour, unsigned int minute, unsigned int second);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_incrementTime") void dc_timing_EarthTime_incrementTime(dc::_Sid sid, int millseconds);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_toLocalTime") void dc_timing_EarthTime_toLocalTime(dc::_Sid sid, int timeShift);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_toGlobalTime") void dc_timing_EarthTime_toGlobalTime(dc::_Sid sid);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_year") int dc_timing_EarthTime_year(dc::_Sid sid);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_month") unsigned int dc_timing_EarthTime_month(dc::_Sid sid);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_day") unsigned int dc_timing_EarthTime_day(dc::_Sid sid);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_hour") unsigned int dc_timing_EarthTime_hour(dc::_Sid sid);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_minute") unsigned int dc_timing_EarthTime_minute(dc::_Sid sid);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_second") unsigned int dc_timing_EarthTime_second(dc::_Sid sid);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_millisecond") unsigned int dc_timing_EarthTime_millisecond(dc::_Sid sid);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_dayOfYear") unsigned int dc_timing_EarthTime_dayOfYear(dc::_Sid sid);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_millisecondOfDay") unsigned long dc_timing_EarthTime_millisecondOfDay(dc::_Sid sid);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_millisecondOfDayIgnoringLeap") unsigned long dc_timing_EarthTime_millisecondOfDayIgnoringLeap(dc::_Sid sid);
-WASM_IMPORT("digicron", "dc_timing_EarthTime_weekday") unsigned int dc_timing_EarthTime_weekday(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_timing_Time_new") dc::_Sid dc_timing_Time_new(int year, unsigned int month, unsigned int day, unsigned int hour, unsigned int minute, unsigned int second);
+WASM_IMPORT("digicron", "dc_timing_Time_newUsingMilliseconds") dc::_Sid dc_timing_Time_newUsingMilliseconds(int year, unsigned int month, unsigned int day, unsigned long millisecondOfDay);
+WASM_IMPORT("digicron", "dc_timing_Time_daysInYear") unsigned int dc_timing_Time_daysInYear(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_timing_Time_daysInMonth") unsigned int dc_timing_Time_daysInMonth(dc::_Sid sid, unsigned int month);
+WASM_IMPORT("digicron", "dc_timing_Time_millisecondsInDay") unsigned long dc_timing_Time_millisecondsInDay(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_timing_Time_inLeapMillisecond") bool dc_timing_Time_inLeapMillisecond(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_timing_Time_postLeapMillisecondOffset") unsigned long dc_timing_Time_postLeapMillisecondOffset(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_timing_Time_setDate") void dc_timing_Time_setDate(dc::_Sid sid, int year, unsigned int month, unsigned int day);
+WASM_IMPORT("digicron", "dc_timing_Time_setTime") void dc_timing_Time_setTime(dc::_Sid sid, unsigned int hour, unsigned int minute, unsigned int second);
+WASM_IMPORT("digicron", "dc_timing_Time_incrementTime") void dc_timing_Time_incrementTime(dc::_Sid sid, int millseconds);
+WASM_IMPORT("digicron", "dc_timing_Time_toLocalTime") void dc_timing_Time_toLocalTime(dc::_Sid sid, int timeShift);
+WASM_IMPORT("digicron", "dc_timing_Time_toGlobalTime") void dc_timing_Time_toGlobalTime(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_timing_Time_year") int dc_timing_Time_year(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_timing_Time_month") unsigned int dc_timing_Time_month(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_timing_Time_day") unsigned int dc_timing_Time_day(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_timing_Time_hour") unsigned int dc_timing_Time_hour(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_timing_Time_minute") unsigned int dc_timing_Time_minute(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_timing_Time_second") unsigned int dc_timing_Time_second(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_timing_Time_millisecond") unsigned int dc_timing_Time_millisecond(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_timing_Time_dayOfYear") unsigned int dc_timing_Time_dayOfYear(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_timing_Time_millisecondOfDay") unsigned long dc_timing_Time_millisecondOfDay(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_timing_Time_millisecondOfDayIgnoringLeap") unsigned long dc_timing_Time_millisecondOfDayIgnoringLeap(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_timing_Time_weekday") unsigned int dc_timing_Time_weekday(dc::_Sid sid);
 WASM_IMPORT("digicron", "dc_ui_Icon_new") dc::_Sid dc_ui_Icon_new();
 WASM_IMPORT("digicron", "dc_ui_Icon_setPixel") void dc_ui_Icon_setPixel(dc::_Sid sid, unsigned int x, unsigned int y, dc::_Enum value);
 WASM_IMPORT("digicron", "dc_ui_Screen_new") dc::_Sid dc_ui_Screen_new();
@@ -67,9 +68,13 @@ WASM_IMPORT("digicron", "dc_ui_Screen_open") void dc_ui_Screen_open(dc::_Sid sid
 WASM_IMPORT("digicron", "dc_ui_Screen_close") void dc_ui_Screen_close(dc::_Sid sid);
 WASM_IMPORT("digicron", "dc_ui_Screen_swapWith") void dc_ui_Screen_swapWith(dc::_Sid sid, dc::_Sid currentScreen);
 WASM_IMPORT("digicron", "dc_test_TestClass_new") dc::_Sid dc_test_TestClass_new(unsigned int seed);
+WASM_IMPORT("digicron", "dc_test_TestClass_identify") void dc_test_TestClass_identify(dc::_Sid sid);
 WASM_IMPORT("digicron", "dc_test_TestClass_add") unsigned int dc_test_TestClass_add(dc::_Sid sid, unsigned int value, unsigned int value2);
 WASM_IMPORT("digicron", "dc_test_TestClass_bools") void dc_test_TestClass_bools(dc::_Sid sid, bool a, bool b, bool c);
 WASM_IMPORT("digicron", "dc_test_TestClass_nextRandomNumber") unsigned int dc_test_TestClass_nextRandomNumber(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_test_TestSubclass_new") dc::_Sid dc_test_TestSubclass_new(unsigned int seed);
+WASM_IMPORT("digicron", "dc_test_TestSubclass_identify") void dc_test_TestSubclass_identify(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_test_TestSubclass_subclass") void dc_test_TestSubclass_subclass(dc::_Sid sid);
 WASM_IMPORT("digicron", "dc_test_sayHello") void dc_test_sayHello();
 WASM_IMPORT("digicron", "dc_test_add") int dc_test_add(int a, int b);
 
@@ -453,7 +458,7 @@ namespace dataTypes {
 
 #endif
 
-enum _Type {EMPTY, timing_EarthTime, ui_Icon, ui_Screen, test_TestClass};
+enum _Type {EMPTY, timing_Time, timing_EarthTime, ui_Icon, ui_Screen, test_TestClass, test_TestSubclass};
 
 struct _StoredInstance {
     _Type type;
@@ -506,39 +511,50 @@ void _removeStoredInstance(void* instance) {
 }
 
 namespace timing {
-    class EarthTime {
-        private:
+    class Time {
+        protected:
             dc::_Sid _sid;
 
+            Time(_Dummy dummy) {}
+
         public:
-            dc::_Sid _getSid() {return _sid;}
+            virtual dc::_Sid _getSid() {return _sid;}
 
-            ~EarthTime() {dc_deleteBySid(_sid); _removeStoredInstance(this);}
+            ~Time() {dc_deleteBySid(_sid); _removeStoredInstance(this);}
 
-            EarthTime(int year, unsigned int month, unsigned int day, unsigned int hour, unsigned int minute, unsigned int second) {_sid = dc_timing_EarthTime_new(year, month, day, hour, minute, second); _addStoredInstance(_Type::timing_EarthTime, this);}
-            EarthTime(int year, unsigned int month, unsigned int day, unsigned long millisecondOfDay) {_sid = dc_timing_EarthTime_newUsingMilliseconds(year, month, day, millisecondOfDay); _addStoredInstance(_Type::timing_EarthTime, this);}
+            Time(int year, unsigned int month, unsigned int day, unsigned int hour, unsigned int minute, unsigned int second) {_sid = dc_timing_Time_new(year, month, day, hour, minute, second); _addStoredInstance(_Type::timing_Time, this);}
+            Time(int year, unsigned int month, unsigned int day, unsigned long millisecondOfDay) {_sid = dc_timing_Time_newUsingMilliseconds(year, month, day, millisecondOfDay); _addStoredInstance(_Type::timing_Time, this);}
 
-            unsigned int daysInYear() {return dc_timing_EarthTime_daysInYear(_sid);}
-            unsigned int daysInMonth(unsigned int month) {return dc_timing_EarthTime_daysInMonth(_sid, month);}
-            unsigned long millisecondsInDay() {return dc_timing_EarthTime_millisecondsInDay(_sid);}
-            bool inLeapMillisecond() {return dc_timing_EarthTime_inLeapMillisecond(_sid);}
-            unsigned long postLeapMillisecondOffset() {return dc_timing_EarthTime_postLeapMillisecondOffset(_sid);}
-            void setDate(int year, unsigned int month, unsigned int day) {return dc_timing_EarthTime_setDate(_sid, year, month, day);}
-            void setTime(unsigned int hour, unsigned int minute, unsigned int second) {return dc_timing_EarthTime_setTime(_sid, hour, minute, second);}
-            void incrementTime(int millseconds) {return dc_timing_EarthTime_incrementTime(_sid, millseconds);}
-            void toLocalTime(int timeShift) {return dc_timing_EarthTime_toLocalTime(_sid, timeShift);}
-            void toGlobalTime() {return dc_timing_EarthTime_toGlobalTime(_sid);}
-            int year() {return dc_timing_EarthTime_year(_sid);}
-            unsigned int month() {return dc_timing_EarthTime_month(_sid);}
-            unsigned int day() {return dc_timing_EarthTime_day(_sid);}
-            unsigned int hour() {return dc_timing_EarthTime_hour(_sid);}
-            unsigned int minute() {return dc_timing_EarthTime_minute(_sid);}
-            unsigned int second() {return dc_timing_EarthTime_second(_sid);}
-            unsigned int millisecond() {return dc_timing_EarthTime_millisecond(_sid);}
-            unsigned int dayOfYear() {return dc_timing_EarthTime_dayOfYear(_sid);}
-            unsigned long millisecondOfDay() {return dc_timing_EarthTime_millisecondOfDay(_sid);}
-            unsigned long millisecondOfDayIgnoringLeap() {return dc_timing_EarthTime_millisecondOfDayIgnoringLeap(_sid);}
-            unsigned int weekday() {return dc_timing_EarthTime_weekday(_sid);}
+            unsigned int daysInYear() {return dc_timing_Time_daysInYear(_sid);}
+            unsigned int daysInMonth(unsigned int month) {return dc_timing_Time_daysInMonth(_sid, month);}
+            unsigned long millisecondsInDay() {return dc_timing_Time_millisecondsInDay(_sid);}
+            bool inLeapMillisecond() {return dc_timing_Time_inLeapMillisecond(_sid);}
+            unsigned long postLeapMillisecondOffset() {return dc_timing_Time_postLeapMillisecondOffset(_sid);}
+            void setDate(int year, unsigned int month, unsigned int day) {return dc_timing_Time_setDate(_sid, year, month, day);}
+            void setTime(unsigned int hour, unsigned int minute, unsigned int second) {return dc_timing_Time_setTime(_sid, hour, minute, second);}
+            void incrementTime(int millseconds) {return dc_timing_Time_incrementTime(_sid, millseconds);}
+            void toLocalTime(int timeShift) {return dc_timing_Time_toLocalTime(_sid, timeShift);}
+            void toGlobalTime() {return dc_timing_Time_toGlobalTime(_sid);}
+            int year() {return dc_timing_Time_year(_sid);}
+            unsigned int month() {return dc_timing_Time_month(_sid);}
+            unsigned int day() {return dc_timing_Time_day(_sid);}
+            unsigned int hour() {return dc_timing_Time_hour(_sid);}
+            unsigned int minute() {return dc_timing_Time_minute(_sid);}
+            unsigned int second() {return dc_timing_Time_second(_sid);}
+            unsigned int millisecond() {return dc_timing_Time_millisecond(_sid);}
+            unsigned int dayOfYear() {return dc_timing_Time_dayOfYear(_sid);}
+            unsigned long millisecondOfDay() {return dc_timing_Time_millisecondOfDay(_sid);}
+            unsigned long millisecondOfDayIgnoringLeap() {return dc_timing_Time_millisecondOfDayIgnoringLeap(_sid);}
+            unsigned int weekday() {return dc_timing_Time_weekday(_sid);}
+    };
+
+    class EarthTime : public Time {
+        protected:
+            EarthTime(_Dummy dummy) : Time(dummy) {}
+
+        public:
+            using Time::Time;
+
     };
 }
 
@@ -578,11 +594,13 @@ namespace ui {
     };
 
     class Icon {
-        private:
+        protected:
             dc::_Sid _sid;
 
+            Icon(_Dummy dummy) {}
+
         public:
-            dc::_Sid _getSid() {return _sid;}
+            virtual dc::_Sid _getSid() {return _sid;}
 
             ~Icon() {dc_deleteBySid(_sid); _removeStoredInstance(this);}
 
@@ -592,11 +610,13 @@ namespace ui {
     };
 
     class Screen {
-        private:
+        protected:
             dc::_Sid _sid;
 
+            Screen(_Dummy dummy) {}
+
         public:
-            dc::_Sid _getSid() {return _sid;}
+            virtual dc::_Sid _getSid() {return _sid;}
 
             ~Screen() {dc_deleteBySid(_sid); _removeStoredInstance(this);}
 
@@ -623,19 +643,35 @@ namespace ui {
 
 namespace test {
     class TestClass {
-        private:
+        protected:
             dc::_Sid _sid;
 
+            TestClass(_Dummy dummy) {}
+
         public:
-            dc::_Sid _getSid() {return _sid;}
+            virtual dc::_Sid _getSid() {return _sid;}
 
             ~TestClass() {dc_deleteBySid(_sid); _removeStoredInstance(this);}
 
             TestClass(unsigned int seed) {_sid = dc_test_TestClass_new(seed); _addStoredInstance(_Type::test_TestClass, this);}
 
+            virtual void identify() {return dc_test_TestClass_identify(_sid);}
             unsigned int add(unsigned int value, unsigned int value2) {return dc_test_TestClass_add(_sid, value, value2);}
             void bools(bool a, bool b, bool c) {return dc_test_TestClass_bools(_sid, a, b, c);}
             unsigned int nextRandomNumber() {return dc_test_TestClass_nextRandomNumber(_sid);}
+    };
+
+    class TestSubclass : public TestClass {
+        protected:
+            TestSubclass(_Dummy dummy) : TestClass(dummy) {}
+
+        public:
+            using TestClass::TestClass;
+
+            TestSubclass(unsigned int seed) : TestClass((_Dummy) {}) {_sid = dc_test_TestSubclass_new(seed); _addStoredInstance(_Type::test_TestSubclass, this);}
+
+            void identify() override {return dc_test_TestSubclass_identify(_sid);}
+            void subclass() {return dc_test_TestSubclass_subclass(_sid);}
     };
 
     void sayHello() {return dc_test_sayHello();}

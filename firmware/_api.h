@@ -13,7 +13,7 @@
 namespace api {
     typedef int Sid;
 
-    enum Type {EMPTY, timing_EarthTime, ui_Icon, ui_Screen, test_TestClass};
+    enum Type {EMPTY, timing_Time, timing_EarthTime, ui_Icon, ui_Screen, test_TestClass, test_TestSubclass};
 
     struct StoredInstance {
         Type type;
@@ -32,29 +32,29 @@ namespace api {
     m3ApiRawFunction(dc_getGlobalI32);
     m3ApiRawFunction(dc_deleteBySid);
 
-    m3ApiRawFunction(dc_timing_EarthTime_new);
-    m3ApiRawFunction(dc_timing_EarthTime_newUsingMilliseconds);
-    m3ApiRawFunction(dc_timing_EarthTime_daysInYear);
-    m3ApiRawFunction(dc_timing_EarthTime_daysInMonth);
-    m3ApiRawFunction(dc_timing_EarthTime_millisecondsInDay);
-    m3ApiRawFunction(dc_timing_EarthTime_inLeapMillisecond);
-    m3ApiRawFunction(dc_timing_EarthTime_postLeapMillisecondOffset);
-    m3ApiRawFunction(dc_timing_EarthTime_setDate);
-    m3ApiRawFunction(dc_timing_EarthTime_setTime);
-    m3ApiRawFunction(dc_timing_EarthTime_incrementTime);
-    m3ApiRawFunction(dc_timing_EarthTime_toLocalTime);
-    m3ApiRawFunction(dc_timing_EarthTime_toGlobalTime);
-    m3ApiRawFunction(dc_timing_EarthTime_year);
-    m3ApiRawFunction(dc_timing_EarthTime_month);
-    m3ApiRawFunction(dc_timing_EarthTime_day);
-    m3ApiRawFunction(dc_timing_EarthTime_hour);
-    m3ApiRawFunction(dc_timing_EarthTime_minute);
-    m3ApiRawFunction(dc_timing_EarthTime_second);
-    m3ApiRawFunction(dc_timing_EarthTime_millisecond);
-    m3ApiRawFunction(dc_timing_EarthTime_dayOfYear);
-    m3ApiRawFunction(dc_timing_EarthTime_millisecondOfDay);
-    m3ApiRawFunction(dc_timing_EarthTime_millisecondOfDayIgnoringLeap);
-    m3ApiRawFunction(dc_timing_EarthTime_weekday);
+    m3ApiRawFunction(dc_timing_Time_new);
+    m3ApiRawFunction(dc_timing_Time_newUsingMilliseconds);
+    m3ApiRawFunction(dc_timing_Time_daysInYear);
+    m3ApiRawFunction(dc_timing_Time_daysInMonth);
+    m3ApiRawFunction(dc_timing_Time_millisecondsInDay);
+    m3ApiRawFunction(dc_timing_Time_inLeapMillisecond);
+    m3ApiRawFunction(dc_timing_Time_postLeapMillisecondOffset);
+    m3ApiRawFunction(dc_timing_Time_setDate);
+    m3ApiRawFunction(dc_timing_Time_setTime);
+    m3ApiRawFunction(dc_timing_Time_incrementTime);
+    m3ApiRawFunction(dc_timing_Time_toLocalTime);
+    m3ApiRawFunction(dc_timing_Time_toGlobalTime);
+    m3ApiRawFunction(dc_timing_Time_year);
+    m3ApiRawFunction(dc_timing_Time_month);
+    m3ApiRawFunction(dc_timing_Time_day);
+    m3ApiRawFunction(dc_timing_Time_hour);
+    m3ApiRawFunction(dc_timing_Time_minute);
+    m3ApiRawFunction(dc_timing_Time_second);
+    m3ApiRawFunction(dc_timing_Time_millisecond);
+    m3ApiRawFunction(dc_timing_Time_dayOfYear);
+    m3ApiRawFunction(dc_timing_Time_millisecondOfDay);
+    m3ApiRawFunction(dc_timing_Time_millisecondOfDayIgnoringLeap);
+    m3ApiRawFunction(dc_timing_Time_weekday);
     m3ApiRawFunction(dc_ui_Icon_new);
     m3ApiRawFunction(dc_ui_Icon_setPixel);
     m3ApiRawFunction(dc_ui_Screen_new);
@@ -73,9 +73,13 @@ namespace api {
     m3ApiRawFunction(dc_ui_Screen_close);
     m3ApiRawFunction(dc_ui_Screen_swapWith);
     m3ApiRawFunction(dc_test_TestClass_new);
+    m3ApiRawFunction(dc_test_TestClass_identify);
     m3ApiRawFunction(dc_test_TestClass_add);
     m3ApiRawFunction(dc_test_TestClass_bools);
     m3ApiRawFunction(dc_test_TestClass_nextRandomNumber);
+    m3ApiRawFunction(dc_test_TestSubclass_new);
+    m3ApiRawFunction(dc_test_TestSubclass_identify);
+    m3ApiRawFunction(dc_test_TestSubclass_subclass);
     m3ApiRawFunction(dc_test_sayHello);
     m3ApiRawFunction(dc_test_add);
 

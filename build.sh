@@ -3,7 +3,7 @@ if [ "$DESKTOP_SESSION" == "gshell" ]; then
     export EMSDK_OS=linux
 fi
 
-tools/api/builder.sh
+# tools/api/builder.sh
 
 if [ "$1" == "--install-dev" ]; then
     if ! [ -x "$(command -v pio)" ]; then

@@ -9,12 +9,21 @@ namespace test {
 
             ~TestClass();
 
+            virtual void identify();
             unsigned int add(unsigned int value, unsigned int value2);
             void bools(bool a, bool b, bool c);
             unsigned int nextRandomNumber();
 
-        private:
+        protected:
             unsigned int _counter = 0;
+    };
+
+    class TestSubclass : public TestClass {
+        public:
+            using TestClass::TestClass;
+
+            void identify() override;
+            void subclass();
     };
 
     void sayHello();

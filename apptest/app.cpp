@@ -7,6 +7,7 @@ using namespace dc::dataTypes;
 int count = 0;
 
 test::TestClass* testClass;
+test::TestSubclass* testSubclass;
 ui::Screen* screen;
 
 ui::Icon* smileIcon = ui::constructIcon(
@@ -92,6 +93,12 @@ void setup() {
     }
 
     testClass->bools(true, false, true);
+
+    testSubclass = new test::TestSubclass(10);
+
+    testClass->identify();
+    testSubclass->identify();
+    testSubclass->subclass();
 
     screen = new HelloScreen();
 
