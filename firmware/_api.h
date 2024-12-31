@@ -33,6 +33,7 @@ namespace api {
     m3ApiRawFunction(dc_deleteBySid);
 
     m3ApiRawFunction(dc_timing_Time_new);
+    m3ApiRawFunction(dc_timing_Time_newUsingDate);
     m3ApiRawFunction(dc_timing_Time_newUsingMilliseconds);
     m3ApiRawFunction(dc_timing_Time_daysInYear);
     m3ApiRawFunction(dc_timing_Time_daysInMonth);
@@ -44,6 +45,7 @@ namespace api {
     m3ApiRawFunction(dc_timing_Time_incrementTime);
     m3ApiRawFunction(dc_timing_Time_toLocalTime);
     m3ApiRawFunction(dc_timing_Time_toGlobalTime);
+    m3ApiRawFunction(dc_timing_Time_timeShift);
     m3ApiRawFunction(dc_timing_Time_year);
     m3ApiRawFunction(dc_timing_Time_month);
     m3ApiRawFunction(dc_timing_Time_day);
@@ -55,6 +57,10 @@ namespace api {
     m3ApiRawFunction(dc_timing_Time_millisecondOfDay);
     m3ApiRawFunction(dc_timing_Time_millisecondOfDayIgnoringLeap);
     m3ApiRawFunction(dc_timing_Time_weekday);
+    m3ApiRawFunction(dc_timing_EarthTime_new);
+    m3ApiRawFunction(dc_timing_EarthTime_newUsingDate);
+    m3ApiRawFunction(dc_timing_EarthTime_newUsingMilliseconds);
+    m3ApiRawFunction(dc_timing_EarthTime_syncToSystemTime);
     m3ApiRawFunction(dc_ui_Icon_new);
     m3ApiRawFunction(dc_ui_Icon_setPixel);
     m3ApiRawFunction(dc_ui_Screen_new);

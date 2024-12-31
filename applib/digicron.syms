@@ -3,6 +3,7 @@ dc_stop
 dc_getGlobalI32
 dc_deleteBySid
 dc_timing_Time_new
+dc_timing_Time_newUsingDate
 dc_timing_Time_newUsingMilliseconds
 dc_timing_Time_daysInYear
 dc_timing_Time_daysInMonth
@@ -14,6 +15,7 @@ dc_timing_Time_setTime
 dc_timing_Time_incrementTime
 dc_timing_Time_toLocalTime
 dc_timing_Time_toGlobalTime
+dc_timing_Time_timeShift
 dc_timing_Time_year
 dc_timing_Time_month
 dc_timing_Time_day
@@ -25,6 +27,10 @@ dc_timing_Time_dayOfYear
 dc_timing_Time_millisecondOfDay
 dc_timing_Time_millisecondOfDayIgnoringLeap
 dc_timing_Time_weekday
+dc_timing_EarthTime_new
+dc_timing_EarthTime_newUsingDate
+dc_timing_EarthTime_newUsingMilliseconds
+dc_timing_EarthTime_syncToSystemTime
 dc_ui_Icon_new
 dc_ui_Icon_setPixel
 dc_ui_Screen_new

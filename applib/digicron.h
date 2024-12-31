@@ -27,7 +27,8 @@ WASM_IMPORT("digicronold", "stop") void dc_stop();
 WASM_IMPORT("digicron", "dc_getGlobalI32") uint32_t dc_getGlobalI32(const char* id);
 WASM_IMPORT("digicron", "dc_deleteBySid") void dc_deleteBySid(dc::_Sid sid);
 
-WASM_IMPORT("digicron", "dc_timing_Time_new") dc::_Sid dc_timing_Time_new(int year, unsigned int month, unsigned int day, unsigned int hour, unsigned int minute, unsigned int second);
+WASM_IMPORT("digicron", "dc_timing_Time_new") dc::_Sid dc_timing_Time_new();
+WASM_IMPORT("digicron", "dc_timing_Time_newUsingDate") dc::_Sid dc_timing_Time_newUsingDate(int year, unsigned int month, unsigned int day, unsigned int hour, unsigned int minute, unsigned int second);
 WASM_IMPORT("digicron", "dc_timing_Time_newUsingMilliseconds") dc::_Sid dc_timing_Time_newUsingMilliseconds(int year, unsigned int month, unsigned int day, unsigned long millisecondOfDay);
 WASM_IMPORT("digicron", "dc_timing_Time_daysInYear") unsigned int dc_timing_Time_daysInYear(dc::_Sid sid);
 WASM_IMPORT("digicron", "dc_timing_Time_daysInMonth") unsigned int dc_timing_Time_daysInMonth(dc::_Sid sid, unsigned int month);
@@ -39,6 +40,7 @@ WASM_IMPORT("digicron", "dc_timing_Time_setTime") void dc_timing_Time_setTime(dc
 WASM_IMPORT("digicron", "dc_timing_Time_incrementTime") void dc_timing_Time_incrementTime(dc::_Sid sid, int millseconds);
 WASM_IMPORT("digicron", "dc_timing_Time_toLocalTime") void dc_timing_Time_toLocalTime(dc::_Sid sid, int timeShift);
 WASM_IMPORT("digicron", "dc_timing_Time_toGlobalTime") void dc_timing_Time_toGlobalTime(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_timing_Time_timeShift") int dc_timing_Time_timeShift(dc::_Sid sid);
 WASM_IMPORT("digicron", "dc_timing_Time_year") int dc_timing_Time_year(dc::_Sid sid);
 WASM_IMPORT("digicron", "dc_timing_Time_month") unsigned int dc_timing_Time_month(dc::_Sid sid);
 WASM_IMPORT("digicron", "dc_timing_Time_day") unsigned int dc_timing_Time_day(dc::_Sid sid);
@@ -50,6 +52,10 @@ WASM_IMPORT("digicron", "dc_timing_Time_dayOfYear") unsigned int dc_timing_Time_
 WASM_IMPORT("digicron", "dc_timing_Time_millisecondOfDay") unsigned long dc_timing_Time_millisecondOfDay(dc::_Sid sid);
 WASM_IMPORT("digicron", "dc_timing_Time_millisecondOfDayIgnoringLeap") unsigned long dc_timing_Time_millisecondOfDayIgnoringLeap(dc::_Sid sid);
 WASM_IMPORT("digicron", "dc_timing_Time_weekday") unsigned int dc_timing_Time_weekday(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_timing_EarthTime_new") dc::_Sid dc_timing_EarthTime_new();
+WASM_IMPORT("digicron", "dc_timing_EarthTime_newUsingDate") dc::_Sid dc_timing_EarthTime_newUsingDate(int year, unsigned int month, unsigned int day, unsigned int hour, unsigned int minute, unsigned int second);
+WASM_IMPORT("digicron", "dc_timing_EarthTime_newUsingMilliseconds") dc::_Sid dc_timing_EarthTime_newUsingMilliseconds(int year, unsigned int month, unsigned int day, unsigned long millisecondOfDay);
+WASM_IMPORT("digicron", "dc_timing_EarthTime_syncToSystemTime") void dc_timing_EarthTime_syncToSystemTime(dc::_Sid sid);
 WASM_IMPORT("digicron", "dc_ui_Icon_new") dc::_Sid dc_ui_Icon_new();
 WASM_IMPORT("digicron", "dc_ui_Icon_setPixel") void dc_ui_Icon_setPixel(dc::_Sid sid, unsigned int x, unsigned int y, dc::_Enum value);
 WASM_IMPORT("digicron", "dc_ui_Screen_new") dc::_Sid dc_ui_Screen_new();
@@ -522,7 +528,8 @@ namespace timing {
 
             ~Time() {dc_deleteBySid(_sid); _removeStoredInstance(this);}
 
-            Time(int year, unsigned int month, unsigned int day, unsigned int hour, unsigned int minute, unsigned int second) {_sid = dc_timing_Time_new(year, month, day, hour, minute, second); _addStoredInstance(_Type::timing_Time, this);}
+            Time() {_sid = dc_timing_Time_new(); _addStoredInstance(_Type::timing_Time, this);}
+            Time(int year, unsigned int month, unsigned int day, unsigned int hour, unsigned int minute, unsigned int second) {_sid = dc_timing_Time_newUsingDate(year, month, day, hour, minute, second); _addStoredInstance(_Type::timing_Time, this);}
             Time(int year, unsigned int month, unsigned int day, unsigned long millisecondOfDay) {_sid = dc_timing_Time_newUsingMilliseconds(year, month, day, millisecondOfDay); _addStoredInstance(_Type::timing_Time, this);}
 
             unsigned int daysInYear() {return dc_timing_Time_daysInYear(_sid);}
@@ -535,6 +542,7 @@ namespace timing {
             void incrementTime(int millseconds) {return dc_timing_Time_incrementTime(_sid, millseconds);}
             void toLocalTime(int timeShift) {return dc_timing_Time_toLocalTime(_sid, timeShift);}
             void toGlobalTime() {return dc_timing_Time_toGlobalTime(_sid);}
+            int timeShift() {return dc_timing_Time_timeShift(_sid);}
             int year() {return dc_timing_Time_year(_sid);}
             unsigned int month() {return dc_timing_Time_month(_sid);}
             unsigned int day() {return dc_timing_Time_day(_sid);}
@@ -555,6 +563,11 @@ namespace timing {
         public:
             using Time::Time;
 
+            EarthTime() : Time((_Dummy) {}) {_sid = dc_timing_EarthTime_new(); _addStoredInstance(_Type::timing_EarthTime, this);}
+            EarthTime(int year, unsigned int month, unsigned int day, unsigned int hour, unsigned int minute, unsigned int second) : Time((_Dummy) {}) {_sid = dc_timing_EarthTime_newUsingDate(year, month, day, hour, minute, second); _addStoredInstance(_Type::timing_EarthTime, this);}
+            EarthTime(int year, unsigned int month, unsigned int day, unsigned long millisecondOfDay) : Time((_Dummy) {}) {_sid = dc_timing_EarthTime_newUsingMilliseconds(year, month, day, millisecondOfDay); _addStoredInstance(_Type::timing_EarthTime, this);}
+
+            void syncToSystemTime() {return dc_timing_EarthTime_syncToSystemTime(_sid);}
     };
 }
 

@@ -97,14 +97,14 @@ function class {
             echo
         ) >> applib/digicron.h
 
-        echo "        (type == Type::${NAMESPACE}_$CLASS && storedInstance->type == Type::${NAMESPACE}_$CLASS_EXTENDS) ||" >> tools/api/_api-typeinheritance.h
+        echo "        (type == Type::${NAMESPACE}_$CLASS_EXTENDS && storedInstance->type == Type::${NAMESPACE}_$CLASS) ||" >> tools/api/_api-typeinheritance.h
 
         shift
         shift
         shift
 
         while (($#)); do
-            echo "        (type == Type::${NAMESPACE}_$CLASS && storedInstance->type == Type::${NAMESPACE}_$1) ||" >> tools/api/_api-typeinheritance.h
+            echo "        (type == Type::${NAMESPACE}_$1 && storedInstance->type == Type::${NAMESPACE}_$CLASS) ||" >> tools/api/_api-typeinheritance.h
             shift
         done
 

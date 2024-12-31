@@ -40,6 +40,7 @@ namespace timing {
             void incrementTime(int milliseconds);
             void toLocalTime(int timeShift);
             void toGlobalTime();
+            int timeShift();
 
             virtual int year();
             virtual unsigned int month();
@@ -97,6 +98,7 @@ namespace timing {
             using EarthTimeNonLeaping::EarthTimeNonLeaping;
 
             struct LeapAdjustment leapAdjustmentToday() override;
+            void syncToSystemTime();
     };
 
     extern timing::EarthTime earthTime;

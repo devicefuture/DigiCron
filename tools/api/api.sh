@@ -2,7 +2,8 @@
 
 namespace timing
     class Time
-        constructor "int" year "unsigned int" month "unsigned int" day "unsigned int" hour "unsigned int" minute "unsigned int" second
+        constructor
+        INTERNAL_NAME=dc_timing_Time_newUsingDate constructor "int" year "unsigned int" month "unsigned int" day "unsigned int" hour "unsigned int" minute "unsigned int" second
         INTERNAL_NAME=dc_timing_Time_newUsingMilliseconds constructor "int" year "unsigned int" month "unsigned int" day "unsigned long" millisecondOfDay
 
         method "unsigned int" daysInYear
@@ -17,6 +18,7 @@ namespace timing
         method "void" incrementTime "int" millseconds
         method "void" toLocalTime "int" timeShift
         method "void" toGlobalTime
+        method "int" timeShift
 
         method "int" year
         method "unsigned int" month
@@ -33,8 +35,11 @@ namespace timing
         method "unsigned int" weekday
 
     class EarthTime extends Time
-        OVERRIDE=true constructor "int" year "unsigned int" month "unsigned int" day "unsigned int" hour "unsigned int" minute "unsigned int" second
+        OVERRIDE=true constructor
+        OVERRIDE=true INTERNAL_NAME=dc_timing_EarthTime_newUsingDate constructor "int" year "unsigned int" month "unsigned int" day "unsigned int" hour "unsigned int" minute "unsigned int" second
         OVERRIDE=true INTERNAL_NAME=dc_timing_EarthTime_newUsingMilliseconds constructor "int" year "unsigned int" month "unsigned int" day "unsigned long" millisecondOfDay
+
+        method "void" syncToSystemTime
 
 namespace input
     enum Button \

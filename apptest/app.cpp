@@ -8,6 +8,7 @@ int count = 0;
 
 test::TestClass* testClass;
 test::TestSubclass* testSubclass;
+timing::EarthTime* currentTime;
 ui::Screen* screen;
 
 ui::Icon* smileIcon = ui::constructIcon(
@@ -24,9 +25,15 @@ class HelloScreen : public ui::Screen {
             clear();
 
             if (_selectPressed) {
+                int secs = currentTime->second();
+
                 print("Pressed!");
                 print('0' + ((updateCycles / 10) % 10));
                 print('0' + (updateCycles % 10));
+                print(" ");
+                print('0' + ((secs / 10) % 10));
+                print('0' + (secs % 10));
+                print('s');
                 print(" ");
             } else {
                 print("Hello,\nworld! ");
@@ -100,12 +107,16 @@ void setup() {
     testSubclass->identify();
     testSubclass->subclass();
 
+    currentTime = new timing::EarthTime();
+
     screen = new HelloScreen();
 
     screen->open(true);
 }
 
 void loop() {
+    currentTime->syncToSystemTime();
+
     if (count >= 10) {
         return;
     }
