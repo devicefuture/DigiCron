@@ -17,8 +17,9 @@ template<typename T> T* api::getBySid(api::Type type, api::Sid sid) {
     StoredInstance* storedInstance = storedInstances[sid];
 
     if (!storedInstance || (storedInstance->type != type && !(
-        (type == Type::timing_Time && storedInstance->type == Type::timing_EarthTime) ||
-        (type == Type::test_TestClass && storedInstance->type == Type::test_TestSubclass) ||
+            (type == Type::timing_Time && storedInstance->type == Type::timing_EarthTime) ||
+            (type == Type::ui_Screen && storedInstance->type == Type::ui_Popup) ||
+            (type == Type::test_TestClass && storedInstance->type == Type::test_TestSubclass) ||
         false
     ))) {
         Serial.println("Inheritance check failed");
@@ -86,6 +87,7 @@ void deleteStoredInstance(api::StoredInstance* storedInstance) {
         case api::Type::timing_EarthTime: delete (timing::EarthTime*)storedInstance->instance; break;
         case api::Type::ui_Icon: delete (ui::Icon*)storedInstance->instance; break;
         case api::Type::ui_Screen: delete (ui::Screen*)storedInstance->instance; break;
+        case api::Type::ui_Popup: delete (ui::Popup*)storedInstance->instance; break;
         case api::Type::test_TestClass: delete (test::TestClass*)storedInstance->instance; break;
         case api::Type::test_TestSubclass: delete (test::TestSubclass*)storedInstance->instance; break;
         default: delete storedInstance->instance; break;
@@ -594,6 +596,33 @@ m3ApiRawFunction(api::dc_ui_Screen_swapWith) {
     m3ApiSuccess();
 }
 
+m3ApiRawFunction(api::dc_ui_Popup_new) {
+    m3ApiReturnType(Sid)
+
+    auto instance = new ui::Popup((proc::WasmProcess*)runtime->userdata);
+
+    Sid result = api::store<ui::Popup>(Type::ui_Popup, (proc::WasmProcess*)runtime->userdata, instance);
+
+    m3ApiReturn(result);
+}
+
+m3ApiRawFunction(api::dc_ui_Popup_open) {
+    m3ApiGetArg(Sid, _sid)
+    m3ApiGetArg(bool, urgent)
+
+    api::getBySid<ui::Popup>(Type::ui_Popup, _sid)->open(urgent);
+
+    m3ApiSuccess();
+}
+
+m3ApiRawFunction(api::dc_ui_Popup_close) {
+    m3ApiGetArg(Sid, _sid)
+
+    api::getBySid<ui::Popup>(Type::ui_Popup, _sid)->close();
+
+    m3ApiSuccess();
+}
+
 m3ApiRawFunction(api::dc_test_TestClass_new) {
     m3ApiReturnType(Sid)
     m3ApiGetArg(unsigned int, seed)
@@ -739,6 +768,9 @@ void api::linkFunctions(IM3Runtime runtime) {
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_open", "v(ii)", &dc_ui_Screen_open);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_close", "v(i)", &dc_ui_Screen_close);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_swapWith", "v(ii)", &dc_ui_Screen_swapWith);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Popup_new", "i()", &dc_ui_Popup_new);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Popup_open", "v(ii)", &dc_ui_Popup_open);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Popup_close", "v(i)", &dc_ui_Popup_close);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_test_TestClass_new", "i(i)", &dc_test_TestClass_new);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_test_TestClass_identify", "v(i)", &dc_test_TestClass_identify);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_test_TestClass_add", "i(iii)", &dc_test_TestClass_add);

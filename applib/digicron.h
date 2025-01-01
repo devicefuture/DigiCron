@@ -73,6 +73,9 @@ WASM_IMPORT("digicron", "dc_ui_Screen_filledRect") void dc_ui_Screen_filledRect(
 WASM_IMPORT("digicron", "dc_ui_Screen_open") void dc_ui_Screen_open(dc::_Sid sid, bool urgent);
 WASM_IMPORT("digicron", "dc_ui_Screen_close") void dc_ui_Screen_close(dc::_Sid sid);
 WASM_IMPORT("digicron", "dc_ui_Screen_swapWith") void dc_ui_Screen_swapWith(dc::_Sid sid, dc::_Sid currentScreen);
+WASM_IMPORT("digicron", "dc_ui_Popup_new") dc::_Sid dc_ui_Popup_new();
+WASM_IMPORT("digicron", "dc_ui_Popup_open") void dc_ui_Popup_open(dc::_Sid sid, bool urgent);
+WASM_IMPORT("digicron", "dc_ui_Popup_close") void dc_ui_Popup_close(dc::_Sid sid);
 WASM_IMPORT("digicron", "dc_test_TestClass_new") dc::_Sid dc_test_TestClass_new(unsigned int seed);
 WASM_IMPORT("digicron", "dc_test_TestClass_identify") void dc_test_TestClass_identify(dc::_Sid sid);
 WASM_IMPORT("digicron", "dc_test_TestClass_add") unsigned int dc_test_TestClass_add(dc::_Sid sid, unsigned int value, unsigned int value2);
@@ -464,7 +467,7 @@ namespace dataTypes {
 
 #endif
 
-enum _Type {EMPTY, timing_Time, timing_EarthTime, ui_Icon, ui_Screen, test_TestClass, test_TestSubclass};
+enum _Type {EMPTY, timing_Time, timing_EarthTime, ui_Icon, ui_Screen, ui_Popup, test_TestClass, test_TestSubclass};
 
 struct _StoredInstance {
     _Type type;
@@ -477,7 +480,12 @@ template<typename T> T* _getBySid(_Type type, _Sid sid) {
     _storedInstances.start();
 
     while (_StoredInstance* storedInstance = _storedInstances.next()) {
-        if (storedInstance->type != type) {
+        if (storedInstance->type != type && !(
+            (type == _Type::timing_Time && storedInstance->type == _Type::timing_EarthTime) ||
+            (type == _Type::ui_Screen && storedInstance->type == _Type::ui_Popup) ||
+            (type == _Type::test_TestClass && storedInstance->type == _Type::test_TestSubclass) ||
+            false
+        )) {
             continue;
         }
 
@@ -648,9 +656,22 @@ namespace ui {
             void filledRect(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, ui::PenMode value) {return dc_ui_Screen_filledRect(_sid, x1, y1, x2, y2, value);}
             virtual void update() {}
             virtual void handleEvent(ui::Event event) {}
-            void open(bool urgent) {return dc_ui_Screen_open(_sid, urgent);}
-            void close() {return dc_ui_Screen_close(_sid);}
+            virtual void open(bool urgent) {return dc_ui_Screen_open(_sid, urgent);}
+            virtual void close() {return dc_ui_Screen_close(_sid);}
             void swapWith(ui::Screen* currentScreen) {return dc_ui_Screen_swapWith(_sid, currentScreen->_getSid());}
+    };
+
+    class Popup : public Screen {
+        protected:
+            Popup(_Dummy dummy) : Screen(dummy) {}
+
+        public:
+            using Screen::Screen;
+
+            Popup() : Screen((_Dummy) {}) {_sid = dc_ui_Popup_new(); _addStoredInstance(_Type::ui_Popup, this);}
+
+            void open(bool urgent) override {return dc_ui_Popup_open(_sid, urgent);}
+            void close() override {return dc_ui_Popup_close(_sid);}
     };
 }
 

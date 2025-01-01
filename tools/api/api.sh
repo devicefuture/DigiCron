@@ -84,9 +84,15 @@ namespace ui
         callable "void" update
         callable "void" handleEvent "ui::Event" event
 
-        method "void" open "bool" urgent
-        method "void" close
+        VIRTUAL=true method "void" open "bool" urgent
+        VIRTUAL=true method "void" close
         method "void" swapWith "CLASSPTR ui::Screen" currentScreen
+
+    class Popup extends Screen
+        OVERRIDE=true PASS_PROCESS=true constructor
+
+        OVERRIDE=true method "void" open "bool" urgent
+        OVERRIDE=true method "void" close
 
 namespace test
     class TestClass

@@ -97,14 +97,16 @@ function class {
             echo
         ) >> applib/digicron.h
 
-        echo "        (type == Type::${NAMESPACE}_$CLASS_EXTENDS && storedInstance->type == Type::${NAMESPACE}_$CLASS) ||" >> tools/api/_api-typeinheritance.h
+        echo "            (type == Type::${NAMESPACE}_$CLASS_EXTENDS && storedInstance->type == Type::${NAMESPACE}_$CLASS) ||" >> tools/api/_api-typeinheritance.h
+        echo "            (type == _Type::${NAMESPACE}_$CLASS_EXTENDS && storedInstance->type == _Type::${NAMESPACE}_$CLASS) ||" >> tools/api/_digicron-typeinheritance.h
 
         shift
         shift
         shift
 
         while (($#)); do
-            echo "        (type == Type::${NAMESPACE}_$1 && storedInstance->type == Type::${NAMESPACE}_$CLASS) ||" >> tools/api/_api-typeinheritance.h
+            echo "            (type == Type::${NAMESPACE}_$1 && storedInstance->type == Type::${NAMESPACE}_$CLASS) ||" >> tools/api/_api-typeinheritance.h
+            echo "            (type == _Type::${NAMESPACE}_$1 && storedInstance->type == _Type::${NAMESPACE}_$CLASS) ||" >> tools/api/_digicron-typeinheritance.h
             shift
         done
 
@@ -454,7 +456,7 @@ template<typename T> T* api::getBySid(api::Type type, api::Sid sid) {
     StoredInstance* storedInstance = storedInstances[sid];
 
     if (!storedInstance || (storedInstance->type != type && !(
-        /* {{ typeInheritance }} */
+        // {{ typeInheritance }}
         false
     ))) {
         Serial.println("Inheritance check failed");
@@ -607,6 +609,7 @@ EOF
 mkdir -p applib
 
 > tools/api/_digicron-imports.h
+> tools/api/_digicron-typeinheritance.h
 > applib/digicron.h
 > applib/digicron.syms
 
@@ -677,7 +680,10 @@ template<typename T> T* _getBySid(_Type type, _Sid sid) {
     _storedInstances.start();
 
     while (_StoredInstance* storedInstance = _storedInstances.next()) {
-        if (storedInstance->type != type) {
+        if (storedInstance->type != type && !(
+            // {{ typeInheritance }}
+            false
+        )) {
             continue;
         }
 
@@ -769,7 +775,7 @@ EOF
 TAG_TYPES=$(echo $TAG_TYPES | sed "s/\(.*\),/\1/")
 
 sed -i -e "\|// {{ includes }}|{r tools/api/_api-includes.h" -e "d}" firmware/_api.cpp
-sed -i -e "\|/\* {{ typeInheritance }} \*/|{r tools/api/_api-typeinheritance.h" -e "d}" firmware/_api.cpp
+sed -i -e "\|// {{ typeInheritance }}|{r tools/api/_api-typeinheritance.h" -e "d}" firmware/_api.cpp
 sed -i -e "\|// {{ templates }}|{r tools/api/_api-templates.h" -e "d}" firmware/_api.cpp
 sed -i -e "\|// {{ deletes }}|{r tools/api/_api-deletes.h" -e "d}" firmware/_api.cpp
 sed -i -e "\|// {{ includes }}|{r tools/api/_api-includes.h" -e "d}" firmware/_api.h
@@ -777,4 +783,5 @@ sed -i "s|/\* {{ tagTypes }} \*/|$TAG_TYPES|" firmware/_api.h
 sed -i "s|/\* {{ tagTypes }} \*/|$TAG_TYPES|" applib/digicron.h
 sed -i -e "\|// {{ stdlib }}|{r tools/api/digicron-stdlib.h" -e "d}" applib/digicron.h
 sed -i -e "\|// {{ imports }}|{r tools/api/_digicron-imports.h" -e "d}" applib/digicron.h
+sed -i -e "\|// {{ typeInheritance }}|{r tools/api/_digicron-typeinheritance.h" -e "d}" applib/digicron.h
 sed -i -e "\|// {{ callables }}|{r tools/api/digicron-callables.h" -e "d}" applib/digicron.h

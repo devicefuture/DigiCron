@@ -429,7 +429,7 @@ void ui::Popup::_update() {
 
 void ui::Popup::_handleEvent(ui::Event event) {
     if (_transitionState == PopupTransitionState::NONE) {
-        handleEvent(event);
+        Screen::_handleEvent(event);
     }
 }
 

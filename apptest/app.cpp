@@ -10,6 +10,7 @@ test::TestClass* testClass;
 test::TestSubclass* testSubclass;
 timing::EarthTime* currentTime;
 ui::Screen* screen;
+ui::Popup* popup;
 
 ui::Icon* smileIcon = ui::constructIcon(
     "     "
@@ -53,6 +54,10 @@ class HelloScreen : public ui::Screen {
                 _selectPressed = true;
             }
 
+            if (event.type == ui::EventType::BUTTON_DOWN && event.data.button == input::Button::DOWN) {
+                popup->open(false);
+            }
+
             if (event.type == ui::EventType::BUTTON_DOWN && event.data.button == input::Button::BACK) {
                 dc_stop();
             }
@@ -61,6 +66,20 @@ class HelloScreen : public ui::Screen {
     private:
         bool _selectPressed = false;
         unsigned int updateCycles = 0;
+};
+
+class HelloPopup : public ui::Popup {
+    void update() {
+        clear();
+
+        print("THIS IS\nA TEST");
+    }
+
+    void handleEvent(ui::Event event) {
+        if (event.type == ui::EventType::BUTTON_DOWN && event.data.button == input::Button::BACK) {
+            close();
+        }
+    }
 };
 
 void addr(unsigned int ptr) {
@@ -110,6 +129,7 @@ void setup() {
     currentTime = new timing::EarthTime();
 
     screen = new HelloScreen();
+    popup = new HelloPopup();
 
     screen->open(true);
 }

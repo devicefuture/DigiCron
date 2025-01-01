@@ -126,6 +126,8 @@ namespace ui {
 
     class Popup : public Screen {
         public:
+            using Screen::Screen;
+
             void open(bool urgent = false) override;
             void close() override;
 
