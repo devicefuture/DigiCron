@@ -41,6 +41,8 @@ namespace timing
 
         method "void" syncToSystemTime
 
+    fn "unsigned long" getCurrentTick
+
 namespace input
     enum Button \
         "NONE = 0" \

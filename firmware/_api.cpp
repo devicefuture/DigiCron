@@ -429,6 +429,13 @@ m3ApiRawFunction(api::dc_timing_EarthTime_syncToSystemTime) {
     m3ApiSuccess();
 }
 
+m3ApiRawFunction(api::dc_timing_getCurrentTick) {
+    m3ApiReturnType(unsigned long)
+    unsigned long result = timing::getCurrentTick();
+
+    m3ApiReturn(result);
+}
+
 m3ApiRawFunction(api::dc_ui_Icon_new) {
     m3ApiReturnType(Sid)
 
@@ -751,6 +758,7 @@ void api::linkFunctions(IM3Runtime runtime) {
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_EarthTime_newUsingDate", "i(iiiiii)", &dc_timing_EarthTime_newUsingDate);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_EarthTime_newUsingMilliseconds", "i(iiii)", &dc_timing_EarthTime_newUsingMilliseconds);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_EarthTime_syncToSystemTime", "v(i)", &dc_timing_EarthTime_syncToSystemTime);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_getCurrentTick", "i()", &dc_timing_getCurrentTick);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Icon_new", "i()", &dc_ui_Icon_new);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Icon_setPixel", "v(iiii)", &dc_ui_Icon_setPixel);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_new", "i()", &dc_ui_Screen_new);

@@ -61,6 +61,7 @@ namespace api {
     m3ApiRawFunction(dc_timing_EarthTime_newUsingDate);
     m3ApiRawFunction(dc_timing_EarthTime_newUsingMilliseconds);
     m3ApiRawFunction(dc_timing_EarthTime_syncToSystemTime);
+    m3ApiRawFunction(dc_timing_getCurrentTick);
     m3ApiRawFunction(dc_ui_Icon_new);
     m3ApiRawFunction(dc_ui_Icon_setPixel);
     m3ApiRawFunction(dc_ui_Screen_new);

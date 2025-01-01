@@ -56,6 +56,7 @@ WASM_IMPORT("digicron", "dc_timing_EarthTime_new") dc::_Sid dc_timing_EarthTime_
 WASM_IMPORT("digicron", "dc_timing_EarthTime_newUsingDate") dc::_Sid dc_timing_EarthTime_newUsingDate(int year, unsigned int month, unsigned int day, unsigned int hour, unsigned int minute, unsigned int second);
 WASM_IMPORT("digicron", "dc_timing_EarthTime_newUsingMilliseconds") dc::_Sid dc_timing_EarthTime_newUsingMilliseconds(int year, unsigned int month, unsigned int day, unsigned long millisecondOfDay);
 WASM_IMPORT("digicron", "dc_timing_EarthTime_syncToSystemTime") void dc_timing_EarthTime_syncToSystemTime(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_timing_getCurrentTick") unsigned long dc_timing_getCurrentTick();
 WASM_IMPORT("digicron", "dc_ui_Icon_new") dc::_Sid dc_ui_Icon_new();
 WASM_IMPORT("digicron", "dc_ui_Icon_setPixel") void dc_ui_Icon_setPixel(dc::_Sid sid, unsigned int x, unsigned int y, dc::_Enum value);
 WASM_IMPORT("digicron", "dc_ui_Screen_new") dc::_Sid dc_ui_Screen_new();
@@ -577,6 +578,8 @@ namespace timing {
 
             void syncToSystemTime() {return dc_timing_EarthTime_syncToSystemTime(_sid);}
     };
+
+    unsigned long getCurrentTick() {return dc_timing_getCurrentTick();}
 }
 
 namespace input {
