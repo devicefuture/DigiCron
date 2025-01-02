@@ -75,8 +75,6 @@ WASM_IMPORT("digicron", "dc_ui_Screen_open") void dc_ui_Screen_open(dc::_Sid sid
 WASM_IMPORT("digicron", "dc_ui_Screen_close") void dc_ui_Screen_close(dc::_Sid sid);
 WASM_IMPORT("digicron", "dc_ui_Screen_swapWith") void dc_ui_Screen_swapWith(dc::_Sid sid, dc::_Sid currentScreen);
 WASM_IMPORT("digicron", "dc_ui_Popup_new") dc::_Sid dc_ui_Popup_new();
-WASM_IMPORT("digicron", "dc_ui_Popup_open") void dc_ui_Popup_open(dc::_Sid sid, bool urgent);
-WASM_IMPORT("digicron", "dc_ui_Popup_close") void dc_ui_Popup_close(dc::_Sid sid);
 WASM_IMPORT("digicron", "dc_test_TestClass_new") dc::_Sid dc_test_TestClass_new(unsigned int seed);
 WASM_IMPORT("digicron", "dc_test_TestClass_identify") void dc_test_TestClass_identify(dc::_Sid sid);
 WASM_IMPORT("digicron", "dc_test_TestClass_add") unsigned int dc_test_TestClass_add(dc::_Sid sid, unsigned int value, unsigned int value2);
@@ -674,9 +672,6 @@ namespace ui {
             using Screen::Screen;
 
             Popup() : Screen((_Dummy) {}) {_sid = dc_ui_Popup_new(); _addStoredInstance(_Type::ui_Popup, this);}
-
-            void open(bool urgent) override {return dc_ui_Popup_open(_sid, urgent);}
-            void close() override {return dc_ui_Popup_close(_sid);}
     };
 }
 

@@ -93,9 +93,6 @@ namespace ui
     class Popup extends Screen
         OVERRIDE=true PASS_PROCESS=true constructor
 
-        OVERRIDE=true method "void" open "bool" urgent
-        OVERRIDE=true method "void" close
-
 namespace test
     class TestClass
         constructor "unsigned int" seed

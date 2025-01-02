@@ -50,8 +50,6 @@ dc_ui_Screen_open
 dc_ui_Screen_close
 dc_ui_Screen_swapWith
 dc_ui_Popup_new
-dc_ui_Popup_open
-dc_ui_Popup_close
 dc_test_TestClass_new
 dc_test_TestClass_identify
 dc_test_TestClass_add

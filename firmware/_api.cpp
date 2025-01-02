@@ -613,23 +613,6 @@ m3ApiRawFunction(api::dc_ui_Popup_new) {
     m3ApiReturn(result);
 }
 
-m3ApiRawFunction(api::dc_ui_Popup_open) {
-    m3ApiGetArg(Sid, _sid)
-    m3ApiGetArg(bool, urgent)
-
-    api::getBySid<ui::Popup>(Type::ui_Popup, _sid)->open(urgent);
-
-    m3ApiSuccess();
-}
-
-m3ApiRawFunction(api::dc_ui_Popup_close) {
-    m3ApiGetArg(Sid, _sid)
-
-    api::getBySid<ui::Popup>(Type::ui_Popup, _sid)->close();
-
-    m3ApiSuccess();
-}
-
 m3ApiRawFunction(api::dc_test_TestClass_new) {
     m3ApiReturnType(Sid)
     m3ApiGetArg(unsigned int, seed)
@@ -777,8 +760,6 @@ void api::linkFunctions(IM3Runtime runtime) {
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_close", "v(i)", &dc_ui_Screen_close);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_swapWith", "v(ii)", &dc_ui_Screen_swapWith);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Popup_new", "i()", &dc_ui_Popup_new);
-    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Popup_open", "v(ii)", &dc_ui_Popup_open);
-    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Popup_close", "v(i)", &dc_ui_Popup_close);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_test_TestClass_new", "i(i)", &dc_test_TestClass_new);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_test_TestClass_identify", "v(i)", &dc_test_TestClass_identify);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_test_TestClass_add", "i(iii)", &dc_test_TestClass_add);

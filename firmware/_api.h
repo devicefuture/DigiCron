@@ -80,8 +80,6 @@ namespace api {
     m3ApiRawFunction(dc_ui_Screen_close);
     m3ApiRawFunction(dc_ui_Screen_swapWith);
     m3ApiRawFunction(dc_ui_Popup_new);
-    m3ApiRawFunction(dc_ui_Popup_open);
-    m3ApiRawFunction(dc_ui_Popup_close);
     m3ApiRawFunction(dc_test_TestClass_new);
     m3ApiRawFunction(dc_test_TestClass_identify);
     m3ApiRawFunction(dc_test_TestClass_add);
