@@ -598,7 +598,9 @@ namespace input {
 namespace ui {
     enum EventType {
         BUTTON_DOWN,
-        BUTTON_UP
+        BUTTON_UP,
+        ITEM_SELECT,
+        CANCEL
     };
 
     enum PopupTransitionState {

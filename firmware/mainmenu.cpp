@@ -39,16 +39,18 @@ mainMenu::MainMenuScreen::MainMenuScreen() : ui::Menu() {
     items.push(new String("REALLY LONG NAME"));
     items.push(new String("ANOTHER"));
     items.push(new String("ENDLESS"));
+}
 
-    onSelect = [](ui::Menu* self, unsigned int selectedIndex) {
-        if (*self->items[selectedIndex] == "NOTIFS") {
+void mainMenu::MainMenuScreen::handleEvent(ui::Event event) {
+    if (event.type == ui::EventType::ITEM_SELECT) {
+        if (items[event.data.index]->equals("NOTIFS")) {
             testPopup.open(true);
         }
 
-        if (*self->items[selectedIndex] == "APPS") {
+        if (items[event.data.index]->equals("APPS")) {
             mainMenu::appsMenuScreen.open();
         }
-    };
+    }
 }
 
 mainMenu::AppsMenuScreen::AppsMenuScreen() : ui::ContextualMenu("APPS") {
@@ -62,8 +64,10 @@ mainMenu::AppsMenuScreen::AppsMenuScreen() : ui::ContextualMenu("APPS") {
     items.push(new String("atto"));
     items.push(new String("Calc"));
     items.push(new String("Cronogotchi"));
+}
 
-    onSelect = [](ui::Menu* self, unsigned int selectedIndex) {
+void mainMenu::AppsMenuScreen::handleEvent(ui::Event event) {
+    if (event.type == ui::EventType::ITEM_SELECT) {
         auto process = new proc::WasmProcess((char*)apptest_app_wasm, apptest_app_wasm_len);
 
         process->onStop = [](proc::Process* process) {
@@ -71,5 +75,5 @@ mainMenu::AppsMenuScreen::AppsMenuScreen() : ui::ContextualMenu("APPS") {
 
             Serial.println("WASM process deleted");
         };
-    };
+    }
 }

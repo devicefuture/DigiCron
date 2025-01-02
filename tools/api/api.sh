@@ -55,7 +55,7 @@ namespace input
         "SELECT = 7"
 
 namespace ui
-    enum EventType BUTTON_DOWN BUTTON_UP
+    enum EventType BUTTON_DOWN BUTTON_UP ITEM_SELECT CANCEL
 
     enum PopupTransitionState NONE OPENING CLOSING
 

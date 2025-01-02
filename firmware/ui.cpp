@@ -251,6 +251,10 @@ void ui::Screen::swapWith(ui::Screen* currentScreen) {
     determineCurrentScreen();
 }
 
+void ui::Screen::preventDefault() {
+    _defaultPrevented = true;
+}
+
 void ui::Screen::_update() {
     update();
 
@@ -260,6 +264,8 @@ void ui::Screen::_update() {
 }
 
 void ui::Screen::_handleEvent(ui::Event event) {
+    _defaultPrevented = false;
+
     handleEvent(event);
 
     if (ownerProcess && ownerProcess->getType() == proc::ProcessType::WASM) {
@@ -312,12 +318,20 @@ void ui::Menu::open(bool urgent) {
     ui::Screen::open(urgent);
 }
 
-void ui::Menu::handleEvent(Event event) {
+void ui::Menu::_handleEvent(Event event) {
+    ui::Screen::_handleEvent(event);
+
     if (event.type == EventType::BUTTON_DOWN) {
         switch (event.data.button) {
             case input::Button::BACK:
             {
-                if (onCancel) onCancel(this);
+                ui::Screen::_handleEvent((Event) {
+                    .type = EventType::CANCEL
+                });
+
+                if (!_defaultPrevented) {
+                    close();
+                }
 
                 break;
             }
@@ -351,9 +365,10 @@ void ui::Menu::handleEvent(Event event) {
             case input::Button::SELECT:
             {
                 if (_currentIndex < items.length()) {
-                    if (onSelect) onSelect(this, _currentIndex);
-                } else {
-                    if (onCancel) onCancel(this);
+                    ui::Screen::_handleEvent((Event) {
+                        .type = EventType::ITEM_SELECT,
+                        .data = {.index = _currentIndex}
+                    });
                 }
 
                 break;
@@ -508,10 +523,3 @@ void ui::renderCurrentScreen() {
 
     display::render(currentScreen->displayData);
 }
-
-template<typename T>
-void ui::defaultCancellationCallback(T* self) {
-    self->close();
-}
-
-template void ui::defaultCancellationCallback<ui::Menu>(ui::Menu* self);

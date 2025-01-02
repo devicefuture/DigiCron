@@ -18,7 +18,9 @@ namespace ui {
 
     enum EventType {
         BUTTON_DOWN,
-        BUTTON_UP
+        BUTTON_UP,
+        ITEM_SELECT,
+        CANCEL
     };
 
     enum PopupTransitionState {
@@ -36,6 +38,7 @@ namespace ui {
         EventType type;
         union {
             input::Button button;
+            unsigned int index;
         } data;
     };
 
@@ -78,6 +81,7 @@ namespace ui {
 
             virtual void update() {}
             virtual void handleEvent(Event event) {}
+            void preventDefault();
 
             virtual void _update();
             virtual void _handleEvent(Event event);
@@ -85,17 +89,12 @@ namespace ui {
         protected:
             unsigned int _currentPosition = 0;
             unsigned long _scrollStartTime = 0;
+            bool _defaultPrevented = false;
     };
 
     class Menu : public Screen {
         public:
-            typedef void (*CancellationCallback)(Menu* self);
-            typedef void (*SelectionCallback)(Menu* self, unsigned int selectedIndex);
-
             dataTypes::List<String> items;
-
-            CancellationCallback onCancel = defaultCancellationCallback<Menu>;
-            SelectionCallback onSelect = nullptr;
 
             Menu() : Screen() {};
 
@@ -106,7 +105,7 @@ namespace ui {
             virtual void open(bool urgent = false) override;
 
             void update() override;
-            void handleEvent(Event event) override;
+            void _handleEvent(Event event) override;
 
         protected:
             unsigned int _currentIndex = 0;

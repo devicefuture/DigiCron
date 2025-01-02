@@ -10,11 +10,15 @@ namespace mainMenu {
     class MainMenuScreen : public ui::Menu {
         public:
             MainMenuScreen();
+
+            void handleEvent(ui::Event event) override;
     };
 
     class AppsMenuScreen : public ui::ContextualMenu {
         public:
             AppsMenuScreen();
+
+            void handleEvent(ui::Event event) override;
     };
 
     extern MainMenuScreen mainMenuScreen;
