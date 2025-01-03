@@ -186,4 +186,6 @@ M3Result m3_Yield() {
 }
 
 template void proc::WasmProcess::callVoidOn<>(void*, char const*);
+template void proc::WasmProcess::callVoidOn<ui::EventType>(void*, char const*, ui::EventType);
 template void proc::WasmProcess::callVoidOn<ui::EventType, input::Button>(void*, char const*, ui::EventType, input::Button);
+template void proc::WasmProcess::callVoidOn<ui::EventType, unsigned int>(void*, char const*, ui::EventType, unsigned int);

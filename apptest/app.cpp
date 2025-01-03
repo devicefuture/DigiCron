@@ -11,6 +11,7 @@ test::TestSubclass* testSubclass;
 timing::EarthTime* currentTime;
 ui::Screen* screen;
 ui::Popup* popup;
+ui::Menu* menu;
 
 ui::Icon* smileIcon = ui::constructIcon(
     "     "
@@ -54,8 +55,12 @@ class HelloScreen : public ui::Screen {
                 _selectPressed = true;
             }
 
-            if (event.type == ui::EventType::BUTTON_DOWN && event.data.button == input::Button::DOWN) {
+            if (event.type == ui::EventType::BUTTON_DOWN && event.data.button == input::Button::UP) {
                 popup->open(false);
+            }
+
+            if (event.type == ui::EventType::BUTTON_DOWN && event.data.button == input::Button::DOWN) {
+                menu->open(false);
             }
 
             if (event.type == ui::EventType::BUTTON_DOWN && event.data.button == input::Button::BACK) {
@@ -80,6 +85,49 @@ class HelloPopup : public ui::Popup {
             close();
         }
     }
+};
+
+class ConfirmationPopup : public ui::Popup {
+    public:
+        String selectedItem = "None";
+
+        void setSelectedItem(String item) {
+            selectedItem = item;
+        }
+
+        void update() {
+            print(selectedItem);
+            print("\nselected");
+        }
+
+        void handleEvent(ui::Event event) {
+            if (event.type == ui::EventType::BUTTON_DOWN && event.data.button == input::Button::BACK) {
+                close();
+            }
+        }
+};
+
+ConfirmationPopup* confirmationPopup;
+
+class HelloMenu : public ui::ContextualMenu {
+    public:
+        HelloMenu() : ui::ContextualMenu() {
+            setTitle("TESTOPTS");
+
+            items.push(new String("Item 1"));
+            items.push(new String("Item 2"));
+            items.push(new String("Item 3"));
+
+            updateItems();
+        }
+
+        void handleEvent(ui::Event event) {
+            if (event.type == ui::EventType::ITEM_SELECT) {
+                confirmationPopup->setSelectedItem(*(items[event.data.index]));
+
+                confirmationPopup->open(false);
+            }
+        }
 };
 
 void addr(unsigned int ptr) {
@@ -130,6 +178,8 @@ void setup() {
 
     screen = new HelloScreen();
     popup = new HelloPopup();
+    menu = new HelloMenu();
+    confirmationPopup = new ConfirmationPopup();
 
     screen->open(true);
 }

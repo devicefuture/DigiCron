@@ -272,6 +272,14 @@ void ui::Screen::_handleEvent(ui::Event event) {
         if (event.type == EventType::BUTTON_UP || event.type == EventType::BUTTON_DOWN) {
             ((proc::WasmProcess*)ownerProcess)->callVoidOn(this, "_callable_ui_Screen_handleButtonEvent", event.type, event.data.button);
         }
+
+        if (event.type == EventType::ITEM_SELECT) {
+            ((proc::WasmProcess*)ownerProcess)->callVoidOn(this, "_callable_ui_Screen_handleItemEvent", event.type, event.data.index);
+        }
+
+        if (event.type == EventType::CANCEL) {
+            ((proc::WasmProcess*)ownerProcess)->callVoidOn(this, "_callable_ui_Screen_handleSimpleEvent", event.type);
+        }
     }
 }
 
@@ -318,7 +326,7 @@ void ui::Menu::open(bool urgent) {
     ui::Screen::open(urgent);
 }
 
-void ui::Menu::_handleEvent(Event event) {
+void ui::Menu::_handleEvent(ui::Event event) {
     ui::Screen::_handleEvent(event);
 
     if (event.type == EventType::BUTTON_DOWN) {
@@ -382,7 +390,7 @@ void ui::Menu::_handleEvent(Event event) {
 void ui::ContextualMenu::update() {
     clear();
 
-    scroll(title);
+    scroll(_title);
 
     if (items.length() == 0) {
         print("(Empty)");

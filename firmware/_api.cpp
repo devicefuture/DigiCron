@@ -18,6 +18,9 @@ template<typename T> T* api::getBySid(api::Type type, api::Sid sid) {
 
     if (!storedInstance || (storedInstance->type != type && !(
             (type == Type::timing_Time && storedInstance->type == Type::timing_EarthTime) ||
+            (type == Type::ui_Screen && storedInstance->type == Type::ui_Menu) ||
+            (type == Type::ui_Menu && storedInstance->type == Type::ui_ContextualMenu) ||
+            (type == Type::ui_Screen && storedInstance->type == Type::ui_ContextualMenu) ||
             (type == Type::ui_Screen && storedInstance->type == Type::ui_Popup) ||
             (type == Type::test_TestClass && storedInstance->type == Type::test_TestSubclass) ||
         false
@@ -87,6 +90,8 @@ void deleteStoredInstance(api::StoredInstance* storedInstance) {
         case api::Type::timing_EarthTime: delete (timing::EarthTime*)storedInstance->instance; break;
         case api::Type::ui_Icon: delete (ui::Icon*)storedInstance->instance; break;
         case api::Type::ui_Screen: delete (ui::Screen*)storedInstance->instance; break;
+        case api::Type::ui_Menu: delete (ui::Menu*)storedInstance->instance; break;
+        case api::Type::ui_ContextualMenu: delete (ui::ContextualMenu*)storedInstance->instance; break;
         case api::Type::ui_Popup: delete (ui::Popup*)storedInstance->instance; break;
         case api::Type::test_TestClass: delete (test::TestClass*)storedInstance->instance; break;
         case api::Type::test_TestSubclass: delete (test::TestSubclass*)storedInstance->instance; break;
@@ -505,11 +510,20 @@ m3ApiRawFunction(api::dc_ui_Screen_printChar) {
     m3ApiSuccess();
 }
 
-m3ApiRawFunction(api::dc_ui_Screen_print) {
+m3ApiRawFunction(api::dc_ui_Screen_printChars) {
     m3ApiGetArg(Sid, _sid)
     m3ApiGetArgMem(char*, chars)
 
     api::getBySid<ui::Screen>(Type::ui_Screen, _sid)->print(chars);
+
+    m3ApiSuccess();
+}
+
+m3ApiRawFunction(api::dc_ui_Screen_print) {
+    m3ApiGetArg(Sid, _sid)
+    m3ApiGetArgMem(char*, string)
+
+    api::getBySid<ui::Screen>(Type::ui_Screen, _sid)->print(String(string));
 
     m3ApiSuccess();
 }
@@ -599,6 +613,63 @@ m3ApiRawFunction(api::dc_ui_Screen_swapWith) {
     m3ApiGetArg(Sid, currentScreen)
 
     api::getBySid<ui::Screen>(Type::ui_Screen, _sid)->swapWith(api::getBySid<ui::Screen>(Type::ui_Screen, currentScreen));
+
+    m3ApiSuccess();
+}
+
+m3ApiRawFunction(api::dc_ui_Menu_new) {
+    m3ApiReturnType(Sid)
+
+    auto instance = new ui::Menu((proc::WasmProcess*)runtime->userdata);
+
+    Sid result = api::store<ui::Menu>(Type::ui_Menu, (proc::WasmProcess*)runtime->userdata, instance);
+
+    m3ApiReturn(result);
+}
+
+m3ApiRawFunction(api::dc_ui_Menu_clearItems) {
+    m3ApiGetArg(Sid, _sid)
+
+    api::getBySid<ui::Menu>(Type::ui_Menu, _sid)->clearItems();
+
+    m3ApiSuccess();
+}
+
+m3ApiRawFunction(api::dc_ui_Menu_addItem) {
+    m3ApiGetArg(Sid, _sid)
+    m3ApiGetArgMem(char*, item)
+
+    api::getBySid<ui::Menu>(Type::ui_Menu, _sid)->addItem(String(item));
+
+    m3ApiSuccess();
+}
+
+m3ApiRawFunction(api::dc_ui_ContextualMenu_new) {
+    m3ApiReturnType(Sid)
+
+    auto instance = new ui::ContextualMenu((proc::WasmProcess*)runtime->userdata);
+
+    Sid result = api::store<ui::ContextualMenu>(Type::ui_ContextualMenu, (proc::WasmProcess*)runtime->userdata, instance);
+
+    m3ApiReturn(result);
+}
+
+m3ApiRawFunction(api::dc_ui_ContextualMenu_newWithTitle) {
+    m3ApiReturnType(Sid)
+    m3ApiGetArgMem(char*, title)
+
+    auto instance = new ui::ContextualMenu((proc::WasmProcess*)runtime->userdata, String(title));
+
+    Sid result = api::store<ui::ContextualMenu>(Type::ui_ContextualMenu, (proc::WasmProcess*)runtime->userdata, instance);
+
+    m3ApiReturn(result);
+}
+
+m3ApiRawFunction(api::dc_ui_ContextualMenu_setTitle) {
+    m3ApiGetArg(Sid, _sid)
+    m3ApiGetArgMem(char*, title)
+
+    api::getBySid<ui::ContextualMenu>(Type::ui_ContextualMenu, _sid)->setTitle(String(title));
 
     m3ApiSuccess();
 }
@@ -749,7 +820,8 @@ void api::linkFunctions(IM3Runtime runtime) {
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_setPosition", "v(iii)", &dc_ui_Screen_setPosition);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_setPixel", "v(iiii)", &dc_ui_Screen_setPixel);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_printChar", "v(ii)", &dc_ui_Screen_printChar);
-    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_print", "v(i*)", &dc_ui_Screen_print);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_printChars", "v(i*)", &dc_ui_Screen_printChars);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_print", "v(ii)", &dc_ui_Screen_print);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_printIcon", "v(ii)", &dc_ui_Screen_printIcon);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_printRepeated", "v(iii)", &dc_ui_Screen_printRepeated);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_scroll", "v(iii)", &dc_ui_Screen_scroll);
@@ -759,6 +831,12 @@ void api::linkFunctions(IM3Runtime runtime) {
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_open", "v(ii)", &dc_ui_Screen_open);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_close", "v(i)", &dc_ui_Screen_close);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_swapWith", "v(ii)", &dc_ui_Screen_swapWith);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Menu_new", "i()", &dc_ui_Menu_new);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Menu_clearItems", "v(i)", &dc_ui_Menu_clearItems);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Menu_addItem", "v(ii)", &dc_ui_Menu_addItem);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_ContextualMenu_new", "i()", &dc_ui_ContextualMenu_new);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_ContextualMenu_newWithTitle", "i(i)", &dc_ui_ContextualMenu_newWithTitle);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_ContextualMenu_setTitle", "v(ii)", &dc_ui_ContextualMenu_setTitle);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Popup_new", "i()", &dc_ui_Popup_new);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_test_TestClass_new", "i(i)", &dc_test_TestClass_new);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_test_TestClass_identify", "v(i)", &dc_test_TestClass_identify);

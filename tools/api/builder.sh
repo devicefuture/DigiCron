@@ -406,6 +406,29 @@ function callable {
     echo ") {}" >> applib/digicron.h
 }
 
+function list {
+    itemType=$1
+    name=$2
+    updaterName=${3:-updateItems}
+    clearerName=${4:-clearItems}
+    adderName=${5:-addItem}
+
+    if [ "$itemType" = "String" ]; then
+        itemType=dataTypes::String
+    fi
+
+    if [ "$HAD_CONSTRUCTOR" = true ]; then
+        echo >> applib/digicron.h
+
+        export HAD_CONSTRUCTOR=false
+    fi
+
+    echo "            dataTypes::List<$itemType> $name;" >> applib/digicron.h
+    echo "            void $updaterName() {$clearerName(); $name.start(); while (auto item = $name.next()) {$adderName(*item);}}" >> applib/digicron.h
+
+    echo "Including list: List<$itemType> $NAMESPACE::$CLASS::$name (updater: $updaterName, clearer: $clearerName, adder: $adderName)"
+}
+
 function struct {
     echo >> applib/digicron.h
     echo "    struct $1 {" >> applib/digicron.h

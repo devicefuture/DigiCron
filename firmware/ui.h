@@ -94,13 +94,16 @@ namespace ui {
 
     class Menu : public Screen {
         public:
-            dataTypes::List<String> items;
+            using Screen::Screen;
 
-            Menu() : Screen() {};
+            dataTypes::List<String> items;
 
             Menu(dataTypes::List<String> menuItems) : Screen() {
                 items = menuItems;
             }
+
+            void clearItems() {items.empty();}
+            void addItem(String item) {items.push(new String(item));}
 
             virtual void open(bool urgent = false) override;
 
@@ -114,13 +117,28 @@ namespace ui {
 
     class ContextualMenu : public Menu {
         public:
-            String title;
+            using Menu::Menu;
 
-            ContextualMenu(String menuTitle) : Menu() {
-                title = menuTitle;
+            ContextualMenu(String title) : Menu() {
+                setTitle(title);
+            }
+
+            ContextualMenu(proc::Process* process, String title) : Menu(process) {
+                setTitle(title);
+            }
+
+            String getTitle() {
+                return _title;
+            }
+
+            void setTitle(String title) {
+                _title = title;
             }
 
             void update() override;
+
+        protected:
+            String _title = "";
     };
 
     class Popup : public Screen {

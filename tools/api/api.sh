@@ -61,7 +61,7 @@ namespace ui
 
     enum PenMode OFF ON
 
-    struct Event "EventType" type "union {input::Button button;}" data
+    struct Event "EventType" type "union {input::Button button; unsigned int index;}" data
 
     class Icon
         constructor
@@ -75,7 +75,8 @@ namespace ui
         method "void" setPosition "unsigned int" column "unsigned int" row
         method "void" setPixel "unsigned int" x "unsigned int" y "ENUM ui::PenMode" value
         INTERNAL_NAME=dc_ui_Screen_printChar method "void" print "char" c
-        method "void" print "char*" chars
+        INTERNAL_NAME=dc_ui_Screen_printChars method "void" print "char*" chars
+        method "void" print "String" string
         INTERNAL_NAME=dc_ui_Screen_printIcon method "void" print "CLASSPTR ui::Icon" icon
         method "void" printRepeated "String" string "unsigned int" times
         method "void" scroll "String" string "unsigned int" maxLength
@@ -89,6 +90,20 @@ namespace ui
         VIRTUAL=true method "void" open "bool" urgent
         VIRTUAL=true method "void" close
         method "void" swapWith "CLASSPTR ui::Screen" currentScreen
+
+    class Menu extends Screen
+        OVERRIDE=true PASS_PROCESS=true constructor
+
+        method "void" clearItems
+        method "void" addItem "String" item
+
+        list "String" items
+
+    class ContextualMenu extends Menu Screen
+        OVERRIDE=true PASS_PROCESS=true constructor
+        INTERNAL_NAME=dc_ui_ContextualMenu_newWithTitle PASS_PROCESS=true constructor "String" title
+
+        method "void" setTitle "String" title
 
     class Popup extends Screen
         OVERRIDE=true PASS_PROCESS=true constructor

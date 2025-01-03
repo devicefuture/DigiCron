@@ -39,6 +39,7 @@ dc_ui_Screen_clear
 dc_ui_Screen_setPosition
 dc_ui_Screen_setPixel
 dc_ui_Screen_printChar
+dc_ui_Screen_printChars
 dc_ui_Screen_print
 dc_ui_Screen_printIcon
 dc_ui_Screen_printRepeated
@@ -49,6 +50,12 @@ dc_ui_Screen_filledRect
 dc_ui_Screen_open
 dc_ui_Screen_close
 dc_ui_Screen_swapWith
+dc_ui_Menu_new
+dc_ui_Menu_clearItems
+dc_ui_Menu_addItem
+dc_ui_ContextualMenu_new
+dc_ui_ContextualMenu_newWithTitle
+dc_ui_ContextualMenu_setTitle
 dc_ui_Popup_new
 dc_test_TestClass_new
 dc_test_TestClass_identify

@@ -64,7 +64,8 @@ WASM_IMPORT("digicron", "dc_ui_Screen_clear") void dc_ui_Screen_clear(dc::_Sid s
 WASM_IMPORT("digicron", "dc_ui_Screen_setPosition") void dc_ui_Screen_setPosition(dc::_Sid sid, unsigned int column, unsigned int row);
 WASM_IMPORT("digicron", "dc_ui_Screen_setPixel") void dc_ui_Screen_setPixel(dc::_Sid sid, unsigned int x, unsigned int y, dc::_Enum value);
 WASM_IMPORT("digicron", "dc_ui_Screen_printChar") void dc_ui_Screen_printChar(dc::_Sid sid, char c);
-WASM_IMPORT("digicron", "dc_ui_Screen_print") void dc_ui_Screen_print(dc::_Sid sid, char* chars);
+WASM_IMPORT("digicron", "dc_ui_Screen_printChars") void dc_ui_Screen_printChars(dc::_Sid sid, char* chars);
+WASM_IMPORT("digicron", "dc_ui_Screen_print") void dc_ui_Screen_print(dc::_Sid sid, char* string);
 WASM_IMPORT("digicron", "dc_ui_Screen_printIcon") void dc_ui_Screen_printIcon(dc::_Sid sid, dc::_Sid icon);
 WASM_IMPORT("digicron", "dc_ui_Screen_printRepeated") void dc_ui_Screen_printRepeated(dc::_Sid sid, char* string, unsigned int times);
 WASM_IMPORT("digicron", "dc_ui_Screen_scroll") void dc_ui_Screen_scroll(dc::_Sid sid, char* string, unsigned int maxLength);
@@ -74,6 +75,12 @@ WASM_IMPORT("digicron", "dc_ui_Screen_filledRect") void dc_ui_Screen_filledRect(
 WASM_IMPORT("digicron", "dc_ui_Screen_open") void dc_ui_Screen_open(dc::_Sid sid, bool urgent);
 WASM_IMPORT("digicron", "dc_ui_Screen_close") void dc_ui_Screen_close(dc::_Sid sid);
 WASM_IMPORT("digicron", "dc_ui_Screen_swapWith") void dc_ui_Screen_swapWith(dc::_Sid sid, dc::_Sid currentScreen);
+WASM_IMPORT("digicron", "dc_ui_Menu_new") dc::_Sid dc_ui_Menu_new();
+WASM_IMPORT("digicron", "dc_ui_Menu_clearItems") void dc_ui_Menu_clearItems(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_ui_Menu_addItem") void dc_ui_Menu_addItem(dc::_Sid sid, char* item);
+WASM_IMPORT("digicron", "dc_ui_ContextualMenu_new") dc::_Sid dc_ui_ContextualMenu_new();
+WASM_IMPORT("digicron", "dc_ui_ContextualMenu_newWithTitle") dc::_Sid dc_ui_ContextualMenu_newWithTitle(char* title);
+WASM_IMPORT("digicron", "dc_ui_ContextualMenu_setTitle") void dc_ui_ContextualMenu_setTitle(dc::_Sid sid, char* title);
 WASM_IMPORT("digicron", "dc_ui_Popup_new") dc::_Sid dc_ui_Popup_new();
 WASM_IMPORT("digicron", "dc_test_TestClass_new") dc::_Sid dc_test_TestClass_new(unsigned int seed);
 WASM_IMPORT("digicron", "dc_test_TestClass_identify") void dc_test_TestClass_identify(dc::_Sid sid);
@@ -466,7 +473,7 @@ namespace dataTypes {
 
 #endif
 
-enum _Type {EMPTY, timing_Time, timing_EarthTime, ui_Icon, ui_Screen, ui_Popup, test_TestClass, test_TestSubclass};
+enum _Type {EMPTY, timing_Time, timing_EarthTime, ui_Icon, ui_Screen, ui_Menu, ui_ContextualMenu, ui_Popup, test_TestClass, test_TestSubclass};
 
 struct _StoredInstance {
     _Type type;
@@ -481,6 +488,9 @@ template<typename T> T* _getBySid(_Type type, _Sid sid) {
     while (_StoredInstance* storedInstance = _storedInstances.next()) {
         if (storedInstance->type != type && !(
             (type == _Type::timing_Time && storedInstance->type == _Type::timing_EarthTime) ||
+            (type == _Type::ui_Screen && storedInstance->type == _Type::ui_Menu) ||
+            (type == _Type::ui_Menu && storedInstance->type == _Type::ui_ContextualMenu) ||
+            (type == _Type::ui_Screen && storedInstance->type == _Type::ui_ContextualMenu) ||
             (type == _Type::ui_Screen && storedInstance->type == _Type::ui_Popup) ||
             (type == _Type::test_TestClass && storedInstance->type == _Type::test_TestSubclass) ||
             false
@@ -614,7 +624,7 @@ namespace ui {
 
     struct Event {
         EventType type;
-        union {input::Button button;} data;
+        union {input::Button button; unsigned int index;} data;
     };
 
     class Icon {
@@ -650,7 +660,8 @@ namespace ui {
             void setPosition(unsigned int column, unsigned int row) {return dc_ui_Screen_setPosition(_sid, column, row);}
             void setPixel(unsigned int x, unsigned int y, ui::PenMode value) {return dc_ui_Screen_setPixel(_sid, x, y, value);}
             void print(char c) {return dc_ui_Screen_printChar(_sid, c);}
-            void print(char* chars) {return dc_ui_Screen_print(_sid, chars);}
+            void print(char* chars) {return dc_ui_Screen_printChars(_sid, chars);}
+            void print(dataTypes::String string) {return dc_ui_Screen_print(_sid, string.c_str());}
             void print(ui::Icon* icon) {return dc_ui_Screen_printIcon(_sid, icon->_getSid());}
             void printRepeated(dataTypes::String string, unsigned int times) {return dc_ui_Screen_printRepeated(_sid, string.c_str(), times);}
             void scroll(dataTypes::String string, unsigned int maxLength) {return dc_ui_Screen_scroll(_sid, string.c_str(), maxLength);}
@@ -662,6 +673,34 @@ namespace ui {
             virtual void open(bool urgent) {return dc_ui_Screen_open(_sid, urgent);}
             virtual void close() {return dc_ui_Screen_close(_sid);}
             void swapWith(ui::Screen* currentScreen) {return dc_ui_Screen_swapWith(_sid, currentScreen->_getSid());}
+    };
+
+    class Menu : public Screen {
+        protected:
+            Menu(_Dummy dummy) : Screen(dummy) {}
+
+        public:
+            using Screen::Screen;
+
+            Menu() : Screen((_Dummy) {}) {_sid = dc_ui_Menu_new(); _addStoredInstance(_Type::ui_Menu, this);}
+
+            void clearItems() {return dc_ui_Menu_clearItems(_sid);}
+            void addItem(dataTypes::String item) {return dc_ui_Menu_addItem(_sid, item.c_str());}
+            dataTypes::List<dataTypes::String> items;
+            void updateItems() {clearItems(); items.start(); while (auto item = items.next()) {addItem(*item);}}
+    };
+
+    class ContextualMenu : public Menu {
+        protected:
+            ContextualMenu(_Dummy dummy) : Menu(dummy) {}
+
+        public:
+            using Menu::Menu;
+
+            ContextualMenu() : Menu((_Dummy) {}) {_sid = dc_ui_ContextualMenu_new(); _addStoredInstance(_Type::ui_ContextualMenu, this);}
+            ContextualMenu(dataTypes::String title) {_sid = dc_ui_ContextualMenu_newWithTitle(title.c_str()); _addStoredInstance(_Type::ui_ContextualMenu, this);}
+
+            void setTitle(dataTypes::String title) {return dc_ui_ContextualMenu_setTitle(_sid, title.c_str());}
     };
 
     class Popup : public Screen {
@@ -1197,10 +1236,23 @@ _DC_CALLABLE(void, ui, Screen, update)(dc::_Sid sid) {
     _DC_MAP_TO_METHOD(ui, Screen, update);
 }
 
+_DC_CALLABLE(void, ui, Screen, handleSimpleEvent)(dc::_Sid sid, dc::ui::EventType eventType) {
+    _DC_MAP_TO_METHOD(ui, Screen, handleEvent, (dc::ui::Event) {
+        .type = eventType
+    });
+}
+
 _DC_CALLABLE(void, ui, Screen, handleButtonEvent)(dc::_Sid sid, dc::ui::EventType eventType, dc::input::Button button) {
     _DC_MAP_TO_METHOD(ui, Screen, handleEvent, (dc::ui::Event) {
         .type = eventType,
         .data.button = button
+    });
+}
+
+_DC_CALLABLE(void, ui, Screen, handleItemEvent)(dc::_Sid sid, dc::ui::EventType eventType, unsigned int index) {
+    _DC_MAP_TO_METHOD(ui, Screen, handleEvent, (dc::ui::Event) {
+        .type = eventType,
+        .data.index = index
     });
 }
 #endif

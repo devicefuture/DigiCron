@@ -14,9 +14,22 @@ _DC_CALLABLE(void, ui, Screen, update)(dc::_Sid sid) {
     _DC_MAP_TO_METHOD(ui, Screen, update);
 }
 
+_DC_CALLABLE(void, ui, Screen, handleSimpleEvent)(dc::_Sid sid, dc::ui::EventType eventType) {
+    _DC_MAP_TO_METHOD(ui, Screen, handleEvent, (dc::ui::Event) {
+        .type = eventType
+    });
+}
+
 _DC_CALLABLE(void, ui, Screen, handleButtonEvent)(dc::_Sid sid, dc::ui::EventType eventType, dc::input::Button button) {
     _DC_MAP_TO_METHOD(ui, Screen, handleEvent, (dc::ui::Event) {
         .type = eventType,
         .data.button = button
+    });
+}
+
+_DC_CALLABLE(void, ui, Screen, handleItemEvent)(dc::_Sid sid, dc::ui::EventType eventType, unsigned int index) {
+    _DC_MAP_TO_METHOD(ui, Screen, handleEvent, (dc::ui::Event) {
+        .type = eventType,
+        .data.index = index
     });
 }
