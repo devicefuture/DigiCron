@@ -1,6 +1,7 @@
 #!/bin/bash
 
 clang \
+    -Oz \
     --target=wasm32 \
     -z stack-size=16384 \
     -fno-rtti \
