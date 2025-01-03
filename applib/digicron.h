@@ -422,11 +422,14 @@ namespace dataTypes {
 
             public:
                 String(const char* value);
+                String(const String& other);
+                ~String();
 
+                String& operator=(const String& other);
                 char operator[](int index);
 
-                char* c_str();
-                unsigned int length();
+                char* c_str() const;
+                unsigned int length() const;
                 char charAt(int index);
         };
     #else
@@ -821,12 +824,41 @@ template<typename T> dataTypes::StoredValue<T>::~StoredValue() {}
         }
     }
 
+    dataTypes::String::String(const dataTypes::String& other) : String(other.c_str()) {}
+
+    dataTypes::String::~String() {
+        if (_value) {
+            free(_value);
+        }
+    }
+
+    dataTypes::String& dataTypes::String::operator=(const dataTypes::String& other) {
+        if (this == &other) {
+            return *this;
+        }
+
+        char* otherCstr = other.c_str();
+
+        _length = other.length();
+        _value = (char*)malloc(_length + 1);
+
+        for (unsigned int i = 0; i <= _length; i++) {
+            _value[i] = otherCstr[i];
+        }
+
+        return *this;
+    }
+
     char dataTypes::String::operator[](int index) {
         return charAt(index);
     }
 
-    char* dataTypes::String::c_str() {
+    char* dataTypes::String::c_str() const {
         return _value;
+    }
+
+    unsigned int dataTypes::String::length() const {
+        return _length;
     }
 
     char dataTypes::String::charAt(int index) {
@@ -835,10 +867,6 @@ template<typename T> dataTypes::StoredValue<T>::~StoredValue() {}
         }
 
         return _value[index];
-    }
-
-    unsigned int dataTypes::String::length() {
-        return _length;
     }
 #endif
 

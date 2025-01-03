@@ -30,11 +30,14 @@ namespace dataTypes {
 
             public:
                 String(const char* value);
+                String(const String& other);
+                ~String();
 
+                String& operator=(const String& other);
                 char operator[](int index);
 
-                char* c_str();
-                unsigned int length();
+                char* c_str() const;
+                unsigned int length() const;
                 char charAt(int index);
         };
     #else

@@ -107,6 +107,9 @@ void proc::WasmProcess::step() {
 
     if (m3_CallV(_stepFunction)) {
         _error = WasmError::RUN_FAILURE;
+
+        stop();
+
         return;
     }
 }
