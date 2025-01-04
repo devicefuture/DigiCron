@@ -310,14 +310,6 @@ function method {
             echo
             echo -n "    auto instance = new $NAMESPACE::$CLASS("
         ) >> firmware/_api.cpp
-
-        if [ "$PASS_PROCESS" = true ]; then
-            echo -n "(proc::WasmProcess*)runtime->userdata" >> firmware/_api.cpp
-
-            if [ "$firmwareArgs" != "" ]; then
-                echo -n ", " >> firmware/_api.cpp
-            fi
-        fi
     else
         echo ")$overrideKeyword {return $INTERNAL_NAME($passArgs);}" >> applib/digicron.h
 
@@ -338,6 +330,14 @@ function method {
             else
                 echo -n "    api::getBySid<$NAMESPACE::$CLASS>(Type::${NAMESPACE}_$CLASS, _sid)->$name(" >> firmware/_api.cpp
             fi
+        fi
+    fi
+
+    if [ "$PASS_PROCESS" = true ]; then
+        echo -n "(proc::WasmProcess*)runtime->userdata" >> firmware/_api.cpp
+
+        if [ "$firmwareArgs" != "" ]; then
+            echo -n ", " >> firmware/_api.cpp
         fi
     fi
 

@@ -144,7 +144,7 @@ void addr(unsigned int ptr) {
 }
 
 void setup() {
-    dc_log((uint8_t*)"Hello from the WASM module!", 27);
+    console::logString("Hello from the WASM module!");
 
     dc_log((uint8_t*)"HB", 2);
     addr(dc_getGlobalI32("__heap_base"));

@@ -6,6 +6,7 @@
 #include "_api.h"
 #include "proc.h"
 #include "datatypes.h"
+#include "console.h"
 #include "timing.h"
 #include "input.h"
 #include "ui.h"
@@ -140,6 +141,14 @@ m3ApiRawFunction(api::dc_deleteBySid) {
     m3ApiGetArg(Sid, _sid)
 
     api::deleteBySid(_sid);
+
+    m3ApiSuccess();
+}
+
+m3ApiRawFunction(api::dc_console_logString) {
+    m3ApiGetArgMem(char*, value)
+
+    console::logString((proc::WasmProcess*)runtime->userdata, String(value));
 
     m3ApiSuccess();
 }
@@ -783,6 +792,7 @@ void api::linkFunctions(IM3Runtime runtime) {
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_getGlobalI32", "i(*)", &dc_getGlobalI32);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_deleteBySid", "v(i)", &dc_deleteBySid);
 
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_console_logString", "v(i)", &dc_console_logString);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_Time_new", "i()", &dc_timing_Time_new);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_Time_newUsingDate", "i(iiiiii)", &dc_timing_Time_newUsingDate);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_Time_newUsingMilliseconds", "i(iiii)", &dc_timing_Time_newUsingMilliseconds);

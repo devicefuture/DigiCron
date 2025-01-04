@@ -27,6 +27,7 @@ WASM_IMPORT("digicronold", "stop") void dc_stop();
 WASM_IMPORT("digicron", "dc_getGlobalI32") uint32_t dc_getGlobalI32(const char* id);
 WASM_IMPORT("digicron", "dc_deleteBySid") void dc_deleteBySid(dc::_Sid sid);
 
+WASM_IMPORT("digicron", "dc_console_logString") void dc_console_logString(char* value);
 WASM_IMPORT("digicron", "dc_timing_Time_new") dc::_Sid dc_timing_Time_new();
 WASM_IMPORT("digicron", "dc_timing_Time_newUsingDate") dc::_Sid dc_timing_Time_newUsingDate(int year, unsigned int month, unsigned int day, unsigned int hour, unsigned int minute, unsigned int second);
 WASM_IMPORT("digicron", "dc_timing_Time_newUsingMilliseconds") dc::_Sid dc_timing_Time_newUsingMilliseconds(int year, unsigned int month, unsigned int day, unsigned long millisecondOfDay);
@@ -534,6 +535,10 @@ void _removeStoredInstance(void* instance) {
 
         index++;
     }
+}
+
+namespace console {
+    void logString(dataTypes::String value) {return dc_console_logString(value.c_str());}
 }
 
 namespace timing {

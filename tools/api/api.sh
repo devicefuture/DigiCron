@@ -1,5 +1,8 @@
 #!/bin/bash
 
+namespace console
+    PASS_PROCESS=true fn "void" logString "String" value
+
 namespace timing
     class Time
         constructor

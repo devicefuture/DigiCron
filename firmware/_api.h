@@ -5,6 +5,7 @@
 
 #include <wasm3.h>
 
+#include "console.h"
 #include "timing.h"
 #include "input.h"
 #include "ui.h"
@@ -32,6 +33,7 @@ namespace api {
     m3ApiRawFunction(dc_getGlobalI32);
     m3ApiRawFunction(dc_deleteBySid);
 
+    m3ApiRawFunction(dc_console_logString);
     m3ApiRawFunction(dc_timing_Time_new);
     m3ApiRawFunction(dc_timing_Time_newUsingDate);
     m3ApiRawFunction(dc_timing_Time_newUsingMilliseconds);
