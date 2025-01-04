@@ -33,7 +33,15 @@ namespace api {
     m3ApiRawFunction(dc_getGlobalI32);
     m3ApiRawFunction(dc_deleteBySid);
 
-    m3ApiRawFunction(dc_console_logString);
+    m3ApiRawFunction(dc_console_logPart);
+    m3ApiRawFunction(dc_console_logPartChars);
+    m3ApiRawFunction(dc_console_logPartUInt);
+    m3ApiRawFunction(dc_console_logPartInt);
+    m3ApiRawFunction(dc_console_logPartULong);
+    m3ApiRawFunction(dc_console_logPartLong);
+    m3ApiRawFunction(dc_console_logPartDouble);
+    m3ApiRawFunction(dc_console_logPartPtr);
+    m3ApiRawFunction(dc_console_logNewline);
     m3ApiRawFunction(dc_timing_Time_new);
     m3ApiRawFunction(dc_timing_Time_newUsingDate);
     m3ApiRawFunction(dc_timing_Time_newUsingMilliseconds);

@@ -27,7 +27,15 @@ WASM_IMPORT("digicronold", "stop") void dc_stop();
 WASM_IMPORT("digicron", "dc_getGlobalI32") uint32_t dc_getGlobalI32(const char* id);
 WASM_IMPORT("digicron", "dc_deleteBySid") void dc_deleteBySid(dc::_Sid sid);
 
-WASM_IMPORT("digicron", "dc_console_logString") void dc_console_logString(char* value);
+WASM_IMPORT("digicron", "dc_console_logPart") void dc_console_logPart(char* value);
+WASM_IMPORT("digicron", "dc_console_logPartChars") void dc_console_logPartChars(char* value);
+WASM_IMPORT("digicron", "dc_console_logPartUInt") void dc_console_logPartUInt(unsigned int value);
+WASM_IMPORT("digicron", "dc_console_logPartInt") void dc_console_logPartInt(int value);
+WASM_IMPORT("digicron", "dc_console_logPartULong") void dc_console_logPartULong(unsigned long value);
+WASM_IMPORT("digicron", "dc_console_logPartLong") void dc_console_logPartLong(long value);
+WASM_IMPORT("digicron", "dc_console_logPartDouble") void dc_console_logPartDouble(double value);
+WASM_IMPORT("digicron", "dc_console_logPartPtr") void dc_console_logPartPtr(void* value);
+WASM_IMPORT("digicron", "dc_console_logNewline") void dc_console_logNewline();
 WASM_IMPORT("digicron", "dc_timing_Time_new") dc::_Sid dc_timing_Time_new();
 WASM_IMPORT("digicron", "dc_timing_Time_newUsingDate") dc::_Sid dc_timing_Time_newUsingDate(int year, unsigned int month, unsigned int day, unsigned int hour, unsigned int minute, unsigned int second);
 WASM_IMPORT("digicron", "dc_timing_Time_newUsingMilliseconds") dc::_Sid dc_timing_Time_newUsingMilliseconds(int year, unsigned int month, unsigned int day, unsigned long millisecondOfDay);
@@ -538,7 +546,15 @@ void _removeStoredInstance(void* instance) {
 }
 
 namespace console {
-    void logString(dataTypes::String value) {return dc_console_logString(value.c_str());}
+    void logPart(dataTypes::String value) {return dc_console_logPart(value.c_str());}
+    void logPart(char* value) {return dc_console_logPartChars(value);}
+    void logPart(unsigned int value) {return dc_console_logPartUInt(value);}
+    void logPart(int value) {return dc_console_logPartInt(value);}
+    void logPart(unsigned long value) {return dc_console_logPartULong(value);}
+    void logPart(long value) {return dc_console_logPartLong(value);}
+    void logPart(double value) {return dc_console_logPartDouble(value);}
+    void logPart(void* value) {return dc_console_logPartPtr(value);}
+    void logNewline() {return dc_console_logNewline();}
 }
 
 namespace timing {
@@ -759,6 +775,16 @@ namespace test {
     int add(int a, int b) {return dc_test_add(a, b);}
 }
 
+#ifndef DC_COMMON_CONSOLE_H_
+#define DC_COMMON_CONSOLE_H_
+
+namespace console {
+    template<typename T> void log(T value);
+    template<typename T, typename ...Args> void log(T value, Args... args);
+}
+
+#endif
+
 #ifndef DC_COMMON_DISPLAY_H_
 #define DC_COMMON_DISPLAY_H_
 
@@ -785,6 +811,27 @@ namespace display {
 
 namespace ui {
     Icon* constructIcon(dataTypes::String pixels);
+}
+
+#endif
+
+#ifndef DC_COMMON_CONSOLE_CPP_
+#define DC_COMMON_CONSOLE_CPP_
+
+#ifndef DIGICRON_H_
+    #include "../console.h"
+    #include "console.h"
+#endif
+
+template<typename T> void console::log(T value) {
+    logPart(value);
+    logNewline();
+}
+
+template<typename T, typename ...Args> void console::log(T value, Args... args) {
+    logPart(value);
+    logPart(" ");
+    log(args...);
 }
 
 #endif

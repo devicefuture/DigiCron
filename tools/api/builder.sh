@@ -242,8 +242,14 @@ function method {
         firmwareArgCall=$internalArgCall
 
         case "$argType" in
-            "char*"|"STRING")
+            "char*"|"STRING"|"void*")
                 shortArgType="*" ;;
+
+            "float")
+                shortArgType="f" ;;
+
+            "double")
+                shortArgType="F" ;;
         esac
 
         if [[ "$argType" =~ ^ENUM\  ]]; then

@@ -2,7 +2,15 @@ dc_log
 dc_stop
 dc_getGlobalI32
 dc_deleteBySid
-dc_console_logString
+dc_console_logPart
+dc_console_logPartChars
+dc_console_logPartUInt
+dc_console_logPartInt
+dc_console_logPartULong
+dc_console_logPartLong
+dc_console_logPartDouble
+dc_console_logPartPtr
+dc_console_logNewline
 dc_timing_Time_new
 dc_timing_Time_newUsingDate
 dc_timing_Time_newUsingMilliseconds

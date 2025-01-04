@@ -130,40 +130,25 @@ class HelloMenu : public ui::ContextualMenu {
         }
 };
 
-void addr(unsigned int ptr) {
-    uint8_t buffer[8];
-
-    for (unsigned int i = 0; i < 8; i++) {
-        unsigned int j = 7 - i;
-
-        buffer[j] = '0' + (ptr % 10);
-        ptr /= 10;
-    }
-
-    dc_log(buffer, 8);
-}
-
 void setup() {
-    console::logString("Hello from the WASM module!");
+    console::log("Hello from the WASM module!");
+    console::log("Demo int:", 123, "float:", 456.789, "ptr:", (void*)smileIcon);
 
-    dc_log((uint8_t*)"HB", 2);
-    addr(dc_getGlobalI32("__heap_base"));
-
-    dc_log((uint8_t*)"MS", 2);
-    addr(__builtin_wasm_memory_size(0) << 16);
+    console::log("Heap base:", (void*)dc_getGlobalI32("__heap_base"));
+    console::log("Memory size:", __builtin_wasm_memory_size(0) << 16);
 
     test::sayHello();
 
     if (test::add(123, 456) == 579) {
-        dc_log((uint8_t*)"Adding function works!", 22);
+        console::log("Adding function works!");
     }
 
     testClass = new test::TestClass(20);
 
-    dc_log((uint8_t*)"Called test!", 12);
+    console::log("Called test!");
 
     if (testClass->add(456, 789) == 1245) {
-        dc_log((uint8_t*)"Adding method works!", 20);
+        console::log("Adding method works!");
     }
 
     testClass->bools(true, false, true);
@@ -193,18 +178,9 @@ void loop() {
 
     unsigned int randomNumber = testClass->nextRandomNumber();
 
-    uint8_t numberBuffer[5] = {'0', '0', '0', '0'};
+    console::log("Received random number:", randomNumber);
 
-    for (unsigned int i = 0; i < 4; i++) {
-        unsigned int j = 3 - i;
-
-        numberBuffer[j] = '0' + (randomNumber % 10);
-        randomNumber /= 10;
-    }
-
-    dc_log(numberBuffer, 4);
-
-    dc_log((uint8_t*)"Hello again!", 12);
+    console::log("Hello again!");
 
     count++;
 }

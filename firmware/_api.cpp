@@ -145,10 +145,72 @@ m3ApiRawFunction(api::dc_deleteBySid) {
     m3ApiSuccess();
 }
 
-m3ApiRawFunction(api::dc_console_logString) {
+m3ApiRawFunction(api::dc_console_logPart) {
     m3ApiGetArgMem(char*, value)
 
-    console::logString((proc::WasmProcess*)runtime->userdata, String(value));
+    console::logPart((proc::WasmProcess*)runtime->userdata, String(value));
+
+    m3ApiSuccess();
+}
+
+m3ApiRawFunction(api::dc_console_logPartChars) {
+    m3ApiGetArgMem(char*, value)
+
+    console::logPart((proc::WasmProcess*)runtime->userdata, value);
+
+    m3ApiSuccess();
+}
+
+m3ApiRawFunction(api::dc_console_logPartUInt) {
+    m3ApiGetArg(unsigned int, value)
+
+    console::logPart((proc::WasmProcess*)runtime->userdata, value);
+
+    m3ApiSuccess();
+}
+
+m3ApiRawFunction(api::dc_console_logPartInt) {
+    m3ApiGetArg(int, value)
+
+    console::logPart((proc::WasmProcess*)runtime->userdata, value);
+
+    m3ApiSuccess();
+}
+
+m3ApiRawFunction(api::dc_console_logPartULong) {
+    m3ApiGetArg(unsigned long, value)
+
+    console::logPart((proc::WasmProcess*)runtime->userdata, value);
+
+    m3ApiSuccess();
+}
+
+m3ApiRawFunction(api::dc_console_logPartLong) {
+    m3ApiGetArg(long, value)
+
+    console::logPart((proc::WasmProcess*)runtime->userdata, value);
+
+    m3ApiSuccess();
+}
+
+m3ApiRawFunction(api::dc_console_logPartDouble) {
+    m3ApiGetArg(double, value)
+
+    console::logPart((proc::WasmProcess*)runtime->userdata, value);
+
+    m3ApiSuccess();
+}
+
+m3ApiRawFunction(api::dc_console_logPartPtr) {
+    m3ApiGetArg(void*, value)
+
+    console::logPart((proc::WasmProcess*)runtime->userdata, value);
+
+    m3ApiSuccess();
+}
+
+m3ApiRawFunction(api::dc_console_logNewline) {
+    console::logNewline((proc::WasmProcess*)runtime->userdata);
 
     m3ApiSuccess();
 }
@@ -792,7 +854,15 @@ void api::linkFunctions(IM3Runtime runtime) {
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_getGlobalI32", "i(*)", &dc_getGlobalI32);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_deleteBySid", "v(i)", &dc_deleteBySid);
 
-    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_console_logString", "v(i)", &dc_console_logString);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_console_logPart", "v(i)", &dc_console_logPart);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_console_logPartChars", "v(*)", &dc_console_logPartChars);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_console_logPartUInt", "v(i)", &dc_console_logPartUInt);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_console_logPartInt", "v(i)", &dc_console_logPartInt);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_console_logPartULong", "v(i)", &dc_console_logPartULong);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_console_logPartLong", "v(i)", &dc_console_logPartLong);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_console_logPartDouble", "v(F)", &dc_console_logPartDouble);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_console_logPartPtr", "v(*)", &dc_console_logPartPtr);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_console_logNewline", "v()", &dc_console_logNewline);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_Time_new", "i()", &dc_timing_Time_new);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_Time_newUsingDate", "i(iiiiii)", &dc_timing_Time_newUsingDate);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_timing_Time_newUsingMilliseconds", "i(iiii)", &dc_timing_Time_newUsingMilliseconds);

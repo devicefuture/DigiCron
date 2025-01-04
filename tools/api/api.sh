@@ -1,7 +1,15 @@
 #!/bin/bash
 
 namespace console
-    PASS_PROCESS=true fn "void" logString "String" value
+    PASS_PROCESS=true fn "void" logPart "String" value
+    INTERNAL_NAME=dc_console_logPartChars PASS_PROCESS=true fn "void" logPart "char*" value
+    INTERNAL_NAME=dc_console_logPartUInt PASS_PROCESS=true fn "void" logPart "unsigned int" value
+    INTERNAL_NAME=dc_console_logPartInt PASS_PROCESS=true fn "void" logPart "int" value
+    INTERNAL_NAME=dc_console_logPartULong PASS_PROCESS=true fn "void" logPart "unsigned long" value
+    INTERNAL_NAME=dc_console_logPartLong PASS_PROCESS=true fn "void" logPart "long" value
+    INTERNAL_NAME=dc_console_logPartDouble PASS_PROCESS=true fn "void" logPart "double" value
+    INTERNAL_NAME=dc_console_logPartPtr PASS_PROCESS=true fn "void" logPart "void*" value
+    PASS_PROCESS=true fn "void" logNewline
 
 namespace timing
     class Time
