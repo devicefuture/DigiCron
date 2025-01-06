@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
 #ifndef DC_SIMULATOR
-    #include <Adafruit_TinyUSB.h>
+    #include <bluefruit.h>
     #include "HCMS39xx.h"
     #include "font5x7.h"
 #else
@@ -39,6 +39,10 @@ ui::Icon* tmIcon = ui::constructIcon(
 unsigned int displayMode = 0;
 long lastTick = 0;
 
+#ifndef DC_SIMULATOR
+    BLEDfu bledfu;
+#endif
+
 void setup() {
     Serial.begin(115200);
     Serial.println("Hello, world!");
@@ -53,6 +57,20 @@ void setup() {
     testScreen->print(tmIcon);
 
     #ifndef DC_SIMULATOR
+        Bluefruit.begin();
+        Bluefruit.setTxPower(0);
+        Bluefruit.setName("DigiCron");
+
+        bledfu.begin();
+
+        Bluefruit.Advertising.addFlags(BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE);
+        Bluefruit.Advertising.addTxPower();
+        Bluefruit.Advertising.addService(bledfu);
+        Bluefruit.ScanResponse.addName();
+        Bluefruit.Advertising.setInterval(32, 244);
+        Bluefruit.Advertising.setFastTimeout(30);
+        Bluefruit.Advertising.start(0);
+
         while (true) {
             loop();
         }

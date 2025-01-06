@@ -1,6 +1,7 @@
 #include <Arduino.h>
 
 #ifndef DC_SIMULATOR
+    #include <nrf_clock.h>
     #include <nrf_timer.h>
 #endif
 
@@ -301,33 +302,17 @@ unsigned long timing::getCurrentTick() {
 
 #ifndef DC_SIMULATOR
 
-void TIMER0_IRQHandler(void) {
-    currentTick += 1000 / timing::RTC_TICK_FREQUENCY;
-    currentMillisecondOffset = millis() % 1000;
+TimerHandle_t tickHandle;
 
-    nrf_timer_event_clear(NRF_TIMER0, NRF_TIMER_EVENT_COMPARE0);
-    nrf_timer_task_trigger(NRF_TIMER0, NRF_TIMER_TASK_CLEAR);
+void tick(TimerHandle_t xTimer) {
+    currentTick += timing::RTC_TICK_PERIOD;
+    currentMillisecondOffset = millis() % 1000;
 }
 
 void timing::init() {
-    NVIC_SetPriority(TIMER0_IRQn, 15); // Lowest priority
+    tickHandle = xTimerCreate(nullptr, pdMS_TO_TICKS(timing::RTC_TICK_PERIOD), pdTRUE, nullptr, tick);
 
-    NRF_CLOCK->TASKS_HFCLKSTART = 1;
-
-    while (NRF_CLOCK->EVENTS_HFCLKSTARTED == 0) {}
-
-    nrf_timer_mode_set(NRF_TIMER0, NRF_TIMER_MODE_TIMER);
-    nrf_timer_bit_width_set(NRF_TIMER0, NRF_TIMER_BIT_WIDTH_32);
-    nrf_timer_frequency_set(NRF_TIMER0, NRF_TIMER_FREQ_1MHz);
-
-    NRF_TIMER0->CC[0] = 1000000 / RTC_TICK_FREQUENCY;
-
-    nrf_timer_int_enable(NRF_TIMER0, NRF_TIMER_INT_COMPARE0_MASK);
-    nrf_timer_task_trigger(NRF_TIMER0, NRF_TIMER_TASK_START);
-
-    NVIC_EnableIRQ(TIMER0_IRQn);
-
-    __enable_irq();
+    xTimerStart(tickHandle, 0);
 }
 
 #else

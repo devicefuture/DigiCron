@@ -9,7 +9,7 @@ namespace timing {
 
     const struct LeapAdjustment NO_LEAP_ADJUSTMENT = {0, 0};
 
-    const int RTC_TICK_FREQUENCY = 1000;
+    const int RTC_TICK_PERIOD = 1000;
     // const int TARGET_FREQUENCY = 32768;
     // const int RTC_COMPARE = 32768 / 2;
 
@@ -107,9 +107,5 @@ namespace timing {
 
     void init();
 }
-
-#ifndef DC_SIMULATOR
-    extern "C" void TIMER0_IRQHandler(void);
-#endif
 
 #endif
