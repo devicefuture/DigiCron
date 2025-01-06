@@ -49,3 +49,6 @@ Then run:
 ```bash
 apptest/build.sh
 ```
+
+> [!NOTE]
+> If you are experiencing segmentation faults with `clang` and `lld` (on version 19), then you may want to try installing `clang-14` and `lld-14`, which are known working versions. The build script will automatically choose `clang-14` (if available) over other installed versions.

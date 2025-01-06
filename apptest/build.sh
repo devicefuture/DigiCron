@@ -1,6 +1,12 @@
 #!/bin/bash
 
-clang \
+CC=clang
+
+if command -v clang-14 2>&1 /dev/null; then
+    CC=clang-14
+fi
+
+$CC \
     -Oz \
     --target=wasm32 \
     -z stack-size=16384 \
