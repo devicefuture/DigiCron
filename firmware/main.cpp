@@ -2,6 +2,8 @@
 
 #ifndef DC_SIMULATOR
     #include <bluefruit.h>
+    #include <Adafruit_LittleFS.h>
+    #include <InternalFileSystem.h>
     #include "HCMS39xx.h"
     #include "font5x7.h"
 #else
@@ -40,6 +42,7 @@ unsigned int displayMode = 0;
 long lastTick = 0;
 
 #ifndef DC_SIMULATOR
+    BLEDis bledis;
     BLEDfu bledfu;
 #endif
 
@@ -57,19 +60,26 @@ void setup() {
     testScreen->print(tmIcon);
 
     #ifndef DC_SIMULATOR
+        InternalFS.begin();
+
         Bluefruit.begin();
         Bluefruit.setTxPower(0);
         Bluefruit.setName("DigiCron");
+
+        bledis.setModel("DeviceFuture DigiCron");
+        bledis.setManufacturer("LiveG Technologies");
+        bledis.begin();
 
         bledfu.begin();
 
         Bluefruit.Advertising.addFlags(BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE);
         Bluefruit.Advertising.addTxPower();
+        Bluefruit.Advertising.addService(bledis);
         Bluefruit.Advertising.addService(bledfu);
         Bluefruit.ScanResponse.addName();
         Bluefruit.Advertising.setInterval(32, 244);
         Bluefruit.Advertising.setFastTimeout(30);
-        Bluefruit.Advertising.start(0);
+        Bluefruit.Advertising.start(10);
 
         while (true) {
             loop();
