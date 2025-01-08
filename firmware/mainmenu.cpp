@@ -5,7 +5,7 @@
 #include "ui.h"
 #include "input.h"
 
-#include "app.wasm.h"
+#include "test/build/app.wasm.h"
 
 proc::Process mainMenu::mainMenuProcess;
 mainMenu::MainMenuScreen mainMenu::mainMenuScreen;
@@ -68,7 +68,7 @@ mainMenu::AppsMenuScreen::AppsMenuScreen() : ui::ContextualMenu("APPS") {
 
 void mainMenu::AppsMenuScreen::handleEvent(ui::Event event) {
     if (event.type == ui::EventType::ITEM_SELECT) {
-        auto process = new proc::WasmProcess((char*)apptest_app_wasm, apptest_app_wasm_len);
+        auto process = new proc::WasmProcess((char*)apps_test_build_app_wasm, apps_test_build_app_wasm_len);
 
         process->onStop = [](proc::Process* process) {
             delete process;

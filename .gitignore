@@ -13,6 +13,10 @@ Makefile
 
 tools/api/_*.h
 
+# App build files
+
+apps/*/build
+
 # Hardware
 
 hardware/*.000

@@ -1,10 +1,15 @@
 #!/bin/bash
 
+APP=$1
 CC=clang
 
 if command -v clang-14 2>&1 /dev/null; then
     CC=clang-14
 fi
+
+echo "Building \`$APP\` using \`$CC\`..."
+
+mkdir -p apps/$APP/build
 
 $CC \
     -Oz \
@@ -19,6 +24,6 @@ $CC \
     -Wl,--no-entry \
     -Wl,--export=__heap_base \
     -Wl,--export=__wasm_call_ctors \
-    apptest/app.cpp -o apptest/app.wasm
+    apps/$APP/app.cpp -o apps/$APP/build/app.wasm
 
-xxd -i apptest/app.wasm > apptest/app.wasm.h
+xxd -i apps/$APP/build/app.wasm > apps/$APP/build/app.wasm.h

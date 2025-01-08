@@ -37,17 +37,17 @@ Then to run the simulator locally, start a web server in this directory. Run the
 python3 -m http.server
 ```
 
-### Building the app demo
+### Building a system app
 First install the required dependencies:
 
 ```bash
 sudo apt install clang lld
 ```
 
-Then run:
+Then run (where `$name` is the name of the app's source directory, such as `test`):
 
 ```bash
-apptest/build.sh
+apps/build.sh $name
 ```
 
 > [!NOTE]

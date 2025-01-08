@@ -5,6 +5,10 @@ fi
 
 tools/api/builder.sh
 
+for appPath in apps/*/; do
+    apps/build.sh $(basename $appPath)
+done
+
 if [ "$1" == "--install-dev" ]; then
     if ! [ -x "$(command -v pio)" ]; then
         echo "Installing PlatformIO..."

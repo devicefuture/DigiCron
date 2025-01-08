@@ -1,4 +1,4 @@
-#include "../applib/digicron.h"
+#include "../../applib/digicron.h"
 
 using namespace dc;
 using namespace dc::dataTypes;
