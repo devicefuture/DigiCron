@@ -1,5 +1,4 @@
 #include "proc.h"
-#include "api.h"
 #include "_api.h"
 
 #include <m3_env.h>
@@ -64,7 +63,6 @@ proc::WasmProcess::WasmProcess(char* code, unsigned int codeSize) : proc::Proces
         return;
     }
 
-    oldApi::linkFunctions(_runtime);
     api::linkFunctions(_runtime);
 
     IM3Function initFunction;
@@ -180,6 +178,10 @@ void proc::stepProcesses() {
             process->step();
         }
     }
+}
+
+void proc::stop(proc::Process* process) {
+    process->stop();
 }
 
 M3Result m3_Yield() {

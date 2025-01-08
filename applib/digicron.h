@@ -21,12 +21,10 @@ void loop();
 
 extern "C" {
 
-WASM_IMPORT("digicronold", "log") void dc_log(uint8_t* text, uint8_t length);
-WASM_IMPORT("digicronold", "stop") void dc_stop();
-
 WASM_IMPORT("digicron", "dc_getGlobalI32") uint32_t dc_getGlobalI32(const char* id);
 WASM_IMPORT("digicron", "dc_deleteBySid") void dc_deleteBySid(dc::_Sid sid);
 
+WASM_IMPORT("digicron", "dc_proc_stop") void dc_proc_stop();
 WASM_IMPORT("digicron", "dc_console_logPart") void dc_console_logPart(char* value);
 WASM_IMPORT("digicron", "dc_console_logPartChars") void dc_console_logPartChars(char* value);
 WASM_IMPORT("digicron", "dc_console_logPartUInt") void dc_console_logPartUInt(unsigned int value);
@@ -543,6 +541,10 @@ void _removeStoredInstance(void* instance) {
 
         index++;
     }
+}
+
+namespace proc {
+    void stop() {return dc_proc_stop();}
 }
 
 namespace console {

@@ -6,6 +6,7 @@
 #include "_api.h"
 #include "proc.h"
 #include "datatypes.h"
+#include "proc.h"
 #include "console.h"
 #include "timing.h"
 #include "input.h"
@@ -141,6 +142,12 @@ m3ApiRawFunction(api::dc_deleteBySid) {
     m3ApiGetArg(Sid, _sid)
 
     api::deleteBySid(_sid);
+
+    m3ApiSuccess();
+}
+
+m3ApiRawFunction(api::dc_proc_stop) {
+    proc::stop((proc::WasmProcess*)runtime->userdata);
 
     m3ApiSuccess();
 }
@@ -854,6 +861,7 @@ void api::linkFunctions(IM3Runtime runtime) {
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_getGlobalI32", "i(*)", &dc_getGlobalI32);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_deleteBySid", "v(i)", &dc_deleteBySid);
 
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_proc_stop", "v()", &dc_proc_stop);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_console_logPart", "v(i)", &dc_console_logPart);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_console_logPartChars", "v(*)", &dc_console_logPartChars);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_console_logPartUInt", "v(i)", &dc_console_logPartUInt);

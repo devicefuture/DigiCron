@@ -666,9 +666,6 @@ void loop();
 
 extern "C" {
 
-WASM_IMPORT("digicronold", "log") void dc_log(uint8_t* text, uint8_t length);
-WASM_IMPORT("digicronold", "stop") void dc_stop();
-
 WASM_IMPORT("digicron", "dc_getGlobalI32") uint32_t dc_getGlobalI32(const char* id);
 WASM_IMPORT("digicron", "dc_deleteBySid") void dc_deleteBySid(dc::_Sid sid);
 
@@ -687,9 +684,6 @@ cat firmware/common/datatypes.h >> applib/digicron.h
 echo >> applib/digicron.h
 echo >> applib/digicron.h
 
-# TODO: Make these functions part of full API
-echo dc_log >> applib/digicron.syms
-echo dc_stop >> applib/digicron.syms
 echo dc_getGlobalI32 >> applib/digicron.syms
 echo dc_deleteBySid >> applib/digicron.syms
 

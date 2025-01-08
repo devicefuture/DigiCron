@@ -70,6 +70,7 @@ namespace proc {
     extern dataTypes::List<Process> processes;
 
     void stepProcesses();
+    void stop(Process* process);
 }
 
 #endif

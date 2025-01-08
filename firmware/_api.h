@@ -5,6 +5,7 @@
 
 #include <wasm3.h>
 
+#include "proc.h"
 #include "console.h"
 #include "timing.h"
 #include "input.h"
@@ -33,6 +34,7 @@ namespace api {
     m3ApiRawFunction(dc_getGlobalI32);
     m3ApiRawFunction(dc_deleteBySid);
 
+    m3ApiRawFunction(dc_proc_stop);
     m3ApiRawFunction(dc_console_logPart);
     m3ApiRawFunction(dc_console_logPartChars);
     m3ApiRawFunction(dc_console_logPartUInt);

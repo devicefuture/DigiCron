@@ -1,5 +1,8 @@
 #!/bin/bash
 
+namespace proc
+    PASS_PROCESS=true fn "void" stop
+
 namespace console
     PASS_PROCESS=true fn "void" logPart "String" value
     INTERNAL_NAME=dc_console_logPartChars PASS_PROCESS=true fn "void" logPart "char*" value

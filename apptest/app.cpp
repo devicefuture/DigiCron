@@ -1,4 +1,3 @@
-// #include "api.h"
 #include "../applib/digicron.h"
 
 using namespace dc;
@@ -64,7 +63,7 @@ class HelloScreen : public ui::Screen {
             }
 
             if (event.type == ui::EventType::BUTTON_DOWN && event.data.button == input::Button::BACK) {
-                dc_stop();
+                proc::stop();
             }
         }
 
