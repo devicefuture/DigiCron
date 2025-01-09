@@ -89,12 +89,18 @@ namespace ui
         method "void" setPosition "unsigned int" column "unsigned int" row
         method "void" setPixel "unsigned int" x "unsigned int" y "ENUM ui::PenMode" value
         INTERNAL_NAME=dc_ui_Screen_printChar method "void" print "char" c
-        INTERNAL_NAME=dc_ui_Screen_printChars method "void" print "char*" chars
         method "void" print "String" string
+        INTERNAL_NAME=dc_ui_Screen_printChars method "void" print "char*" chars
+        INTERNAL_NAME=dc_ui_Screen_printUInt method "void" print "unsigned int" value
+        INTERNAL_NAME=dc_ui_Screen_printInt method "void" print "int" value
+        INTERNAL_NAME=dc_ui_Screen_printULong method "void" print "unsigned long" value
+        INTERNAL_NAME=dc_ui_Screen_printLong method "void" print "long" value
+        INTERNAL_NAME=dc_ui_Screen_printDouble method "void" print "double" value
         INTERNAL_NAME=dc_ui_Screen_printIcon method "void" print "CLASSPTR ui::Icon" icon
         method "void" printRepeated "String" string "unsigned int" times
         method "void" scroll "String" string "unsigned int" maxLength
         method "void" resetScroll
+        method "void" pad "unsigned int" size "char" c
         method "void" rect "unsigned int" x1 "unsigned int" y1 "unsigned int" x2 "unsigned int" y2 "ENUM ui::PenMode" value
         method "void" filledRect "unsigned int" x1 "unsigned int" y1 "unsigned int" x2 "unsigned int" y2 "ENUM ui::PenMode" value
 

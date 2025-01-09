@@ -588,6 +588,15 @@ m3ApiRawFunction(api::dc_ui_Screen_printChar) {
     m3ApiSuccess();
 }
 
+m3ApiRawFunction(api::dc_ui_Screen_print) {
+    m3ApiGetArg(Sid, _sid)
+    m3ApiGetArgMem(char*, string)
+
+    api::getBySid<ui::Screen>(Type::ui_Screen, _sid)->print(String(string));
+
+    m3ApiSuccess();
+}
+
 m3ApiRawFunction(api::dc_ui_Screen_printChars) {
     m3ApiGetArg(Sid, _sid)
     m3ApiGetArgMem(char*, chars)
@@ -597,11 +606,47 @@ m3ApiRawFunction(api::dc_ui_Screen_printChars) {
     m3ApiSuccess();
 }
 
-m3ApiRawFunction(api::dc_ui_Screen_print) {
+m3ApiRawFunction(api::dc_ui_Screen_printUInt) {
     m3ApiGetArg(Sid, _sid)
-    m3ApiGetArgMem(char*, string)
+    m3ApiGetArg(unsigned int, value)
 
-    api::getBySid<ui::Screen>(Type::ui_Screen, _sid)->print(String(string));
+    api::getBySid<ui::Screen>(Type::ui_Screen, _sid)->print(value);
+
+    m3ApiSuccess();
+}
+
+m3ApiRawFunction(api::dc_ui_Screen_printInt) {
+    m3ApiGetArg(Sid, _sid)
+    m3ApiGetArg(int, value)
+
+    api::getBySid<ui::Screen>(Type::ui_Screen, _sid)->print(value);
+
+    m3ApiSuccess();
+}
+
+m3ApiRawFunction(api::dc_ui_Screen_printULong) {
+    m3ApiGetArg(Sid, _sid)
+    m3ApiGetArg(unsigned long, value)
+
+    api::getBySid<ui::Screen>(Type::ui_Screen, _sid)->print(value);
+
+    m3ApiSuccess();
+}
+
+m3ApiRawFunction(api::dc_ui_Screen_printLong) {
+    m3ApiGetArg(Sid, _sid)
+    m3ApiGetArg(long, value)
+
+    api::getBySid<ui::Screen>(Type::ui_Screen, _sid)->print(value);
+
+    m3ApiSuccess();
+}
+
+m3ApiRawFunction(api::dc_ui_Screen_printDouble) {
+    m3ApiGetArg(Sid, _sid)
+    m3ApiGetArg(double, value)
+
+    api::getBySid<ui::Screen>(Type::ui_Screen, _sid)->print(value);
 
     m3ApiSuccess();
 }
@@ -639,6 +684,16 @@ m3ApiRawFunction(api::dc_ui_Screen_resetScroll) {
     m3ApiGetArg(Sid, _sid)
 
     api::getBySid<ui::Screen>(Type::ui_Screen, _sid)->resetScroll();
+
+    m3ApiSuccess();
+}
+
+m3ApiRawFunction(api::dc_ui_Screen_pad) {
+    m3ApiGetArg(Sid, _sid)
+    m3ApiGetArg(unsigned int, size)
+    m3ApiGetArg(char, c)
+
+    api::getBySid<ui::Screen>(Type::ui_Screen, _sid)->pad(size, c);
 
     m3ApiSuccess();
 }
@@ -908,12 +963,18 @@ void api::linkFunctions(IM3Runtime runtime) {
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_setPosition", "v(iii)", &dc_ui_Screen_setPosition);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_setPixel", "v(iiii)", &dc_ui_Screen_setPixel);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_printChar", "v(ii)", &dc_ui_Screen_printChar);
-    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_printChars", "v(i*)", &dc_ui_Screen_printChars);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_print", "v(ii)", &dc_ui_Screen_print);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_printChars", "v(i*)", &dc_ui_Screen_printChars);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_printUInt", "v(ii)", &dc_ui_Screen_printUInt);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_printInt", "v(ii)", &dc_ui_Screen_printInt);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_printULong", "v(ii)", &dc_ui_Screen_printULong);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_printLong", "v(ii)", &dc_ui_Screen_printLong);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_printDouble", "v(iF)", &dc_ui_Screen_printDouble);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_printIcon", "v(ii)", &dc_ui_Screen_printIcon);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_printRepeated", "v(iii)", &dc_ui_Screen_printRepeated);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_scroll", "v(iii)", &dc_ui_Screen_scroll);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_resetScroll", "v(i)", &dc_ui_Screen_resetScroll);
+    m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_pad", "v(iii)", &dc_ui_Screen_pad);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_rect", "v(iiiiii)", &dc_ui_Screen_rect);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_filledRect", "v(iiiiii)", &dc_ui_Screen_filledRect);
     m3_LinkRawFunction(runtime->modules, MODULE_NAME, "dc_ui_Screen_open", "v(ii)", &dc_ui_Screen_open);

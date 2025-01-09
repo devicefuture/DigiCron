@@ -65,13 +65,19 @@ namespace ui {
             void setPosition(unsigned int column, unsigned int row);
             void setPixel(unsigned int x, unsigned int y, PenMode value);
             void print(char c);
-            void print(char* chars);
             void print(String string);
+            void print(char* chars);
+            void print(unsigned int value);
+            void print(int value);
+            void print(unsigned long value);
+            void print(long value);
+            void print(double value);
             void print(Icon* icon);
             void printf(String format, ...);
             void printRepeated(String string, unsigned int times);
             void scroll(String string, unsigned int maxLength = display::COLUMNS);
             void resetScroll();
+            void pad(unsigned int size, char c);
             void rect(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, PenMode value);
             void filledRect(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, PenMode value);
 
@@ -89,6 +95,8 @@ namespace ui {
         protected:
             unsigned int _currentPosition = 0;
             unsigned long _scrollStartTime = 0;
+            unsigned int _padUntil = 0;
+            unsigned int _padChar = '\0';
             bool _defaultPrevented = false;
     };
 

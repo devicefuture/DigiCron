@@ -29,11 +29,11 @@ class HelloScreen : public ui::Screen {
                 int secs = currentTime->second();
 
                 print("Pressed!");
-                print('0' + ((updateCycles / 10) % 10));
-                print('0' + (updateCycles % 10));
+                pad(2, '0');
+                print(updateCycles % 100);
                 print(" ");
-                print('0' + ((secs / 10) % 10));
-                print('0' + (secs % 10));
+                pad(2, '0');
+                print(secs);
                 print('s');
                 print(" ");
             } else {

@@ -124,6 +124,14 @@ void ui::Screen::print(char c) {
 }
 
 void ui::Screen::print(String string) {
+    if (_padChar) {
+        while (_currentPosition < _padUntil - string.length()) {
+            print((char)_padChar);
+        }
+
+        _padChar = '\0';
+    }
+
     for (unsigned int i = 0; i < string.length(); i++) {
         print(string[i]);
     }
@@ -132,9 +140,39 @@ void ui::Screen::print(String string) {
 void ui::Screen::print(char* chars) {
     unsigned int i = 0;
 
+    if (_padChar) {
+        String string = chars;
+
+        while (_currentPosition < _padUntil - string.length()) {
+            print((char)_padChar);
+        }
+
+        _padChar = '\0';
+    }
+
     while (chars[i] != '\0') {
         print(chars[i++]);
     }
+}
+
+void ui::Screen::print(unsigned int value) {
+    printf("%u", value);
+}
+
+void ui::Screen::print(int value) {
+    printf("%d", value);
+}
+
+void ui::Screen::print(unsigned long value) {
+    printf("%lu", value);
+}
+
+void ui::Screen::print(long value) {
+    printf("%ld", value);
+}
+
+void ui::Screen::print(double value) {
+    printf("%f", value);
 }
 
 void ui::Screen::print(Icon* icon) {
@@ -193,6 +231,17 @@ void ui::Screen::scroll(String string, unsigned int maxLength) {
 
 void ui::Screen::resetScroll() {
     _scrollStartTime = timing::getCurrentTick();
+}
+
+void ui::Screen::pad(unsigned int size, char c) {
+    if (size == 0) {
+        _padChar = '\0';
+
+        return;
+    }
+
+    _padUntil = _currentPosition + size;
+    _padChar = c;
 }
 
 void ui::Screen::rect(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, PenMode value) {

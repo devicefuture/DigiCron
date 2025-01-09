@@ -71,12 +71,18 @@ WASM_IMPORT("digicron", "dc_ui_Screen_clear") void dc_ui_Screen_clear(dc::_Sid s
 WASM_IMPORT("digicron", "dc_ui_Screen_setPosition") void dc_ui_Screen_setPosition(dc::_Sid sid, unsigned int column, unsigned int row);
 WASM_IMPORT("digicron", "dc_ui_Screen_setPixel") void dc_ui_Screen_setPixel(dc::_Sid sid, unsigned int x, unsigned int y, dc::_Enum value);
 WASM_IMPORT("digicron", "dc_ui_Screen_printChar") void dc_ui_Screen_printChar(dc::_Sid sid, char c);
-WASM_IMPORT("digicron", "dc_ui_Screen_printChars") void dc_ui_Screen_printChars(dc::_Sid sid, char* chars);
 WASM_IMPORT("digicron", "dc_ui_Screen_print") void dc_ui_Screen_print(dc::_Sid sid, char* string);
+WASM_IMPORT("digicron", "dc_ui_Screen_printChars") void dc_ui_Screen_printChars(dc::_Sid sid, char* chars);
+WASM_IMPORT("digicron", "dc_ui_Screen_printUInt") void dc_ui_Screen_printUInt(dc::_Sid sid, unsigned int value);
+WASM_IMPORT("digicron", "dc_ui_Screen_printInt") void dc_ui_Screen_printInt(dc::_Sid sid, int value);
+WASM_IMPORT("digicron", "dc_ui_Screen_printULong") void dc_ui_Screen_printULong(dc::_Sid sid, unsigned long value);
+WASM_IMPORT("digicron", "dc_ui_Screen_printLong") void dc_ui_Screen_printLong(dc::_Sid sid, long value);
+WASM_IMPORT("digicron", "dc_ui_Screen_printDouble") void dc_ui_Screen_printDouble(dc::_Sid sid, double value);
 WASM_IMPORT("digicron", "dc_ui_Screen_printIcon") void dc_ui_Screen_printIcon(dc::_Sid sid, dc::_Sid icon);
 WASM_IMPORT("digicron", "dc_ui_Screen_printRepeated") void dc_ui_Screen_printRepeated(dc::_Sid sid, char* string, unsigned int times);
 WASM_IMPORT("digicron", "dc_ui_Screen_scroll") void dc_ui_Screen_scroll(dc::_Sid sid, char* string, unsigned int maxLength);
 WASM_IMPORT("digicron", "dc_ui_Screen_resetScroll") void dc_ui_Screen_resetScroll(dc::_Sid sid);
+WASM_IMPORT("digicron", "dc_ui_Screen_pad") void dc_ui_Screen_pad(dc::_Sid sid, unsigned int size, char c);
 WASM_IMPORT("digicron", "dc_ui_Screen_rect") void dc_ui_Screen_rect(dc::_Sid sid, unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, dc::_Enum value);
 WASM_IMPORT("digicron", "dc_ui_Screen_filledRect") void dc_ui_Screen_filledRect(dc::_Sid sid, unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, dc::_Enum value);
 WASM_IMPORT("digicron", "dc_ui_Screen_open") void dc_ui_Screen_open(dc::_Sid sid, bool urgent);
@@ -686,12 +692,18 @@ namespace ui {
             void setPosition(unsigned int column, unsigned int row) {return dc_ui_Screen_setPosition(_sid, column, row);}
             void setPixel(unsigned int x, unsigned int y, ui::PenMode value) {return dc_ui_Screen_setPixel(_sid, x, y, value);}
             void print(char c) {return dc_ui_Screen_printChar(_sid, c);}
-            void print(char* chars) {return dc_ui_Screen_printChars(_sid, chars);}
             void print(dataTypes::String string) {return dc_ui_Screen_print(_sid, string.c_str());}
+            void print(char* chars) {return dc_ui_Screen_printChars(_sid, chars);}
+            void print(unsigned int value) {return dc_ui_Screen_printUInt(_sid, value);}
+            void print(int value) {return dc_ui_Screen_printInt(_sid, value);}
+            void print(unsigned long value) {return dc_ui_Screen_printULong(_sid, value);}
+            void print(long value) {return dc_ui_Screen_printLong(_sid, value);}
+            void print(double value) {return dc_ui_Screen_printDouble(_sid, value);}
             void print(ui::Icon* icon) {return dc_ui_Screen_printIcon(_sid, icon->_getSid());}
             void printRepeated(dataTypes::String string, unsigned int times) {return dc_ui_Screen_printRepeated(_sid, string.c_str(), times);}
             void scroll(dataTypes::String string, unsigned int maxLength) {return dc_ui_Screen_scroll(_sid, string.c_str(), maxLength);}
             void resetScroll() {return dc_ui_Screen_resetScroll(_sid);}
+            void pad(unsigned int size, char c) {return dc_ui_Screen_pad(_sid, size, c);}
             void rect(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, ui::PenMode value) {return dc_ui_Screen_rect(_sid, x1, y1, x2, y2, value);}
             void filledRect(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, ui::PenMode value) {return dc_ui_Screen_filledRect(_sid, x1, y1, x2, y2, value);}
             virtual void update() {}
