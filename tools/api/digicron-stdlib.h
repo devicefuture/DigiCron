@@ -9,7 +9,7 @@
 // #define _DC_DEBUG_HEAP
 
 #ifdef _DC_DEBUG_HEAP
-    #define _DC_DEBUG_HEAP_LOG(message) dc_log((uint8_t*)(message), sizeof(message) - 1)
+    #define _DC_DEBUG_HEAP_LOG(message) dc_console_logPart(message); dc_console_logNewline()
 #else
     #define _DC_DEBUG_HEAP_LOG(message)
 #endif
