@@ -38,6 +38,8 @@ python3 -m http.server
 ```
 
 ### Building a system app
+All system apps are already built when running the main build script, but it is possible to build apps separately anyway for debugging purposes.
+
 First install the required dependencies:
 
 ```bash
