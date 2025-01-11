@@ -46,6 +46,8 @@ namespace dataTypes {
 
     template<typename T> class List {
         public:
+            typedef _ListItem<T>* Iterator;
+
             typedef void (*IterationCallback)(T* itemPtr, unsigned int index);
             typedef T* (*MappingFunction)(T* itemPtr, unsigned int index);
             typedef bool (*FilteringFunction)(T* itemPtr, unsigned int index);
@@ -55,8 +57,8 @@ namespace dataTypes {
 
             T* operator[](int index);
 
-            void start();
-            T* next();
+            void start(Iterator* iterator = nullptr);
+            T* next(Iterator* iterator = nullptr);
             unsigned int length();
             void empty();
             unsigned int push(T* valuePtr);
@@ -74,7 +76,7 @@ namespace dataTypes {
 
         private:
             _ListItem<T>* _firstItemPtr;
-            _ListItem<T>* _currentItemPtr;
+            Iterator _defaultIterator;
             unsigned int _length;
 
             _ListItem<T>* getItemAtIndex(int index);

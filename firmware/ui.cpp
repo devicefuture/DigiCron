@@ -265,7 +265,7 @@ void ui::Screen::filledRect(unsigned int x1, unsigned int y1, unsigned int x2, u
 }
 
 void ui::Screen::open(bool urgent) {
-    Serial.printf("Opened %x (urgent: %d)\n", ownerProcess, urgent);
+    Serial.printf("Opened %x (urgent: %d, permanence: %d)\n", ownerProcess, urgent, permanence);
 
     screenStack.push(this);
 
@@ -505,6 +505,19 @@ void ui::Popup::_handleEvent(ui::Event event) {
     }
 }
 
+void ui::enactScreenPermanence(ui::ScreenPermanence permanenceBoundary) {
+    dataTypes::List<ui::Screen>::Iterator iterator;
+
+    screenStack.start(&iterator);
+
+    while (ui::Screen* screen = screenStack.next(&iterator)) {
+        if (screen->permanence <= permanenceBoundary) {
+            Serial.println("Close");
+            screen->close();
+        }
+    }
+}
+
 ui::Screen* ui::determineCurrentScreen() {
     if (screenStack.length() > 0) {
         bool anyScreensFoundInForeground = false;
@@ -568,6 +581,7 @@ void ui::renderCurrentScreen() {
                 } else if (currentScreen->canGoHome) {
                     foregroundProcess = &home::homeProcess;
 
+                    enactScreenPermanence(ScreenPermanence::CLOSE_ON_HOME);
                     determineCurrentScreen();
                 }
             }
