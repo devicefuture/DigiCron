@@ -19,7 +19,7 @@ Before building for the first time, install dev dependencies:
 ./build.sh --install-dev
 ```
 
-To build the firmware and upload it to the target device, run:
+To build the firmware and upload it to the target device over USB, run:
 
 ```bash
 ./build.sh --upload
