@@ -29,81 +29,77 @@ proc::Process home::homeProcess;
 home::HomeScreen home::homeScreen;
 
 void home::HomeScreen::update() {
-    if (_buttonIsDown) {
-        return;
-    }
-
     clear();
 
     switch (_mode) {
-                case 0:
-                {
-                    printf("%02d:%02d:%02d",
-                        timing::earthTime.hour() % 100,
-                        timing::earthTime.minute() % 100,
-                        timing::earthTime.second() % 100
-                    );
+        case 0:
+        {
+            printf("%02d:%02d:%02d",
+                timing::earthTime.hour() % 100,
+                timing::earthTime.minute() % 100,
+                timing::earthTime.second() % 100
+            );
 
-                    print(notificationsIcon);
-                    print("3     ");
-                    print(batteryIcon);
+            print(notificationsIcon);
+            print("3     ");
+            print(batteryIcon);
 
-                    break;
-                }
+            break;
+        }
 
-                case 1:
-                {
-                    printf("%02d/%02d/%02d%02d:%02d:%02d",
-                        timing::earthTime.day() % 100,
-                        timing::earthTime.month() % 100,
-                        timing::earthTime.year() % 100,
-                        timing::earthTime.hour() % 100,
-                        timing::earthTime.minute() % 100,
-                        timing::earthTime.second() % 100
-                    );
+        case 1:
+        {
+            printf("%02d/%02d/%02d%02d:%02d:%02d",
+                timing::earthTime.day() % 100,
+                timing::earthTime.month() % 100,
+                timing::earthTime.year() % 100,
+                timing::earthTime.hour() % 100,
+                timing::earthTime.minute() % 100,
+                timing::earthTime.second() % 100
+            );
 
-                    break;
-                }
+            break;
+        }
 
-                case 2:
-                {
-                    printf("%02d:%02d:%02d.%03d",
-                        timing::earthTime.hour() % 100,
-                        timing::earthTime.minute() % 100,
-                        timing::earthTime.second() % 100,
-                        timing::earthTime.millisecond()
-                    );
+        case 2:
+        {
+            printf("%02d:%02d:%02d.%03d",
+                timing::earthTime.hour() % 100,
+                timing::earthTime.minute() % 100,
+                timing::earthTime.second() % 100,
+                timing::earthTime.millisecond()
+            );
 
-                    break;
-                }
+            break;
+        }
 
-                case 3:
-                {
-                    printf("Battery %s %03d%%",
-                        power::isCharging() ? "chg" : "dsc",
-                        (int)round(power::getBatteryLevel())
-                    );
+        case 3:
+        {
+            printf("Battery %s %03d%%",
+                power::isCharging() ? "chg" : "dsc",
+                (int)round(power::getBatteryLevel())
+            );
 
-                    break;
-                }
+            break;
+        }
 
-                case 4:
-                {
-                    printf("Battery %1.4f V",
-                        power::getBatteryVoltage()
-                    );
+        case 4:
+        {
+            printf("Battery %1.4f V",
+                power::getBatteryVoltage()
+            );
 
-                    break;
-                }
+            break;
+        }
 
-                case 5:
-                {
-                    print("NOTICE\n");
-                    scroll("This is a demo of using the scrolling feature!");
+        case 5:
+        {
+            print("NOTICE\n");
+            scroll("This is a demo of using the scrolling feature!");
 
-                    break;
-                }
-            }
+            break;
+        }
+    }
 }
 
 void home::HomeScreen::handleEvent(ui::Event event) {
@@ -117,15 +113,17 @@ void home::HomeScreen::handleEvent(ui::Event event) {
         clear();
 
         switch (event.data.button) {
-            case input::Button::BACK: print("Button      BACK"); break;
-            case input::Button::HOME: print("Button      HOME"); break;
-            case input::Button::UP: print("Button        UP"); break;
-            case input::Button::DOWN: print("Button      DOWN"); break;
+            case input::Button::BACK:
+            {
+                resetScroll();
+
+                _mode = 0;
+
+                break;
+            }
 
             case input::Button::LEFT:
             {
-                print("Button      LEFT");
-
                 resetScroll();
 
                 if (_mode == 0) {
@@ -139,8 +137,6 @@ void home::HomeScreen::handleEvent(ui::Event event) {
 
             case input::Button::RIGHT:
             {
-                print("Button     RIGHT");
-
                 resetScroll();
 
                 _mode++;
@@ -154,8 +150,6 @@ void home::HomeScreen::handleEvent(ui::Event event) {
 
             case input::Button::SELECT:
             {
-                print("Button    SELECT");
-
                 mainMenu::mainMenuScreen.open(true);
 
                 break;
