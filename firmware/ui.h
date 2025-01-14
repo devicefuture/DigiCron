@@ -23,6 +23,12 @@ namespace ui {
         CANCEL
     };
 
+    // We use powers of 2 for numbering to allow future insertions between permanence boundaries
+    enum ScreenPermanence {
+        NEUTRAL = 0,
+        CLOSE_ON_HOME = -256
+    };
+
     enum PopupTransitionState {
         NONE,
         OPENING,
@@ -53,6 +59,7 @@ namespace ui {
         public:
             proc::Process* ownerProcess = nullptr;
             bool canGoHome = true;
+            ScreenPermanence permanence = NEUTRAL;
 
             char displayData[display::DATA_SIZE];
 
@@ -170,6 +177,7 @@ namespace ui {
     extern proc::Process* lastNonHomeProcess;
     extern dataTypes::List<Screen> screenStack;
 
+    void enactScreenPermanence(ScreenPermanence permanenceBoundary);
     Screen* determineCurrentScreen();
     void renderCurrentScreen();
 }

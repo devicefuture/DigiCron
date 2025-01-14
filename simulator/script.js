@@ -54,7 +54,31 @@ Module.onRuntimeInitialized = function() {
         });
     });
 
-    document.body.addEventListener("pointerup", function(event) {
-        Module.input_setButtonStatus(0);
+    document.body.addEventListener("keydown", function(event) {
+        if (event.target.matches("button, input")) {
+            return;
+        }
+
+        var button = {
+            "Escape": 1,
+            "Backspace": 1,
+            "KeyH": 2,
+            "ArrowUp": 3,
+            "ArrowDown": 4,
+            "ArrowLeft": 5,
+            "ArrowRight": 6,
+            "Space": 7,
+            "Enter": 7
+        }[event.code];
+
+        if (button != undefined) {
+            Module.input_setButtonStatus(button);
+        }
+    });
+
+    ["pointerup", "keyup"].forEach(function(type) {
+        document.body.addEventListener(type, function(event) {
+            Module.input_setButtonStatus(0);
+        });
     });
 };

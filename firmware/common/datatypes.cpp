@@ -148,18 +148,26 @@ template<typename T> dataTypes::_ListItem<T>* dataTypes::List<T>::getLastItem() 
     return previousItemPtr;
 }
 
-template<typename T> void dataTypes::List<T>::start() {
-    _currentItemPtr = _firstItemPtr;
+template<typename T> void dataTypes::List<T>::start(Iterator* iterator) {
+    if (iterator == nullptr) {
+        iterator = &_defaultIterator;
+    }
+
+    *iterator = _firstItemPtr;
 }
 
-template<typename T> T* dataTypes::List<T>::next() {
-    auto itemPtr = _currentItemPtr;
+template<typename T> T* dataTypes::List<T>::next(Iterator* iterator) {
+    if (iterator == nullptr) {
+        iterator = &_defaultIterator;
+    }
 
-    if (!_currentItemPtr) {
+    auto itemPtr = *iterator;
+
+    if (!*iterator) {
         return nullptr;
     }
 
-    _currentItemPtr = _currentItemPtr->nextItemPtr;
+    *iterator = (*iterator)->nextItemPtr;
 
     return itemPtr->valuePtr;
 }

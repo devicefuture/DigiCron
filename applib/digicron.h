@@ -451,6 +451,8 @@ namespace dataTypes {
 
     template<typename T> class List {
         public:
+            typedef _ListItem<T>* Iterator;
+
             typedef void (*IterationCallback)(T* itemPtr, unsigned int index);
             typedef T* (*MappingFunction)(T* itemPtr, unsigned int index);
             typedef bool (*FilteringFunction)(T* itemPtr, unsigned int index);
@@ -460,8 +462,8 @@ namespace dataTypes {
 
             T* operator[](int index);
 
-            void start();
-            T* next();
+            void start(Iterator* iterator = nullptr);
+            T* next(Iterator* iterator = nullptr);
             unsigned int length();
             void empty();
             unsigned int push(T* valuePtr);
@@ -479,7 +481,7 @@ namespace dataTypes {
 
         private:
             _ListItem<T>* _firstItemPtr;
-            _ListItem<T>* _currentItemPtr;
+            Iterator _defaultIterator;
             unsigned int _length;
 
             _ListItem<T>* getItemAtIndex(int index);
@@ -1000,18 +1002,26 @@ template<typename T> dataTypes::_ListItem<T>* dataTypes::List<T>::getLastItem() 
     return previousItemPtr;
 }
 
-template<typename T> void dataTypes::List<T>::start() {
-    _currentItemPtr = _firstItemPtr;
+template<typename T> void dataTypes::List<T>::start(Iterator* iterator) {
+    if (iterator == nullptr) {
+        iterator = &_defaultIterator;
+    }
+
+    *iterator = _firstItemPtr;
 }
 
-template<typename T> T* dataTypes::List<T>::next() {
-    auto itemPtr = _currentItemPtr;
+template<typename T> T* dataTypes::List<T>::next(Iterator* iterator) {
+    if (iterator == nullptr) {
+        iterator = &_defaultIterator;
+    }
 
-    if (!_currentItemPtr) {
+    auto itemPtr = *iterator;
+
+    if (!*iterator) {
         return nullptr;
     }
 
-    _currentItemPtr = _currentItemPtr->nextItemPtr;
+    *iterator = (*iterator)->nextItemPtr;
 
     return itemPtr->valuePtr;
 }

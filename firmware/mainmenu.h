@@ -6,6 +6,7 @@
 
 namespace mainMenu {
     extern proc::Process mainMenuProcess;
+    extern proc::Process* primaryAppProcess;
 
     class MainMenuScreen : public ui::Menu {
         public:

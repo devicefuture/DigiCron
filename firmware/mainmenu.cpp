@@ -10,28 +10,35 @@
 proc::Process mainMenu::mainMenuProcess;
 mainMenu::MainMenuScreen mainMenu::mainMenuScreen;
 mainMenu::AppsMenuScreen mainMenu::appsMenuScreen;
+proc::Process* mainMenu::primaryAppProcess = nullptr;
 
 class TestPopup : public ui::Popup {
-    proc::Process* ownerProcess = &mainMenu::mainMenuProcess;
+    public:
+        proc::Process* ownerProcess = &mainMenu::mainMenuProcess;
 
-    void update() {
-        clear();
-        print("Test\npopup!");
-    }
+        TestPopup() : ui::Popup() {
+            permanence = ui::ScreenPermanence::CLOSE_ON_HOME;
+        }
 
-    void handleEvent(ui::Event event) {
-        if (event.type == ui::EventType::BUTTON_DOWN) {
-            if (event.data.button == input::Button::BACK) {
-                close();
+        void update() {
+            clear();
+            print("Test\npopup!");
+        }
+
+        void handleEvent(ui::Event event) {
+            if (event.type == ui::EventType::BUTTON_DOWN) {
+                if (event.data.button == input::Button::BACK) {
+                    close();
+                }
             }
         }
-    }
 };
 
 TestPopup testPopup;
 
 mainMenu::MainMenuScreen::MainMenuScreen() : ui::Menu() {
     ownerProcess = &mainMenuProcess;
+    permanence = ui::ScreenPermanence::CLOSE_ON_HOME;
 
     items.push(new String("NOTIFS"));
     items.push(new String("APPS"));
@@ -55,6 +62,7 @@ void mainMenu::MainMenuScreen::handleEvent(ui::Event event) {
 
 mainMenu::AppsMenuScreen::AppsMenuScreen() : ui::ContextualMenu("APPS") {
     ownerProcess = &mainMenuProcess;
+    permanence = ui::ScreenPermanence::CLOSE_ON_HOME;
 
     items.push(new String("Alarms"));
     items.push(new String("Timer"));
@@ -68,12 +76,22 @@ mainMenu::AppsMenuScreen::AppsMenuScreen() : ui::ContextualMenu("APPS") {
 
 void mainMenu::AppsMenuScreen::handleEvent(ui::Event event) {
     if (event.type == ui::EventType::ITEM_SELECT) {
+        if (primaryAppProcess) {
+            primaryAppProcess->stop();
+        }
+
         auto process = new proc::WasmProcess((char*)apps_test_build_app_wasm, apps_test_build_app_wasm_len);
 
         process->onStop = [](proc::Process* process) {
+            if (primaryAppProcess == process) {
+                primaryAppProcess = nullptr;
+            }
+
             delete process;
 
             Serial.println("WASM process deleted");
         };
+
+        primaryAppProcess = process;
     }
 }
