@@ -512,7 +512,6 @@ void ui::enactScreenPermanence(ui::ScreenPermanence permanenceBoundary) {
 
     while (ui::Screen* screen = screenStack.next(&iterator)) {
         if (screen->permanence <= permanenceBoundary) {
-            Serial.println("Close");
             screen->close();
         }
     }
