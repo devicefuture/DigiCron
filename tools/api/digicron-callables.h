@@ -2,7 +2,7 @@
     #define WASM_EXPORT_AS(name)
 #endif
 
-#define _DC_CALLABLE(type, namespace, class, method) WASM_EXPORT_AS("_callable_" #namespace "_" #class "_" #method) type _callable_##namespace##_##class##_##method
+#define _DC_CALLABLE(type, namespace, class, method) WASM_EXPORT_AS("_callable_" #namespace "_" #class "_" #method) inline type _callable_##namespace##_##class##_##method
 
 #define _DC_MAP_TO_METHOD(namespace, class, method, ...) do { \
         if (auto instance = dc::_getBySid<dc::namespace::class>(dc::_Type::namespace##_##class, sid)) { \

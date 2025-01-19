@@ -10,6 +10,8 @@
 #define WASM_IMPORT(module, name) __attribute__((import_module(module))) __attribute__((import_name(name)))
 #define WASM_CONSTRUCTOR __attribute__((constructor))
 
+#define ONCE inline
+
 namespace dc {
     typedef unsigned int _Enum;
     typedef int _Sid;
@@ -108,298 +110,32 @@ WASM_IMPORT("digicron", "dc_test_add") int dc_test_add(int a, int b);
 
 }
 
-#define _DC_ALIGN_SIZE 4
-#define _DC_ALIGN(value) (((value) + _DC_ALIGN_SIZE - 1) & ~(_DC_ALIGN_SIZE - 1))
-
-#define _DC_FLAG_USED 0x8000
-#define _DC_BLOCK_IS_USED(address) (*(address) & _DC_FLAG_USED)
-#define _DC_BLOCK_SIZE(address) (*(address) & (_DC_FLAG_USED - 1))
-#define _DC_BLOCK_IS_LAST(address) (*(address) == 0)
-
-// #define _DC_DEBUG_HEAP
-
-#ifdef _DC_DEBUG_HEAP
-    #define _DC_DEBUG_HEAP_LOG(message) dc_console_logPart(message); dc_console_logNewline()
-#else
-    #define _DC_DEBUG_HEAP_LOG(message)
-#endif
-
 typedef unsigned long size_t;
 
 namespace dc::heap {
     typedef size_t Block;
 
-    const Block* base = (Block*)dc_getGlobalI32("__heap_base");
-    Block* firstFreeBlock = (Block*)base;
+    extern const Block* base;
+    extern Block* firstFreeBlock;
 }
 
 extern "C" {
-    void* memset(void* destination, char value, size_t size) {
-        for (size_t i = 0; i < size; i++) {
-            *((char*)destination + size) = value;
-        }
-
-
-        return destination;
-    }
-
-    void* memcpy(void* destination, void* source, size_t size) {
-        for (size_t i = 0; i < size; i++) {
-            *((char*)destination + i) = *((char*)source + i);
-        }
-
-        return destination;
-    }
-
-    void* malloc(size_t size) {
-        _DC_DEBUG_HEAP_LOG("> malloc");
-
-        if (size == 0) {
-            size = _DC_ALIGN_SIZE;
-        }
-
-        if (size & _DC_FLAG_USED) {
-            return nullptr;
-        }
-
-        size = _DC_ALIGN(size);
-
-        dc::heap::Block* currentBlock = dc::heap::firstFreeBlock;
-
-        while (true) {
-            if (_DC_BLOCK_IS_LAST(currentBlock)) {
-                _DC_DEBUG_HEAP_LOG("Use last block");
-
-                *currentBlock = _DC_FLAG_USED | size;
-                *(currentBlock + sizeof(dc::heap::Block) + size) = 0; // Create a new last block after this one
-
-                if (currentBlock == dc::heap::firstFreeBlock) {
-                    _DC_DEBUG_HEAP_LOG("  Set next free block");
-
-                    dc::heap::firstFreeBlock = currentBlock + sizeof(dc::heap::Block) + size;
-                }
-
-                return currentBlock + sizeof(dc::heap::Block);
-            }
-
-            size_t originalBlockSize = _DC_BLOCK_SIZE(currentBlock);
-
-            if (_DC_BLOCK_IS_USED(currentBlock)) {
-                // Skip over this block if it's used
-
-                _DC_DEBUG_HEAP_LOG("Skip used");
-
-                currentBlock += sizeof(dc::heap::Block) + originalBlockSize;
-
-                continue;
-            }
-
-            if (originalBlockSize < size) {
-                // Try and merge subsequent blocks to meet required size; if not, then skip
-
-                dc::heap::Block* originalBlock = currentBlock;
-                size_t totalUsableSize = originalBlockSize;
-                bool encounteredUsedBlock = false;
-                bool encounteredLastBlock = false;
-
-                _DC_DEBUG_HEAP_LOG("Attempt resize");
-
-                do {
-                    currentBlock += sizeof(dc::heap::Block) + originalBlockSize;
-
-                    if (_DC_BLOCK_IS_USED(currentBlock)) {
-                        _DC_DEBUG_HEAP_LOG("  Encountered used block");
-
-                        encounteredUsedBlock = true;
-
-                        break;
-                    }
-
-                    if (_DC_BLOCK_IS_LAST(currentBlock)) {
-                        // Looks like we can use the rest of the available memory
-
-                        _DC_DEBUG_HEAP_LOG("  Encountered last block");
-
-                        encounteredLastBlock = true;
-
-                        break;
-                    }
-
-                    totalUsableSize += *currentBlock + sizeof(dc::heap::Block);
-                } while (totalUsableSize < size);
-
-                if (encounteredUsedBlock) {
-                    continue;
-                }
-
-                currentBlock = originalBlock;
-
-                if (encounteredLastBlock) {
-                    _DC_DEBUG_HEAP_LOG("  Using last block");
-
-                    *(currentBlock + sizeof(dc::heap::Block) + size) = 0; // Create a new last block after this one
-                }
-            }
-
-            if (originalBlockSize > size + sizeof(dc::heap::Block) + _DC_ALIGN_SIZE) {
-                // Split this block so that the rest can be used for other purposes
-
-                _DC_DEBUG_HEAP_LOG("Split block");
-
-                *currentBlock = size;
-                *(currentBlock + sizeof(dc::heap::Block) + size) = originalBlockSize - size - sizeof(dc::heap::Block);
-            }
-
-            _DC_DEBUG_HEAP_LOG("Mark as used");
-
-            *currentBlock |= _DC_FLAG_USED;
-
-            if (currentBlock == dc::heap::firstFreeBlock) {
-            _DC_DEBUG_HEAP_LOG("Search for a new first free block");
-
-                while (_DC_BLOCK_IS_USED(dc::heap::firstFreeBlock)) {
-                    _DC_DEBUG_HEAP_LOG("  Search next");
-
-                    dc::heap::firstFreeBlock += _DC_BLOCK_SIZE(dc::heap::firstFreeBlock) + sizeof(dc::heap::Block);
-                }
-            }
-
-            return currentBlock + sizeof(dc::heap::Block);
-        }
-    }
-
-    void free(void* ptr) {
-        dc::heap::Block* block = (dc::heap::Block*)ptr - sizeof(dc::heap::Block);
-
-        _DC_DEBUG_HEAP_LOG("> free");
-
-        *block &= ~_DC_FLAG_USED;
- 
-        if (block < dc::heap::firstFreeBlock) {
-            _DC_DEBUG_HEAP_LOG("Set first free block");
-
-            dc::heap::firstFreeBlock = block;
-        }
-
-        dc::heap::Block* currentBlock = block + sizeof(dc::heap::Block) + *block;
-
-        // Merge together any subsequent free blocks
-        while (!_DC_BLOCK_IS_USED(currentBlock)) {
-            if (_DC_BLOCK_IS_LAST(currentBlock)) {
-                _DC_DEBUG_HEAP_LOG("Convert to last block");
-
-                *block = 0; // Make the penultimate block the last one instead
-
-                return;
-            }
-
-            _DC_DEBUG_HEAP_LOG("Merge subsequent block");
-
-            *block += _DC_BLOCK_SIZE(currentBlock) + sizeof(dc::heap::Block);
-            currentBlock += _DC_BLOCK_SIZE(currentBlock) + sizeof(dc::heap::Block);
-        }
-    }
-
-    void* calloc(size_t count, size_t size) {
-        void* memory = malloc(count * size);
-
-        if (memory) {
-            memset(memory, '\0', count * size);
-        }
-
-        return memory;
-    }
-
-    void* realloc(void* ptr, size_t size) {
-        _DC_DEBUG_HEAP_LOG("> realloc");
-
-        if (!ptr || size & _DC_FLAG_USED) {
-            return nullptr;
-        }
-
-        if (size == 0) {
-            free(ptr);
-
-            return nullptr;
-        }
-
-        size = _DC_ALIGN(size);
-
-        dc::heap::Block* blockPtr = (dc::heap::Block*)ptr;
-        dc::heap::Block* block = blockPtr - sizeof(dc::heap::Block);
-
-        if (size == _DC_BLOCK_SIZE(block)) {
-            _DC_DEBUG_HEAP_LOG("Equal size");
-
-            return ptr;
-        }
-
-        if (_DC_BLOCK_IS_LAST(blockPtr + _DC_BLOCK_SIZE(block))) {
-            // Modify last block to match new size
-
-            _DC_DEBUG_HEAP_LOG("Modify last block");
-
-            *block = _DC_FLAG_USED | _DC_ALIGN(size);
-            *(blockPtr + size) = 0; // Set new position for last block
-
-            return ptr;
-        }
-
-        if (size + sizeof(dc::heap::Block) < _DC_BLOCK_SIZE(block)) {
-            // Truncate current block by splitting truncated portion off into new block
-
-            _DC_DEBUG_HEAP_LOG("Truncate block");
-
-            *(blockPtr + size) = _DC_BLOCK_SIZE(block) - size - sizeof(dc::heap::Block);
-            *block = _DC_FLAG_USED | size;
-
-            return ptr;
-        }
-
-        // Perform full reallocation
-
-        _DC_DEBUG_HEAP_LOG("Fully reallocate");
-
-        void* newPtr = malloc(size);
-
-        if (!newPtr) {
-            return nullptr;
-        }
-
-        memcpy(newPtr, ptr, _DC_BLOCK_SIZE(block));
-        free(ptr);
-
-        return newPtr;
-    }
+    void* memset(void* destination, char value, size_t size);
+    void* memcpy(void* destination, void* source, size_t size);
+    void* malloc(size_t size);
+    void free(void* ptr);
+    void* calloc(size_t count, size_t size);
+    void* realloc(void* ptr, size_t size);
 }
 
-void* operator new(size_t size) {
-    return malloc(size);
-}
+void* operator new(size_t size);
+void* operator new[](size_t size);
+void operator delete(void* ptr);
+void operator delete(void* ptr, size_t size);
+void operator delete[](void* ptr);
+void operator delete[](void* ptr, size_t size);
 
-void* operator new[](size_t size) {
-    return malloc(size);
-}
-
-void operator delete(void* ptr) {
-    free(ptr);
-}
-
-void operator delete(void* ptr, size_t size) {
-    free(ptr);
-}
-
-void operator delete[](void* ptr) {
-    free(ptr);
-}
-
-void operator delete[](void* ptr, size_t size) {
-    free(ptr);
-}
-
-extern "C" int __cxa_atexit(void (*function)(void*), void* argument, void* handle) {
-    return 0;
-}
+extern "C" int __cxa_atexit(void (*function)(void*), void* argument, void* handle);
 
 namespace dc {
 
@@ -498,7 +234,7 @@ struct _StoredInstance {
     void* instance;
 };
 
-dataTypes::List<_StoredInstance> _storedInstances;
+inline dataTypes::List<_StoredInstance> _storedInstances;
 
 template<typename T> T* _getBySid(_Type type, _Sid sid) {
     _storedInstances.start();
@@ -526,7 +262,7 @@ template<typename T> T* _getBySid(_Type type, _Sid sid) {
     return nullptr;
 }
 
-void _addStoredInstance(_Type type, void* instance) {
+inline void _addStoredInstance(_Type type, void* instance) {
     auto storedInstance = new _StoredInstance {
         .type = type,
         .instance = instance
@@ -535,7 +271,7 @@ void _addStoredInstance(_Type type, void* instance) {
     _storedInstances.push(storedInstance);
 }
 
-void _removeStoredInstance(void* instance) {
+inline void _removeStoredInstance(void* instance) {
     _storedInstances.start();
 
     unsigned int index = 0;
@@ -552,19 +288,19 @@ void _removeStoredInstance(void* instance) {
 }
 
 namespace proc {
-    void stop() {return dc_proc_stop();}
+    inline void stop() {return dc_proc_stop();}
 }
 
 namespace console {
-    void logPart(dataTypes::String value) {return dc_console_logPart(value.c_str());}
-    void logPart(char* value) {return dc_console_logPartChars(value);}
-    void logPart(unsigned int value) {return dc_console_logPartUInt(value);}
-    void logPart(int value) {return dc_console_logPartInt(value);}
-    void logPart(unsigned long value) {return dc_console_logPartULong(value);}
-    void logPart(long value) {return dc_console_logPartLong(value);}
-    void logPart(double value) {return dc_console_logPartDouble(value);}
-    void logPart(void* value) {return dc_console_logPartPtr(value);}
-    void logNewline() {return dc_console_logNewline();}
+    inline void logPart(dataTypes::String value) {return dc_console_logPart(value.c_str());}
+    inline void logPart(char* value) {return dc_console_logPartChars(value);}
+    inline void logPart(unsigned int value) {return dc_console_logPartUInt(value);}
+    inline void logPart(int value) {return dc_console_logPartInt(value);}
+    inline void logPart(unsigned long value) {return dc_console_logPartULong(value);}
+    inline void logPart(long value) {return dc_console_logPartLong(value);}
+    inline void logPart(double value) {return dc_console_logPartDouble(value);}
+    inline void logPart(void* value) {return dc_console_logPartPtr(value);}
+    inline void logNewline() {return dc_console_logNewline();}
 }
 
 namespace timing {
@@ -621,7 +357,7 @@ namespace timing {
             void syncToSystemTime() {return dc_timing_EarthTime_syncToSystemTime(_sid);}
     };
 
-    unsigned long getCurrentTick() {return dc_timing_getCurrentTick();}
+    inline unsigned long getCurrentTick() {return dc_timing_getCurrentTick();}
 }
 
 namespace input {
@@ -787,8 +523,8 @@ namespace test {
             void subclass() {return dc_test_TestSubclass_subclass(_sid);}
     };
 
-    void sayHello() {return dc_test_sayHello();}
-    int add(int a, int b) {return dc_test_add(a, b);}
+    inline void sayHello() {return dc_test_sayHello();}
+    inline int add(int a, int b) {return dc_test_add(a, b);}
 }
 
 #ifndef DC_COMMON_CONSOLE_H_
@@ -820,13 +556,17 @@ namespace display {
 #ifndef DC_COMMON_UI_H_
 #define DC_COMMON_UI_H_
 
+#ifndef ONCE
+#define ONCE
+#endif
+
 #ifndef DIGICRON_H_
     #include "../datatypes.h"
     #include "../ui.h"
 #endif
 
 namespace ui {
-    Icon* constructIcon(dataTypes::String pixels);
+    ONCE Icon* constructIcon(dataTypes::String pixels);
 }
 
 #endif
@@ -880,7 +620,7 @@ template<typename T> dataTypes::StoredValue<T>::StoredValue(T valueToStore) {
 template<typename T> dataTypes::StoredValue<T>::~StoredValue() {}
 
 #ifdef DIGICRON_H_
-    dataTypes::String::String(const char* value) {
+    inline dataTypes::String::String(const char* value) {
         while (value[_length] != '\0') {
             _length++;
         }
@@ -892,15 +632,15 @@ template<typename T> dataTypes::StoredValue<T>::~StoredValue() {}
         }
     }
 
-    dataTypes::String::String(const dataTypes::String& other) : String(other.c_str()) {}
+    inline dataTypes::String::String(const dataTypes::String& other) : String(other.c_str()) {}
 
-    dataTypes::String::~String() {
+    inline dataTypes::String::~String() {
         if (_value) {
             free(_value);
         }
     }
 
-    dataTypes::String& dataTypes::String::operator=(const dataTypes::String& other) {
+    inline dataTypes::String& dataTypes::String::operator=(const dataTypes::String& other) {
         if (this == &other) {
             return *this;
         }
@@ -917,19 +657,19 @@ template<typename T> dataTypes::StoredValue<T>::~StoredValue() {}
         return *this;
     }
 
-    char dataTypes::String::operator[](int index) {
+    inline char dataTypes::String::operator[](int index) {
         return charAt(index);
     }
 
-    char* dataTypes::String::c_str() const {
+    inline char* dataTypes::String::c_str() const {
         return _value;
     }
 
-    unsigned int dataTypes::String::length() const {
+    inline unsigned int dataTypes::String::length() const {
         return _length;
     }
 
-    char dataTypes::String::charAt(int index) {
+    inline char dataTypes::String::charAt(int index) {
         if (!_value || index >= _length) {
             return '\0';
         }
@@ -1316,11 +1056,11 @@ ui::Icon* ui::constructIcon(dataTypes::String pixels) {
 
 }
 
-WASM_EXPORT_AS("_setup") void _setup() {
+WASM_EXPORT_AS("_setup") inline void _setup() {
     setup();
 }
 
-WASM_EXPORT_AS("_loop") void _loop() {
+WASM_EXPORT_AS("_loop") inline void _loop() {
     loop();
 }
 
@@ -1328,7 +1068,7 @@ WASM_EXPORT_AS("_loop") void _loop() {
     #define WASM_EXPORT_AS(name)
 #endif
 
-#define _DC_CALLABLE(type, namespace, class, method) WASM_EXPORT_AS("_callable_" #namespace "_" #class "_" #method) type _callable_##namespace##_##class##_##method
+#define _DC_CALLABLE(type, namespace, class, method) WASM_EXPORT_AS("_callable_" #namespace "_" #class "_" #method) inline type _callable_##namespace##_##class##_##method
 
 #define _DC_MAP_TO_METHOD(namespace, class, method, ...) do { \
         if (auto instance = dc::_getBySid<dc::namespace::class>(dc::_Type::namespace##_##class, sid)) { \

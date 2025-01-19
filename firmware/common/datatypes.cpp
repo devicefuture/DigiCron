@@ -26,7 +26,7 @@ template<typename T> dataTypes::StoredValue<T>::StoredValue(T valueToStore) {
 template<typename T> dataTypes::StoredValue<T>::~StoredValue() {}
 
 #ifdef DIGICRON_H_
-    dataTypes::String::String(const char* value) {
+    inline dataTypes::String::String(const char* value) {
         while (value[_length] != '\0') {
             _length++;
         }
@@ -38,15 +38,15 @@ template<typename T> dataTypes::StoredValue<T>::~StoredValue() {}
         }
     }
 
-    dataTypes::String::String(const dataTypes::String& other) : String(other.c_str()) {}
+    inline dataTypes::String::String(const dataTypes::String& other) : String(other.c_str()) {}
 
-    dataTypes::String::~String() {
+    inline dataTypes::String::~String() {
         if (_value) {
             free(_value);
         }
     }
 
-    dataTypes::String& dataTypes::String::operator=(const dataTypes::String& other) {
+    inline dataTypes::String& dataTypes::String::operator=(const dataTypes::String& other) {
         if (this == &other) {
             return *this;
         }
@@ -63,19 +63,19 @@ template<typename T> dataTypes::StoredValue<T>::~StoredValue() {}
         return *this;
     }
 
-    char dataTypes::String::operator[](int index) {
+    inline char dataTypes::String::operator[](int index) {
         return charAt(index);
     }
 
-    char* dataTypes::String::c_str() const {
+    inline char* dataTypes::String::c_str() const {
         return _value;
     }
 
-    unsigned int dataTypes::String::length() const {
+    inline unsigned int dataTypes::String::length() const {
         return _length;
     }
 
-    char dataTypes::String::charAt(int index) {
+    inline char dataTypes::String::charAt(int index) {
         if (!_value || index >= _length) {
             return '\0';
         }

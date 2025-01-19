@@ -167,7 +167,7 @@ function method {
     fi
 
     if [ "$OUT_OF_CLASS" = true ]; then
-        echo -n "    $nameAndType(" >> applib/digicron.h
+        echo -n "    inline $nameAndType(" >> applib/digicron.h
     else
         echo -n "            $virtualKeyword$nameAndType(" >> applib/digicron.h
     fi
@@ -655,6 +655,8 @@ tee -a applib/digicron.h > /dev/null << EOF
 #define WASM_IMPORT(module, name) __attribute__((import_module(module))) __attribute__((import_name(name)))
 #define WASM_CONSTRUCTOR __attribute__((constructor))
 
+#define ONCE inline
+
 namespace dc {
     typedef unsigned int _Enum;
     typedef int _Sid;
@@ -697,7 +699,7 @@ struct _StoredInstance {
     void* instance;
 };
 
-dataTypes::List<_StoredInstance> _storedInstances;
+inline dataTypes::List<_StoredInstance> _storedInstances;
 
 template<typename T> T* _getBySid(_Type type, _Sid sid) {
     _storedInstances.start();
@@ -720,7 +722,7 @@ template<typename T> T* _getBySid(_Type type, _Sid sid) {
     return nullptr;
 }
 
-void _addStoredInstance(_Type type, void* instance) {
+inline void _addStoredInstance(_Type type, void* instance) {
     auto storedInstance = new _StoredInstance {
         .type = type,
         .instance = instance
@@ -729,7 +731,7 @@ void _addStoredInstance(_Type type, void* instance) {
     _storedInstances.push(storedInstance);
 }
 
-void _removeStoredInstance(void* instance) {
+inline void _removeStoredInstance(void* instance) {
     _storedInstances.start();
 
     unsigned int index = 0;
@@ -782,11 +784,11 @@ done
 tee -a applib/digicron.h > /dev/null << EOF
 }
 
-WASM_EXPORT_AS("_setup") void _setup() {
+WASM_EXPORT_AS("_setup") inline void _setup() {
     setup();
 }
 
-WASM_EXPORT_AS("_loop") void _loop() {
+WASM_EXPORT_AS("_loop") inline void _loop() {
     loop();
 }
 
@@ -808,3 +810,5 @@ sed -i -e "\|// {{ stdlib }}|{r tools/api/digicron-stdlib.h" -e "d}" applib/digi
 sed -i -e "\|// {{ imports }}|{r tools/api/_digicron-imports.h" -e "d}" applib/digicron.h
 sed -i -e "\|// {{ typeInheritance }}|{r tools/api/_digicron-typeinheritance.h" -e "d}" applib/digicron.h
 sed -i -e "\|// {{ callables }}|{r tools/api/digicron-callables.h" -e "d}" applib/digicron.h
+
+cp tools/api/digicron-stdlib.cpp applib/digicron-stdlib.cpp

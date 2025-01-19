@@ -24,6 +24,7 @@ $CC \
     -Wl,--no-entry \
     -Wl,--export=__heap_base \
     -Wl,--export=__wasm_call_ctors \
-    apps/$APP/app.cpp -o apps/$APP/build/app.wasm
+    -Wl,-error-limit=0 \
+    apps/$APP/*.cpp applib/digicron-stdlib.cpp -o apps/$APP/build/app.wasm
 
 xxd -i apps/$APP/build/app.wasm > apps/$APP/build/app.wasm.h
